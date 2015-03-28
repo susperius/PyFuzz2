@@ -30,12 +30,13 @@ class Listener:
             if line:
                 job += line
                 fp.flush()
+                print(line)
             else:
                 break
         fp.write("RECV\r\n\r\n")
         sock.shutdown(socket.SHUT_WR)
         sock.close()
-        self._logger.debug(job)
+        self._logger.debug("Received a job from " + address[0])
         self._task_queue.put(Task(ord(job[0]), address[0], job[1:]))
 
     def __serve(self):

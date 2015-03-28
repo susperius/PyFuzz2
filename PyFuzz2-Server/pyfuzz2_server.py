@@ -1,17 +1,15 @@
 __author__ = 'susperius'
 
 import logging
+
 import gevent
 import gevent.monkey
-
-from model.task import Task
-from model.message_types import MESSAGE_TYPES
-from model.node import PyFuzz2Node
 from gevent.queue import Queue
+
 from communication.beaconserver import BeaconServer
 from communication.reportserver import ReportServer
-from communication.tcpclient import TcpClient
 from beacon.beaconworker import BeaconWorker
+
 
 gevent.monkey.patch_all()
 

@@ -1,0 +1,7 @@
+<PyFuzz2Server>
+    <beacon>
+        <server port="31337"/>
+        <worker timeout="120"/>
+    </beacon>
+    <reportServer port="31338"/>
+</PyFuzz2Server>

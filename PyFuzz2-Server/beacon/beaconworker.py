@@ -9,11 +9,12 @@ from model.node import PyFuzz2Node
 
 
 class BeaconWorker:
-    def __init__(self, beacon_queue):
+    def __init__(self, beacon_queue, timeout):
         self._beacon_queue = beacon_queue
         self._logger = logging.getLogger(__name__)
         self._active = False
         self._node_dict = {}
+        self._timeout = timeout
 
     def __beacon_worker_green(self):
         while True:
@@ -28,12 +29,13 @@ class BeaconWorker:
             self._node_dict[beacon[1]] = PyFuzz2Node(beacon[1], beacon[0], beacon[2])
         else:
             self._node_dict[beacon[1]].beacon_received()
-        self._logger.debug(self._node_dict[beacon[0]].dump())
+            self._node_dict[beacon[1]].address = beacon[0]
+        self._logger.debug(self._node_dict[beacon[1]].dump())
 
     def __check_all_beacons(self):
         while True:
             for key, node in self._node_dict.items():
-                if not node.check_status() and not node.check_status(120):
+                if not node.check_status() and not node.check_status(self._timeout):
                     del self._node_dict[key]
                     self._logger.debug("Node: " + node.name + " deleted because of inactivity")
             gevent.sleep(40)

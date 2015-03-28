@@ -18,7 +18,7 @@ class BeaconServer(BaseServer):
         BaseServer.__init__(self, port, task_queue)
 
     def __serve(self):
-        self.logger.info("Beacon Server started")
+        self.logger.info("[Beacon Server] initialized on port " + str(self.port) + " ...")
         self.beacon_server = DatagramServer(('', self.port), self.__beacon_receiver)
         self.beacon_server.serve_forever()
 

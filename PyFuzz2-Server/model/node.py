@@ -11,11 +11,12 @@ class PyFuzz2Node:
         self._is_active = True
         self._last_beacon = time.time()
 
-    def check_status(self):
-        if time.time() - self._last_beacon > 60:
+    def check_status(self, sec=60):
+        if time.time() - self._last_beacon > sec:
             self._is_active = False
         else:
             self._is_active = True
+        return self._is_active
 
     def beacon_received(self):
         self._last_beacon = time.time()

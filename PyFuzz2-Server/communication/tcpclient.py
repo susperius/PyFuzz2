@@ -12,12 +12,12 @@ from gevent import socket
 
 class TcpClient():
     def __init__(self, node_listener, node_port):
-        self.node_listener = node_listener
-        self.node_port = node_port
+        self._node_listener = node_listener
+        self._node_port = node_port
 
     def send_to_node(self, data):
         answer = ""
-        sock = gevent.socket.create_connection((self.node_listener, self.node_port))
+        sock = gevent.socket.create_connection((self._node_listener, self._node_port))
         sock.send(data)
         fp = sock.makefile()
         while True:

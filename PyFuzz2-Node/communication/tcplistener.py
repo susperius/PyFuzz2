@@ -15,12 +15,12 @@ from model.task import Task
 
 class Listener:
     def __init__(self, port, task_queue):
-        self.port = port
-        self.serving = False
-        self.serving_greenlet = None
-        self.beacon_server = None
-        self.logger = logging.getLogger(__name__)
-        self.task_queue = task_queue
+        self._port = port
+        self._serving = False
+        self._serving_greenlet = None
+        self._beacon_server = None
+        self._logger = logging.getLogger(__name__)
+        self._task_queue = task_queue
 
     def __listener_receiver(self, sock, address):
         job = ""
@@ -35,18 +35,18 @@ class Listener:
         fp.write("RECV\r\n\r\n")
         sock.shutdown(socket.SHUT_WR)
         sock.close()
-        self.logger.debug(job)
-        self.task_queue.put(Task(ord(job[0]), address[0], job[1:]))
+        self._logger.debug(job)
+        self._task_queue.put(Task(ord(job[0]), address[0], job[1:]))
 
     def __serve(self):
-        self.logger.info("[Listener] initialized on port " + str(self.port) + " ...")
-        self.beacon_server = StreamServer(('', self.port), self.__listener_receiver)
-        self.beacon_server.serve_forever()
+        self._logger.info("[Listener] initialized on port " + str(self._port) + " ...")
+        self._beacon_server = StreamServer(('', self._port), self.__listener_receiver)
+        self._beacon_server.serve_forever()
 
     def serve(self):
-        if not self.serving:
-            self.serving_greenlet = gevent.spawn(self.__serve)
-            self.serving = True
+        if not self._serving:
+            self._serving_greenlet = gevent.spawn(self.__serve)
+            self._serving = True
             gevent.sleep(0)
         else:
             pass

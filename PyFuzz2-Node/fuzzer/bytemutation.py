@@ -4,13 +4,19 @@ import random
 import helper
 
 
-def fuzz(input_data, min_change, max_change, seed=None):
-    random.seed(seed)
-    data = input_data
-    data_length = len(data)
-    changes = min(random.randint(min_change, max_change), data_length)
-    for i in range(changes):
-        num = random.randint(0, data_length)
-        fuzz_byte = random.choice(helper.BYTE_MATRIX)
-        data = data[:num-1] + fuzz_byte + data[num+1:]
-    return data
+class ByteMutation:
+    def __init__(self,min_change=1, max_change=1, seed=None):
+        self._seed = seed
+        self._min_change = min_change
+        self._max_change = max_change
+        random.seed(self._seed)
+
+    def fuzz(self, input_data):
+        data = input_data
+        data_length = len(data)
+        changes = min(random.randint(self._min_change, self._max_change), data_length)
+        for i in range(changes):
+            num = random.randint(0, data_length)
+            fuzz_byte = random.choice(helper.BYTE_MATRIX)
+            data = data[:num-1] + fuzz_byte + data[num+1:]
+        return data

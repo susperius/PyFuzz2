@@ -1,3 +1,3 @@
 __author__ = 'susperius'
 
-all = ['bytemutation']
+__all__ = ['bytemutation']

@@ -17,7 +17,11 @@ class ByteMutation:
 
     @property
     def config_attribs(self):
-        return ['min_change', 'max_change', 'seed', 'iteration']
+        return ['min_change', 'max_change', 'seed', 'iteration'] #same order as in the __init__
+
+    @property
+    def name(self):
+        return "bytemutation"
 
     def fuzz(self, input_data):
         data = input_data

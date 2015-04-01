@@ -3,8 +3,6 @@ __author__ = 'susperius'
 import random
 import helper
 
-CONFIG_ATTRIB = ['min_change', 'max_change', 'seed', 'iteration']
-
 
 class ByteMutation:
     def __init__(self, min_change=1, max_change=1, seed=None, iteration=0):
@@ -17,6 +15,9 @@ class ByteMutation:
             for i in range(self._iteration):
                 random.randint(1, 10)
 
+    @property
+    def config_attribs(self):
+        return ['min_change', 'max_change', 'seed', 'iteration']
 
     def fuzz(self, input_data):
         data = input_data

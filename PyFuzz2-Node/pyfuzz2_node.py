@@ -26,7 +26,7 @@ class PyFuzz2Node:
         self._task_queue = Queue()
         self._beacon_client = BeaconClient(self._beacon_server, self._beacon_port, self._node_name,
                                            self._beacon_interval, self._tcp_listener_port)
-        self._tcp_listener = Listener(32337, self._task_queue)
+        self._tcp_listener = Listener(self._tcp_listener_port, self._task_queue)
         self._fuzzer = {'type': "", 'options': {}}
 
     def _read_config(self, config_filename):

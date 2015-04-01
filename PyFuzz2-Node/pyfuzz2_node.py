@@ -42,7 +42,7 @@ class PyFuzz2Node:
         self._beacon_port = int(beacon.attrib['port'])
         self._beacon_interval = int(beacon.attrib['interval'])
         self._tcp_listener_port = int(listener.attrib['port'])
-        self._fuzzer = self._chose_fuzzer(fuzzer_conf)
+        self._fuzzer = self._choose_fuzzer(fuzzer_conf)
 
 
     def _choose_fuzzer(self, fuzzer_conf):

@@ -9,10 +9,12 @@ from communication.beaconclient import BeaconClient
 from communication.tcplistener import Listener
 from gevent.queue import Queue
 from fuzzer.fuzzers import FUZZERS
+from worker.listenerworker import ListenerWorker
 
 gevent.monkey.patch_all()
 
 CONFIG_FILENAME = "node_config.xml"
+pyfuzznode = None
 
 
 class PyFuzz2Node:
@@ -26,10 +28,11 @@ class PyFuzz2Node:
         self._fuzzer = None
         self._fuzz_file = ""
         self._read_config(config_filename)
-        self._task_queue = Queue()
+        self._listener_queue = Queue()
         self._beacon_client = BeaconClient(self._beacon_server, self._beacon_port, self._node_name,
                                            self._beacon_interval, self._tcp_listener_port)
-        self._tcp_listener = Listener(self._tcp_listener_port, self._task_queue)
+        self._tcp_listener = Listener(self._tcp_listener_port, self._listener_queue)
+        self._listener_worker = ListenerWorker(self._listener_queue)
 
     def _read_config(self, config_filename):
         tree = ET.parse(config_filename)
@@ -43,7 +46,6 @@ class PyFuzz2Node:
         self._beacon_interval = int(beacon.attrib['interval'])
         self._tcp_listener_port = int(listener.attrib['port'])
         self._fuzzer = self._choose_fuzzer(fuzzer_conf)
-
 
     def _choose_fuzzer(self, fuzzer_conf):
         f_type = fuzzer_conf.attrib['type']
@@ -60,24 +62,27 @@ class PyFuzz2Node:
             raise Exception("No such fuzzer!")
         pass
 
-
     def main(self):
         self._logger.info("PyFuzz 2 Node started ...")
         self._beacon_client.start_beacon()
         self._tcp_listener.serve()
+        self._listener_worker.start_worker()
         while True:
             try:
-                if not self._task_queue.empty():
-                    task = self._task_queue.get_nowait()
-                    self._logger.debug(task)
+                if self._listener_worker.new_config:
+                    restart()
                 gevent.sleep(0)
             except KeyboardInterrupt:
                 quit()
 
 
+def restart():
+    pyfuzznode = PyFuzz2Node(logger)
+    pyfuzznode.main()
+
+logging.basicConfig(format='%(levelname)s: %(message)s', level=logging.DEBUG)
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
 if __name__ == "__main__":
-    logging.basicConfig(format='%(levelname)s: %(message)s', level=logging.DEBUG)
-    logger = logging.getLogger(__name__)
-    logger.setLevel(logging.DEBUG)
     pyfuzznode = PyFuzz2Node(logger)
     pyfuzznode.main()

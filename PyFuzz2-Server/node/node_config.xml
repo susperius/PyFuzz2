@@ -1,0 +1,6 @@
+<PyFuzz2Node name="">
+    <beacon server="" port="" interval=""/>
+    <report server="" port="" />
+    <listener port=""/>
+    <fuzzer/>
+</PyFuzz2Node>

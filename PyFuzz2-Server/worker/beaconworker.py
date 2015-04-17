@@ -15,6 +15,7 @@ class BeaconWorker:
         self._active = False
         self._node_dict = {}
         self._timeout = timeout
+        self._greenlets = []
 
     def __beacon_worker_green(self):
         while True:
@@ -46,7 +47,12 @@ class BeaconWorker:
 
     def start_worker(self):
         if not self._active:
-            gevent.spawn(self.__beacon_worker_green)
-            gevent.spawn(self.__check_all_beacons)
+            self._greenlets.append(gevent.spawn(self.__beacon_worker_green))
+            self._greenlets.append(gevent.spawn(self.__check_all_beacons))
             self._active = True
             gevent.sleep(0)
+
+    def stop_worker(self):
+        if self._active:
+            gevent.killall(self._greenlets)
+            self._active = False

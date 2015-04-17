@@ -8,7 +8,7 @@ import xml.etree.ElementTree as ET
 from gevent.queue import Queue
 from communication.beaconserver import BeaconServer
 from communication.reportserver import ReportServer
-from beacon.beaconworker import BeaconWorker
+from worker.beaconworker import BeaconWorker
 
 gevent.monkey.patch_all()
 

@@ -59,7 +59,7 @@ class PyFuzz2Server:
     def web_main(self, environ, start_response):
         site = WebSite()
         func = "home"
-        if environ['PATH_INFO'] == '/index.py':
+        if environ['PATH_INFO'] == "/index.py":
             parameters = parse_qs(environ['QUERY_STRING'])
             if "func" in parameters:
                 func = parameters['func'][0] if parameters['func'][0] in site.funcs else "home"
@@ -67,6 +67,9 @@ class PyFuzz2Server:
                 status, headers, html = site.home()
             elif func == "node_detail":
                 status, headers, html = site.node_detail()
+        elif environ['PATH_INFO'] == "/style.css":
+            status, headers, html = site.get_style()
+            start_response(status, headers)
         else:
             status, headers, html = site.file_not_found()
         start_response(status, headers)

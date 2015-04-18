@@ -1,0 +1,58 @@
+#header {
+    background-color:darkorange;
+    color:black;
+    text-align:center;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    padding:5px;
+}
+#nav {
+    background-color: darkorange;
+    color: black;
+    line-height:30px;
+    height:300px;
+    width:250px;
+    float:left;
+    padding:5px;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-style: oblique;
+    text-transform: uppercase;
+}
+#nav li{
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+#nav a:hover{
+    background-color: white;
+    border-bottom: 1px solid black;
+    color: black;
+    padding-bottom: 8px;
+}
+#nav a{
+    background: darkorange;
+    border-bottom: 1px solid white;
+    color: black;
+    display: block;
+    margin: 0;
+    padding: 8px 12px;
+    text-decoration: none;
+    font-weight: normal;
+}
+#section {
+    width:350px;
+    float:left;
+    padding:10px;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+#footer {
+    background-color: darkorange;
+    color:black;
+    clear:both;
+    text-align:center;
+    padding:5px;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+table {
+    border: solid;
+}

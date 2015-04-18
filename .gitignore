@@ -58,7 +58,6 @@ docs/_build/
 target/
 
 
-*.html
 *.swp
 .idea
 *.pyc

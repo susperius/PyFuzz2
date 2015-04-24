@@ -1,0 +1,27 @@
+<html> 
+<head>
+<title>PyFuzz 0.1</title>
+<meta http-equiv="Cache-control" content="no-cache"></meta>
+
+<script type='text/javascript'>
+
+function eventHandler(event){
+  EVENT_HANDLER
+  document.writeln("Hit Handler");
+  return false;
+}
+
+function startup(){
+  START_UP
+}
+
+SCRIPT_BODY
+
+</script>
+
+</head>
+
+<body onload="startup()">
+Hello World!
+</body>
+</html>

@@ -1,3 +1,3 @@
 __author__ = 'susperius'
 
-FUZZERS = ['bytemutation']
+FUZZERS = ['bytemutation', 'jsfuzzer']

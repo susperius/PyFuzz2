@@ -1,16 +1,16 @@
 __author__ = 'susperius'
 
 import logging
+
 import gevent
 import gevent.monkey
-import xml.etree.ElementTree as ET
+from gevent.queue import Queue
 
 from communication.beaconclient import BeaconClient
 from communication.tcplistener import Listener
-from gevent.queue import Queue
-from fuzzer.fuzzers import FUZZERS
 from worker.listenerworker import ListenerWorker
 from model.config import ConfigParser
+
 
 gevent.monkey.patch_all()
 

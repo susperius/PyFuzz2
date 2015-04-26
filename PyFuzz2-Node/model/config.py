@@ -64,5 +64,9 @@ class ConfigParser:
         return self._listener_port if self._node_mode == "net" else None
 
     @property
+    def fuzzer_type(self):
+        return self._fuzzer_type
+
+    @property
     def fuzzer_config(self):
-        return self._fuzzer_type, self._fuzz_config
+        return self._fuzz_config

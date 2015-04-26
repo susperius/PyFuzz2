@@ -1,6 +1,6 @@
 <html> 
 <head>
-<title>PyFuzz 0.1</title>
+<title>PyFuzz2 0.1</title>
 <meta http-equiv="Cache-control" content="no-cache"></meta>
 
 <script type='text/javascript'>
@@ -23,5 +23,6 @@ SCRIPT_BODY
 
 <body onload="startup()">
 Hello World!
+HTML_BODY
 </body>
 </html>

@@ -14,7 +14,7 @@ import os
 
 TEMPLATE_FILE = "fuzzer/jsfuzzer/template.dat"
 
-
+#TODO: add constants to save name and config params
 class JsFuzz:
     def __init__(self, starting_element_count, total_count, browser, seed=31337):
         self.__js_elements = {}

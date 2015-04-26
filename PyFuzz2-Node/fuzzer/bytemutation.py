@@ -3,7 +3,7 @@ __author__ = 'susperius'
 import random
 import helper
 
-
+#TODO: add constants to save name and config params
 class ByteMutation:
     def __init__(self, min_change=1, max_change=1, seed=None, iteration=0):
         self._seed = seed

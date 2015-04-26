@@ -1,5 +1,6 @@
-<PyFuzz2Node name="NODE01">
+<PyFuzz2Node name="NODE01" mode="net">
     <beacon server="127.0.0.1" port="31337" interval="10"/>
+    <reporting server="127.0.0.1" port="31338"/>
     <listener port="32337"/>
     <fuzzer type="bytemutation" min_change="1" max_change="1" seed="1337" iteration="0" fuzz_file="sample.txt"/>
 </PyFuzz2Node>

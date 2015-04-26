@@ -3,9 +3,12 @@ __author__ = 'susperius'
 import random
 import helper
 
-#TODO: add constants to save name and config params
+NAME = "bytemutation"
+CONFIG_PARAMS = ["fuzz_file", "min_change", "max_change", "seed", "iteration"]
+
+
 class ByteMutation:
-    def __init__(self, min_change=1, max_change=1, seed=None, iteration=0):
+    def __init__(self, fuzz_file, min_change=1, max_change=1, seed=31337, iteration=0):
         self._seed = seed
         self._min_change = min_change
         self._max_change = max_change
@@ -14,14 +17,6 @@ class ByteMutation:
         if self._iteration != 0: # Set the old state for iteration x
             for i in range(self._iteration):
                 random.randint(1, 10)
-
-    @property
-    def config_attribs(self):
-        return ['min_change', 'max_change', 'seed', 'iteration'] #same order as in the __init__
-
-    @property
-    def name(self):
-        return "bytemutation"
 
     def fuzz(self, input_data):
         data = input_data

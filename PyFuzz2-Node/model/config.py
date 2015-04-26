@@ -28,10 +28,10 @@ class ConfigParser:
             self._fuzzer_type = fuzzer.attrib['type']
             self._fuzz_config = []
             if self._fuzzer_type == "bytemutation":
+                self._fuzz_config.append(fuzzer.attrib['fuzz_file'])
                 self._fuzz_config.append(fuzzer.attrib['min_change'])
                 self._fuzz_config.append(fuzzer.attrib['max_change'])
                 self._fuzz_config.append(fuzzer.attrib['seed'])
-                self._fuzz_config.append(fuzzer.attrib['fuzz_file'])
             elif self._fuzzer_type == "js_fuzzer":
                 self._fuzz_config.append(fuzzer.attrib['starting_elements'])
                 self._fuzz_config.append(fuzzer.attrib['total_operations'])

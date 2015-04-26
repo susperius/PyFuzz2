@@ -13,16 +13,18 @@ import random
 import os
 
 TEMPLATE_FILE = "fuzzer/jsfuzzer/template.dat"
+NAME = "js_fuzzer"
+CONFIG_PARAMS = ["starting_element", "total_operations", "browser", "seed"]
 
-#TODO: add constants to save name and config params
+
 class JsFuzz:
-    def __init__(self, starting_element_count, total_count, browser, seed=31337):
+    def __init__(self, starting_elements, total_operations, browser, seed=31337):
         self.__js_elements = {}
         self.__js_attributes = []
         self.__bool = ['true', 'false']
         self.__tag_names = []
-        self.__starting_element_count = starting_element_count
-        self.__total_count = total_count
+        self.__starting_element_count = starting_elements
+        self.__total_count = total_operations
         self.__event_listener = "dummy"
         self.__browser = browser
         self.__html_fuzzer = None

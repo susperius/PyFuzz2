@@ -1,4 +1,6 @@
 __author__ = 'susperius'
 
-#TODO: Change to dict in order save all info about config param
-FUZZERS = ['bytemutation', 'jsfuzzer']
+import javascript
+import bytemutation
+
+FUZZERS = {bytemutation.NAME: bytemutation.CONFIG_PARAMS, javascript.NAME: javascript.CONFIG_PARAMS}

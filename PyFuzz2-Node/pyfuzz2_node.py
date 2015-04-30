@@ -30,7 +30,7 @@ class PyFuzz2Node:
             self._tcp_listener_port = node_config.listener_config
         self._fuzzer_type = node_config.fuzzer_type
         self._fuzzer_config = node_config.fuzzer_config
-        self._fuzzer = self.__chose_fuzzer()
+        self._fuzzer = self.__choose_fuzzer()
         self._listener_queue = Queue()
         self._beacon_client = BeaconClient(self._beacon_server, self._beacon_port, self._node_name,
                                            self._beacon_interval, self._tcp_listener_port)

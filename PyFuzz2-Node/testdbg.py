@@ -8,7 +8,6 @@ import socket
 
 dbg = wdbg.Debugger("C:\\Program Files\\Tracker Software\\PDF Viewer\\PDFXcview.exe")
 
-
 dbg_w = dbgworker.DebuggerWorker(dbg)
 
 dbg_w.start_worker("test.pdf")

@@ -1,4 +1,4 @@
-TODO: 1) add program path to configfile
+
 TODO: 2) implement the testing routine
 TODO: 3) implement reset functionality
 TODO: 4) crash reporter

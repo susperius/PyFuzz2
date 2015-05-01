@@ -24,6 +24,7 @@ class ConfigParser:
                 self._listener_port = int(listener.attrib['port'])
             elif self._node_mode != "single":
                 raise ValueError("Only net and single are available modes for node!")
+            self._program_path = self._root.find("program").attrib['path']
             fuzzer = self._root.find("fuzzer")
             self._fuzzer_type = fuzzer.attrib['type']
             self._fuzz_config = []
@@ -62,6 +63,10 @@ class ConfigParser:
     @property
     def listener_config(self):
         return self._listener_port if self._node_mode == "net" else None
+
+    @property
+    def program_path(self):
+        return self._program_path
 
     @property
     def fuzzer_type(self):

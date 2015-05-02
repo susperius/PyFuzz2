@@ -8,15 +8,18 @@ CONFIG_PARAMS = ["fuzz_file", "min_change", "max_change", "seed", "iteration"]
 
 
 class ByteMutation:
-    def __init__(self, fuzz_file, min_change=1, max_change=1, seed=31337, iteration=0):
+    def __init__(self, fuzz_file, min_change=1, max_change=1, seed=31337):
         self._seed = seed
         self._min_change = min_change
         self._max_change = max_change
-        self._iteration = iteration
         random.seed(self._seed)
-        if self._iteration != 0: # Set the old state for iteration x
-            for i in range(self._iteration):
-                random.randint(1, 10)
+
+    @property
+    def get_state(self):
+        return random.getstate()
+
+    def set_state(self, state):
+        random.setstate(state)
 
     def fuzz(self, input_data):
         data = input_data

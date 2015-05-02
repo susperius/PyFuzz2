@@ -58,6 +58,13 @@ class JsFuzz:
         self.__set_start_values()
         return templ
 
+    @property
+    def get_state(self):
+        return random.getstate()
+
+    def set_state(self, state):
+        random.setstate(state)
+
     @staticmethod
     def __get_html_ids(html):
         start = html.find("IDS:") + 5

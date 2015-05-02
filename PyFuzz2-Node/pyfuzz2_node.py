@@ -4,6 +4,8 @@ import logging
 
 import gevent
 import gevent.monkey
+import pickle
+import os
 from gevent.queue import Queue
 from fuzzer.fuzzers import FUZZERS
 from communication.beaconclient import BeaconClient
@@ -31,6 +33,10 @@ class PyFuzz2Node:
         self._fuzzer_type = node_config.fuzzer_type
         self._fuzzer_config = node_config.fuzzer_config
         self._fuzzer = self.__choose_fuzzer()
+        if os.path.isfile("fuzz_state.pickle"):  # Load the saved state of the prng
+            with open("fuzz_state.pickle", 'r') as fd:
+                self._fuzzer.set_state(pickle.load(fd))
+            os.remove("fuzz_state.pickle")
         self._listener_queue = Queue()
         self._beacon_client = BeaconClient(self._beacon_server, self._beacon_port, self._node_name,
                                            self._beacon_interval, self._tcp_listener_port)
@@ -55,6 +61,9 @@ class PyFuzz2Node:
         while True:
             try:
                 if self._listener_worker.new_config:
+                    fuzz_state = self._fuzzer.get_state()
+                    with open("fuzz_state.pickle", 'w+') as fd:
+                        pickle.dump(fuzz_state, fd)
                     restart()
                 gevent.sleep(0)
             except KeyboardInterrupt:

@@ -38,12 +38,15 @@ class DebuggerWorker:
                 self._process.start()
                 started = time.time()
                 util = psutil.Process(self._process.pid)
-                if (time.time() - started >= self._sleep_time) or (util.get_cpu_times == 0):
-                    # Either time is up or no cpu time is used
-                    self._process.terminate()
+                while True:
+                    if (time.time() - started >= self._sleep_time) or (util.get_cpu_times == 0):
+                        # Either time is up or no cpu time is used
+                        self._process.terminate()
+                        break
                 if self.crashed:
                     self._report_queue.put(self.crash_report)
                     self._crash_occurred = False
+                gevent.sleep(0)
 
     def _create_testcases(self):
         pass

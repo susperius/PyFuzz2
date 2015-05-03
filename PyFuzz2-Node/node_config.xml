@@ -3,5 +3,5 @@
     <reporting server="127.0.0.1" port="31338"/>
     <listener port="32337"/>
     <program path="C:\Program Files\Tracker Software\..."/>
-    <fuzzer type="bytemutation" min_change="1" max_change="1" seed="1337" iteration="0" fuzz_file="sample.txt"/>
+    <fuzzer type="bytemutation" min_change="1" max_change="1" seed="1337" iteration="0" fuzz_file="sample.txt" file_type="html"/>
 </PyFuzz2Node>

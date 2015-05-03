@@ -40,6 +40,7 @@ class ConfigParser:
                 self._fuzz_config.append(fuzzer.attrib['seed'])
             else:
                 raise ValueError("Unsupported fuzzer type!")
+            self._fuzz_config.append(fuzzer.attrib['file_type'])
         except Exception as ex:
             self._logger.error("General error occurred while parsing config: " + ex.message)
             quit()

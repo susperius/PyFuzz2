@@ -14,11 +14,11 @@ import os
 
 TEMPLATE_FILE = "fuzzer/jsfuzzer/template.dat"
 NAME = "js_fuzzer"
-CONFIG_PARAMS = ["starting_element", "total_operations", "browser", "seed"]
+CONFIG_PARAMS = ["starting_element", "total_operations", "browser", "seed", "file_type"]
 
 
 class JsFuzz:
-    def __init__(self, starting_elements, total_operations, browser, seed=31337):
+    def __init__(self, starting_elements, total_operations, browser, seed=31337, file_type="html"):
         self.__js_elements = {}
         self.__js_attributes = []
         self.__bool = ['true', 'false']
@@ -29,6 +29,7 @@ class JsFuzz:
         self.__browser = browser
         self.__html_fuzzer = None
         self.__seed = seed
+        self.__file_type = file_type
         random.seed(seed)
 
     def __set_start_values(self):
@@ -61,6 +62,10 @@ class JsFuzz:
     @property
     def get_state(self):
         return random.getstate()
+
+    @property
+    def file_type(self):
+        return self.__file_type
 
     def set_state(self, state):
         random.setstate(state)

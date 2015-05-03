@@ -47,11 +47,11 @@ class PyFuzz2Node:
         if self._fuzzer_type == "bytemutation":
             from fuzzer.bytemutation import ByteMutation
             return ByteMutation(self._fuzzer_config[0], self._fuzzer_config[1], self._fuzzer_config[2],
-                                        self._fuzzer_config[3], self._fuzzer_config[4])
+                                self._fuzzer_config[3], self._fuzzer_config[4])
         elif self._fuzzer_type == "js_fuzzer":
             from fuzzer.javascript import JsFuzz
             return JsFuzz(self._fuzzer_config[0], self._fuzzer_config[1],
-                          self._fuzzer_config[2], self._fuzzer_config[3])
+                          self._fuzzer_config[2], self._fuzzer_config[3], self._fuzzer_config[4])
 
     def main(self):
         self._logger.info("PyFuzz 2 Node started ...")
@@ -63,7 +63,7 @@ class PyFuzz2Node:
                 if self._listener_worker.new_config:
                     fuzz_state = self._fuzzer.get_state()
                     with open("fuzz_state.pickle", 'w+') as fd:
-                        pickle.dump(fuzz_state, fd)
+                        pickle.dump(fuzz_state, fd) # Save the state of the prng
                     restart()
                 gevent.sleep(0)
             except KeyboardInterrupt:

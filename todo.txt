@@ -1,5 +1,5 @@
 
-TODO: 2) implement the testing routine
+TODO: 2) test the testing routine
 TODO: 3) implement reset functionality
 TODO: 4) crash reporter
 TODO: 5) go on with the web interface

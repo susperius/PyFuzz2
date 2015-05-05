@@ -10,7 +10,7 @@ from debugging.windbg import Debugger
 
 
 class DebuggerWorker:
-    def __init__(self, program_path, fuzzer, report_queue, sleep_time):
+    def __init__(self, program_path, fuzzer, report_queue, sleep_time, dbg_child=False):
         self._logger = logging.getLogger(__name__)
         self._greenlet = None
         self._process = None
@@ -22,15 +22,7 @@ class DebuggerWorker:
         self._fuzzer = fuzzer
         self._report_queue = report_queue
         self._sleep_time = sleep_time
-
-    def _create_crash_report(self):
-        self._crash_report += "Crash Report\r\n"
-        self._crash_report += self._dbg.issue_dbg_command(u"r")
-        self._crash_report += "\r\n"
-        self._crash_report += self._dbg.issue_dbg_command(u"k")
-        self._crash_report += "\r\n"
-        self._crash_report += self._dbg.involve_msec()
-        self._crash_occurred = True
+        self._dbg_child = dbg_child
 
     def _debugger_worker_green(self):
         x = 3 # debug .... defaults to -> while True:
@@ -38,15 +30,25 @@ class DebuggerWorker:
             self._create_testcases()
             for filename in os.listdir("testcases/"):
                 output = ""
-                process = subprocess.Popen(
-                    "python debugging\\windbg.py -p \"" + self._program_path + "\" -t \"testcases\\" + filename + "\"",
-                    stdout=subprocess.PIPE)
+                testcase_dir = os.getcwd() + "\\testcases\\"
+                if self._dbg_child:
+                    process = subprocess.Popen(
+                        "python debugging\\windbg.py -p \"" + self._program_path
+                        + "\" -t \"" + testcase_dir + filename + "\"",
+                        stdout=subprocess.PIPE)
+                else:
+                    process = subprocess.Popen(
+                        "python debugging\\windbg.py -p \"" + self._program_path
+                        + "\" -t \"" + testcase_dir + filename + "\" -c",
+                        stdout=subprocess.PIPE)
                 self._logger.debug("Debugger started...")
                 util = psutil.Process(process.pid)
                 start = time.time()
                 try:
                     while True:
-                        if (time.time() - start > self._sleep_time) or (util.cpu_times() == 0):
+                        if time.time() - start > self._sleep_time:
+                            break
+                        elif util.cpu_percent(1.0) == 0.0:
                             break
                 except:
                     pass # just ignore
@@ -67,26 +69,14 @@ class DebuggerWorker:
             with open("testcases/" + filename, "w+") as fd:
                 fd.write(self._fuzzer.fuzz())
 
-    def _debugger_worker(self, filename):
-        self._dbg.start_process("testcases/" + filename)
-        self._dbg.run()
-        self._create_crash_report()
 
     def start_worker(self):
         if self._greenlet is None:
             self._greenlet = gevent.spawn(self._debugger_worker_green)
 
     def stop_worker(self):
-        if self._running:
-            self._process.terminate()
-            self._running = False
-
-    def reset(self):
-        self._greenlet = None
-        self._testcase = ""
-        self._crash_occurred = False
-        self._crash_report = ""
-        self._dbg.kill_process()
+        if self._greenlet is not None:
+            gevent.kill(self._greenlet)
 
     @property
     def crashed(self):

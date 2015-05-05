@@ -2,6 +2,6 @@
     <beacon server="127.0.0.1" port="31337" interval="10"/>
     <reporting server="127.0.0.1" port="31338"/>
     <listener port="32337"/>
-    <program path="C:\Program Files\Tracker Software\..."/>
+    <program path="C:\Program Files\Tracker Software\..." dbg_child="False"/>
     <fuzzer type="bytemutation" min_change="1" max_change="1" seed="1337" iteration="0" fuzz_file="sample.txt" file_type="html"/>
 </PyFuzz2Node>

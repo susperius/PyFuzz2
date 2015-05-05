@@ -25,6 +25,7 @@ class ConfigParser:
             elif self._node_mode != "single":
                 raise ValueError("Only net and single are available modes for node!")
             self._program_path = self._root.find("program").attrib['path']
+            self._program_dbg_child = bool(self._root.find("program").attrib['dbg_child'])
             fuzzer = self._root.find("fuzzer")
             self._fuzzer_type = fuzzer.attrib['type']
             self._fuzz_config = []

@@ -1,7 +1,7 @@
-<PyFuzz2Node name="NODE01" mode="net">
+<PyFuzz2Node name="NODE01" mode="single">
     <beacon server="127.0.0.1" port="31337" interval="10"/>
     <reporting server="127.0.0.1" port="31338"/>
     <listener port="32337"/>
-    <program path="C:\Program Files\Tracker Software\..." dbg_child="False"/>
-    <fuzzer type="bytemutation" min_change="1" max_change="1" seed="1337" iteration="0" fuzz_file="sample.txt" file_type="html"/>
+    <program path="C:\Program Files\Tracker Software\PDF Viewer\PDFXcview.exe" dbg_child="False" sleep_time="5"/>
+    <fuzzer type="bytemutation" min_change="1" max_change="1" seed="1337" fuzz_file="test.pdf" file_type="pdf"/>
 </PyFuzz2Node>

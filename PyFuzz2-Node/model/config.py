@@ -26,19 +26,20 @@ class ConfigParser:
                 raise ValueError("Only net and single are available modes for node!")
             self._program_path = self._root.find("program").attrib['path']
             self._program_dbg_child = bool(self._root.find("program").attrib['dbg_child'])
+            self._program_sleep_time = int(self._root.find("program").attrib['sleep_time'])
             fuzzer = self._root.find("fuzzer")
             self._fuzzer_type = fuzzer.attrib['type']
             self._fuzz_config = []
             if self._fuzzer_type == "bytemutation":
                 self._fuzz_config.append(fuzzer.attrib['fuzz_file'])
-                self._fuzz_config.append(fuzzer.attrib['min_change'])
-                self._fuzz_config.append(fuzzer.attrib['max_change'])
-                self._fuzz_config.append(fuzzer.attrib['seed'])
+                self._fuzz_config.append(int(fuzzer.attrib['min_change']))
+                self._fuzz_config.append(int(fuzzer.attrib['max_change']))
+                self._fuzz_config.append(int(fuzzer.attrib['seed']))
             elif self._fuzzer_type == "js_fuzzer":
-                self._fuzz_config.append(fuzzer.attrib['starting_elements'])
-                self._fuzz_config.append(fuzzer.attrib['total_operations'])
+                self._fuzz_config.append(int(fuzzer.attrib['starting_elements']))
+                self._fuzz_config.append(int(fuzzer.attrib['total_operations']))
                 self._fuzz_config.append(fuzzer.attrib['browser'])
-                self._fuzz_config.append(fuzzer.attrib['seed'])
+                self._fuzz_config.append(int(fuzzer.attrib['seed']))
             else:
                 raise ValueError("Unsupported fuzzer type!")
             self._fuzz_config.append(fuzzer.attrib['file_type'])
@@ -69,6 +70,14 @@ class ConfigParser:
     @property
     def program_path(self):
         return self._program_path
+
+    @property
+    def dbg_child(self):
+        return self._program_dbg_child
+
+    @property
+    def sleep_time(self):
+        return self._program_sleep_time
 
     @property
     def fuzzer_type(self):

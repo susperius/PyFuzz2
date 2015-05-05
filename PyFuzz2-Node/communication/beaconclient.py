@@ -29,3 +29,7 @@ class BeaconClient():
         if not self._beacon_running:
             self._beacon_greenlet = gevent.spawn(self.__beacon)
             self._beacon_running = True
+
+    # TODO: implement stop_beacon
+    def stop_beacon(self):
+        pass

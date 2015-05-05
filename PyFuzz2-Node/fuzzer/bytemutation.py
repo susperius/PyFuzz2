@@ -20,7 +20,7 @@ class ByteMutation:
         random.seed(self._seed)
 
     def __load_fuzz_file(self):
-        with open(self._fuzz_file, "r") as fd:
+        with open(self._fuzz_file, "rb") as fd:
             self._data = fd.read()
         self._count = 0
 

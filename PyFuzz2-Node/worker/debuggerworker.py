@@ -24,10 +24,10 @@ class DebuggerWorker:
         self._sleep_time = sleep_time
         self._dbg_child = dbg_child
 
-    def _debugger_worker_green(self):
+    def __debugger_worker_green(self):
         x = 3 # debug .... defaults to -> while True:
         while x > 1:
-            self._create_testcases()
+            self.__create_testcases()
             for filename in os.listdir("testcases/"):
                 output = ""
                 testcase_dir = os.getcwd() + "\\testcases\\"
@@ -55,33 +55,25 @@ class DebuggerWorker:
                 process.kill()
                 output = process.stdout.read()
                 if "Crash Report" in output:
-                    self._logger.info("Crash")
-                    self._report_queue.put(output)
-                else:
-                    self._logger.info("No crash")
+                    with open(testcase_dir + filename, "rb") as fd:
+                        testcase = fd.read()
+                    self._report_queue.put((output, testcase))
                 gevent.sleep(0)
                 x -= 1
 
-    def _create_testcases(self):
+    def __create_testcases(self):
         for i in range(100):
             filename = "test" + str(i) if i > 9 else "test0" + str(i)
             filename += "." + self._fuzzer.file_type
-            with open("testcases/" + filename, "w+") as fd:
+            with open("testcases/" + filename, "wb+") as fd:
                 fd.write(self._fuzzer.fuzz())
 
 
     def start_worker(self):
         if self._greenlet is None:
-            self._greenlet = gevent.spawn(self._debugger_worker_green)
+            self._greenlet = gevent.spawn(self.__debugger_worker_green)
 
     def stop_worker(self):
         if self._greenlet is not None:
             gevent.kill(self._greenlet)
 
-    @property
-    def crashed(self):
-        return self._crash_occurred
-
-    @property
-    def crash_report(self):
-        return self._crash_report

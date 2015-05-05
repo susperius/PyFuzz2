@@ -66,3 +66,30 @@ class Debugger:
 
     def kill_process(self):
         pykd.killAllProcesses()
+
+    @property
+    def crashed(self):
+        return self._crash_occurred
+
+if __name__ == "__main__":
+    from optparse import OptionParser
+    parser = OptionParser()
+    parser.add_option("-p", "--path", dest="path", help="The path of the executable", metavar="PATH")
+    parser.add_option("-t", "--testcase", dest="testcase", help="The path of the testcase", metavar="TESTCASE")
+    (options, args) = parser.parse_args()
+    print(options.path)
+    print(options.testcase)
+    dbg = Debugger(options.path)
+    dbg.start_process(options.testcase)
+    dbg.run()
+    crash_report = ""
+    if dbg.crashed:
+        crash_report += "Crash Report\r\n"
+        crash_report += dbg.issue_dbg_command(u"r")
+        crash_report += "\r\n"
+        crash_report += dbg.issue_dbg_command(u"k")
+        crash_report += "\r\n"
+        crash_report += dbg.involve_msec()
+        print crash_report
+    else:
+        print "No Crash"

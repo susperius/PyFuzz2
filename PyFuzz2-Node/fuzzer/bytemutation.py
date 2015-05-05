@@ -3,11 +3,11 @@ __author__ = 'susperius'
 import random
 import helper
 
-NAME = "bytemutation"
-CONFIG_PARAMS = ["fuzz_file", "min_change", "max_change", "seed", "file_type"]
-
 
 class ByteMutation:
+    NAME = "bytemutation"
+    CONFIG_PARAMS = ["fuzz_file", "min_change", "max_change", "seed", "file_type"]
+
     def __init__(self, fuzz_file, min_change=1, max_change=1, seed=31337, file_type="png"):
         self._seed = seed
         self._min_change = min_change

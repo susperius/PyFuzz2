@@ -3,17 +3,26 @@ __author__ = 'susperius'
 import debugging.windbg as wdbg
 import worker.debuggerworker as dbgworker
 import gevent
+import gevent.monkey
 import time
 import socket
+from fuzzer.javascript import JsFuzz
+from gevent.queue import Queue
+from subprocess import Popen
+import subprocess
+import logging
 
-dbg = wdbg.Debugger("C:\\Program Files\\Tracker Software\\PDF Viewer\\PDFXcview.exe")
+gevent.monkey.patch_all()
 
-dbg_w = dbgworker.DebuggerWorker(dbg)
-
-dbg_w.start_worker("test.pdf")
-
-gevent.sleep(5)
-
-print(dbg_w.crash_report)
-
-dbg_w.reset()
+if __name__ == "__main__":
+    logging.basicConfig(format='%(levelname)s: %(message)s', level=logging.DEBUG)
+    logger = logging.getLogger(__name__)
+    logger.setLevel(logging.DEBUG)
+    fuz = JsFuzz(10, 100, "ie")
+    rep_q = Queue()
+    dbg_w = dbgworker.DebuggerWorker("C:\\Program Files\\Tracker Software\\PDF Viewer\\PDFXcview.exe\" -t \"testcases\\test.pdf", fuz, rep_q, 5)
+    #dbg_w.start_worker()
+    #gevent.sleep(10)
+    #rep = rep_q.get_nowait()
+    #print(rep)
+    dbg_w._create_testcases()

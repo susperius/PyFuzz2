@@ -13,11 +13,12 @@ import random
 import os
 
 TEMPLATE_FILE = "fuzzer/jsfuzzer/template.dat"
-NAME = "js_fuzzer"
-CONFIG_PARAMS = ["starting_element", "total_operations", "browser", "seed", "file_type"]
 
 
 class JsFuzz:
+    NAME = "js_fuzzer"
+    CONFIG_PARAMS = ["starting_element", "total_operations", "browser", "seed", "file_type"]
+
     def __init__(self, starting_elements, total_operations, browser, seed=31337, file_type="html"):
         self.__js_elements = {}
         self.__js_attributes = []

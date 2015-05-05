@@ -7,6 +7,7 @@ from gevent.queue import Queue
 from model.task import Task
 from model.message_types import MESSAGE_TYPES
 
+
 class ListenerWorker:
     def __init__(self, listener_queue):
         self._logger = logging.getLogger(__name__)

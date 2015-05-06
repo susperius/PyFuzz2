@@ -86,7 +86,7 @@ if __name__ == "__main__":
         crash_report += "Crash Report\r\n"
         crash_report += dbg.issue_dbg_command(u"r")
         crash_report += "\r\n"
-        crash_report += dbg.issue_dbg_command(u"k")
+        crash_report += dbg.issue_dbg_command(u"kb")
         crash_report += "\r\n"
         crash_report += dbg.involve_msec()
         print crash_report

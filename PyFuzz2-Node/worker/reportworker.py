@@ -3,30 +3,35 @@ __author__ = 'susperius'
 import gevent
 import pickle
 import logging
+import os
 from communication.reportclient import ReportClient
 
 
 class ReportWorker:
-    def __init__(self, net_mode, report_queue, report_server="", report_server_port=0):
+    def __init__(self, net_mode, report_queue, file_type, report_server="", report_server_port=0):
         self._logger = logging.getLogger(__name__)
         self._report_queue = report_queue
         self._net_mode = net_mode
         self._greenlet = None
+        self._file_type = file_type
         if self._net_mode:
             self._client = ReportClient(report_server, report_server_port)
 
     def __worker_green(self):
         while True:
             if not self._report_queue.empty():
-                crash = self._report_queue.get_no_wait()
-                self.__report_crash_local(crash)
-                if self._net_mode:
-                    data_string = pickle.dumps(crash)
-                    self._client.send(data_string)
+                report_type, crash = self._report_queue.get_nowait()
+                if report_type == 0xFF:
+                    self.__report_crash_local(crash)
+                    if self._net_mode:
+                        data_string = pickle.dumps((report_type, crash), -1)
+                        self._client.send(data_string)
+            gevent.sleep(0)
 
     def start_worker(self):
         if self._greenlet is None:
             self._greenlet = gevent.spawn(self.__worker_green)
+            gevent.sleep(0)
 
     def stop_worker(self):
         if self._greenlet is not None:
@@ -52,6 +57,6 @@ class ReportWorker:
                               " \r\n\tsaved in " + directory)
             os.makedirs(directory)
             with open(directory + "\\crash_report.txt", 'w+') as fd_rep, open(
-                                    directory + "\\crash_file." + self._fuzzer.file_type, "wb+") as fd_crash:
+                                    directory + "\\crash_file." + self._file_type, "wb+") as fd_crash:
                 fd_rep.write(crash[0])
                 fd_crash.write(crash[1])

@@ -18,7 +18,7 @@ class Listener:
         self._port = port
         self._serving = False
         self._serving_greenlet = None
-        self._beacon_server = None
+        self._node_server = None
         self._logger = logging.getLogger(__name__)
         self._task_queue = task_queue
 
@@ -30,7 +30,6 @@ class Listener:
             if line:
                 job += line
                 fp.flush()
-                print(line)
             else:
                 break
         fp.write("RECV\r\n\r\n")
@@ -41,8 +40,8 @@ class Listener:
 
     def __serve(self):
         self._logger.info("[Listener] initialized on port " + str(self._port) + " ...")
-        self._beacon_server = StreamServer(('', self._port), self.__listener_receiver)
-        self._beacon_server.serve_forever()
+        self._node_server = StreamServer(('', self._port), self.__listener_receiver)
+        self._node_server.serve_forever()
 
     def serve(self):
         if not self._serving:

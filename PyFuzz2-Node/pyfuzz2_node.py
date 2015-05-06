@@ -13,6 +13,7 @@ from communication.beaconclient import BeaconClient
 from communication.nodelistener import Listener
 from worker.listenerworker import ListenerWorker
 from worker.debuggerworker import DebuggerWorker
+from worker.reportworker import ReportWorker
 from model.config import ConfigParser
 
 
@@ -40,13 +41,17 @@ class PyFuzz2Node:
             with open("fuzz_state.pickle", 'r') as fd:
                 self._fuzzer.set_state(pickle.load(fd))
             os.remove("fuzz_state.pickle")
+        self._reporter_queue = Queue()
         if self._node_mode == "net":
             self._listener_queue = Queue()
             self._beacon_client = BeaconClient(self._beacon_server, self._beacon_port, self._node_name,
                                                self._beacon_interval, self._tcp_listener_port)
             self._tcp_listener = Listener(self._tcp_listener_port, self._listener_queue)
             self._listener_worker = ListenerWorker(self._listener_queue)
-        self._reporter_queue = Queue()
+            self._report_worker = ReportWorker(True, self._reporter_queue, self._fuzzer.file_type,
+                                               self._report_server, self._report_port)
+        else:
+            self._report_worker = ReportWorker(False, self._reporter_queue, self._fuzzer.file_type)
         self._debugger_worker = DebuggerWorker(node_config.program_path, self._fuzzer, self._reporter_queue,
                                                node_config.sleep_time, node_config.dbg_child)
 
@@ -80,6 +85,7 @@ class PyFuzz2Node:
             self._beacon_client.start_beacon()
             self._tcp_listener.serve()
             self._listener_worker.start_worker()
+        self._report_worker.start_worker()
         self._debugger_worker.start_worker()
         while True:
             try:

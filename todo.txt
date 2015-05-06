@@ -1,4 +1,3 @@
-TODO: 4) test crash reporter
 TODO: 5) go on with the web interface
 TODO: 6) develop a code coverage analysis tool with results importable in hopper
 TODO: 7) develop a update possibility (via git?)

@@ -56,9 +56,8 @@ class DebuggerWorker:
                 if "Crash Report" in output:
                     with open(testcase_dir + filename, "rb") as fd:
                         testcase = fd.read()
-                    self._report_queue.put((output, testcase))
+                    self._report_queue.put((0xFF, (output, testcase)))
                 gevent.sleep(0)
-                x -= 1
 
     def __create_testcases(self):
         for i in range(100):

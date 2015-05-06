@@ -5,6 +5,7 @@ import logging
 import gevent
 import gevent.monkey
 import xml.etree.ElementTree as ET
+import pickle
 from gevent.queue import Queue
 from communication.beaconserver import BeaconServer
 from communication.reportserver import ReportServer
@@ -46,6 +47,10 @@ class PyFuzz2Server:
         while True:
             try:
                 gevent.sleep(0)
+                if not self._report_queue.empty():
+                    data = self._report_queue.get_nowait()
+                    report_type, crash = pickle.loads(data)
+                    self._logger.debug("Received Report -> \r\n" + crash[0])
             except KeyboardInterrupt:
                 exit(0)
 

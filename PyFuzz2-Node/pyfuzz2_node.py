@@ -6,13 +6,15 @@ import gevent
 import gevent.monkey
 import pickle
 import os
+import time
 from gevent.queue import Queue
-from fuzzer.fuzzers import FUZZERS
+# from fuzzer.fuzzers import FUZZERS
 from communication.beaconclient import BeaconClient
-from communication.tcplistener import Listener
+from communication.nodelistener import Listener
 from worker.listenerworker import ListenerWorker
 from worker.debuggerworker import DebuggerWorker
 from model.config import ConfigParser
+
 
 
 gevent.monkey.patch_all()
@@ -66,7 +68,13 @@ class PyFuzz2Node:
             self._listener_worker.stop_worker()
             self._beacon_client.stop_beacon()
 
+    def __save_fuzz_state(self):
+        fuzz_state = self._fuzzer.get_state()
+        with open("fuzz_state.pickle", 'w+') as fd:
+            pickle.dump(fuzz_state, fd)  # Save the state of the prng
+
     def main(self):
+        start = time.time()
         self._logger.info("PyFuzz 2 Node started ...")
         if self._node_mode == "net":
             self._beacon_client.start_beacon()
@@ -77,43 +85,26 @@ class PyFuzz2Node:
             try:
                 if self._node_mode == "net":
                     if self._listener_worker.new_config:
-                        fuzz_state = self._fuzzer.get_state()
-                        with open("fuzz_state.pickle", 'w+') as fd:
-                            pickle.dump(fuzz_state, fd)  # Save the state of the prng
+                        self.__stop_all_workers()
+                        self.__save_fuzz_state()
                         restart()
-                else:
-                    if not self._reporter_queue.empty():
-                        crash = self._reporter_queue.get_nowait()
-                        self.__report_crash_local(crash)
+                    elif self._listener_worker.reset:
+                        self.__stop_all_workers()
+                        self.__save_fuzz_state()
+                        reboot()
+                if time.time() - start > (6*60*60):  # Reboot after six hours
+                    self.__stop_all_workers()
+                    self.__save_fuzz_state()
+                    reboot()
                 gevent.sleep(0)
             except KeyboardInterrupt:
                 self.__stop_all_workers()
                 quit()
 
-    @staticmethod
-    def __parse_string_report(crash, value, end_marker="\r"):
-        start = crash.find(value) + len(value)
-        end = crash.find(end_marker, start)
-        return crash[start:end]
 
-    def __report_crash_local(self, crash):
-        classification = self.__parse_string_report(crash[0], "Exploitability Classification: ")
-        description = self.__parse_string_report(crash[0], "Short Description: ")
-        hash_val = self.__parse_string_report(crash[0], "(Hash=", ")")
-        hash_val = hash_val.split(".")
-        directory = "results\\" + classification + "\\" + description + "\\" + hash_val[0] + "\\" + hash_val[1]
-        if os.path.exists(directory):
-            self._logger.info("duplicated crash")
-        else:
-            self._logger.info("New unique crash -> \r\n\tclass = " + classification +
-                              " \r\n\tShort Description = " + description +
-                              " \r\n\tsaved in " + directory)
-            os.makedirs(directory)
-            with open(directory + "\\crash_report.txt", 'w+') as fd_rep, open(
-                                    directory + "\\crash_file." + self._fuzzer.file_type, "wb+") as fd_crash:
-                fd_rep.write(crash[0])
-                fd_crash.write(crash[1])
-        pass
+def reboot():
+    import subprocess
+    subprocess.call("shutdown /f /r /t 10")
 
 
 def restart():

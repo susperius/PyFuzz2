@@ -1,6 +1,5 @@
 __author__ = 'susperius'
 
-__author__ = 'susperius'
 
 import gevent
 import gevent.monkey
@@ -10,7 +9,7 @@ from gevent import socket
 #gevent.monkey.patch_all()
 
 
-class TcpClient():
+class NodeClient():
     def __init__(self, node_listener, node_port):
         self._node_listener = node_listener
         self._node_port = node_port

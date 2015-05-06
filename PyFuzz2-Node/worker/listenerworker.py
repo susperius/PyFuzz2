@@ -14,6 +14,7 @@ class ListenerWorker:
         self._listener_queue = listener_queue
         self._new_config = False
         self._running = False
+        self._reset = False
         self._greenlet = None
 
     def _listener_worker_green(self):
@@ -30,12 +31,12 @@ class ListenerWorker:
                 pass
             elif task['type'] == 0x02:
                 pass
-            elif task['type'] == 0x03: # SET_CONFIG
+            elif task['type'] == 0x03:  # SET_CONFIG
                 self._set_config(task['msg'])
-            elif task['type'] == 0x04: # GET_CONFIG
+            elif task['type'] == 0x04:  # GET_CONFIG
                 pass
-            elif task['type'] == 0x05:
-                pass
+            elif task['type'] == 0x05:  # RESET
+                self._reset = True
             elif task['type'] == 0x06:
                 pass
             elif task['type'] == 0xFF:
@@ -50,8 +51,15 @@ class ListenerWorker:
 
     @property
     def new_config(self):
-        return self._new_config
+        if self._new_config:
+            self._new_config = False
+            return True
+        else:
+            return False
 
+    @property
+    def reset(self):
+        return self._reset
     def start_worker(self):
         if not self._running:
             self._greenlet = gevent.spawn(self._listener_worker_green)

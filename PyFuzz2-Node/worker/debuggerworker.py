@@ -25,8 +25,7 @@ class DebuggerWorker:
         self._dbg_child = dbg_child
 
     def __debugger_worker_green(self):
-        x = 3 # debug .... defaults to -> while True:
-        while x > 1:
+        while True:
             self.__create_testcases()
             for filename in os.listdir("testcases/"):
                 output = ""

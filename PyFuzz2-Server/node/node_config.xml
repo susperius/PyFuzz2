@@ -1,6 +1,7 @@
-<PyFuzz2Node name="">
+<PyFuzz2Node name="" mode="net">
     <beacon server="" port="" interval=""/>
-    <report server="" port="" />
+    <reporting server="" port=""/>
     <listener port=""/>
-    <fuzzer/>
+    <program path="" dbg_child="" sleep_time=""/>
+    <fuzzer />
 </PyFuzz2Node>

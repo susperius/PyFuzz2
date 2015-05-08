@@ -24,18 +24,15 @@ class ReportServer:
     def __report_receiver(self, sock, address):
         report = ""
         fp = sock.makefile("rb")
-        self._logger.debug("Report server is receiving...")
         while True:
             line = fp.readline()
             if not line:
                 break
-            self._logger.debug(line)
             report += line
             fp.flush()
-        self._logger.debug("Left read while")
         sock.shutdown(socket.SHUT_WR)
         sock.close()
-        self._task_queue.put(report)
+        self._task_queue.put((address[0], report))
 
     def __serve(self):
         self._logger.info("[Report Server] initialized on port " + str(self._port) + " ...")

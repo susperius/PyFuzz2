@@ -49,9 +49,10 @@ class PyFuzz2Node:
             self._tcp_listener = Listener(self._tcp_listener_port, self._listener_queue)
             self._listener_worker = ListenerWorker(self._listener_queue)
             self._report_worker = ReportWorker(True, self._reporter_queue, self._fuzzer.file_type,
-                                               self._report_server, self._report_port)
+                                               node_config.program_path, self._report_server, self._report_port)
         else:
-            self._report_worker = ReportWorker(False, self._reporter_queue, self._fuzzer.file_type)
+            self._report_worker = ReportWorker(False, self._reporter_queue, self._fuzzer.file_type,
+                                               node_config.program_path)
         self._debugger_worker = DebuggerWorker(node_config.program_path, self._fuzzer, self._reporter_queue,
                                                node_config.sleep_time, node_config.dbg_child)
 

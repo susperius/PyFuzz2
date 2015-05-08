@@ -27,11 +27,11 @@ class BeaconWorker:
     def __beacon_worker(self, task):
         beacon = (task.get_task()['sender'], task.get_task()['msg'].split(':')[0], task.get_task()['msg'].split(':')[0])
         if not beacon[1] in self._node_dict:
-            self._node_dict[beacon[1]] = PyFuzz2Node(beacon[1], beacon[0], beacon[2])
+            self._node_dict[beacon[0]] = PyFuzz2Node(beacon[1], beacon[0], beacon[2])
         else:
-            self._node_dict[beacon[1]].beacon_received()
-            self._node_dict[beacon[1]].address = beacon[0]
-        self._logger.debug(self._node_dict[beacon[1]].dump())
+            self._node_dict[beacon[0]].beacon_received()
+            self._node_dict[beacon[0]].address = beacon[0]
+        self._logger.debug(self._node_dict[beacon[0]].dump())
 
     def __check_all_beacons(self):
         while True:

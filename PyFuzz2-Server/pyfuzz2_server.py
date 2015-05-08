@@ -4,13 +4,14 @@ import logging
 
 import gevent
 import gevent.monkey
-import xml.etree.ElementTree as ET
 import pickle
 from gevent.queue import Queue
 from communication.beaconserver import BeaconServer
 from communication.reportserver import ReportServer
 from communication.webserver import WebServer
+from model.config import ConfigParser
 from worker.beaconworker import BeaconWorker
+from worker.reportworker import ReportWorker
 from web.main import WebSite
 from urlparse import parse_qs
 
@@ -22,49 +23,36 @@ CONFIG_FILENAME = "server_config.xml"
 class PyFuzz2Server:
     def __init__(self, logger, config_filename=CONFIG_FILENAME):
         self._logger = logger
-        self._beacon_port = 0
-        self._report_port = 0
-        self._web_port = 8080
-        self._beacon_timeout = -1
-        self.__read_config(config_filename)
+        self._config = ConfigParser(config_filename)
+        self._beacon_port, self._beacon_timeout = self._config.beacon_config
+        self._report_port = self._config.report_server_config
+        self._web_port = self._config.web_server_config
         self._beacon_queue = Queue()
         self._beacon_server = BeaconServer(self._beacon_port, self._beacon_queue)
         self._beacon_worker = BeaconWorker(self._beacon_queue, self._beacon_timeout)
         self._report_queue = Queue()
         self._report_server = ReportServer(self._report_port, self._report_queue)
+        self._report_worker = ReportWorker(self._report_queue, self._beacon_worker.nodes)
         self._web_queue = Queue()
         self._web_server = WebServer(self._web_port, self._web_queue, self.web_main)
-        self._node_dict = {}
-
-    def __read_config(self, config_filename):
-        tree = ET.parse(config_filename)
-        root = tree.getroot()
-        beacon = root.find("beacon")
-        report = root.find("reportServer")
-        self._beacon_port = int(beacon.find("server").attrib['port'])
-        self._beacon_timeout = int(beacon.find("worker").attrib['timeout'])
-        self._report_port = int(report.attrib['port'])
 
     def main(self):
         self._logger.info("PyFuzz2 Server started...")
         self._beacon_server.serve()
         self._beacon_worker.start_worker()
         self._report_server.serve()
+        self._report_worker.start_worker()
         self._web_server.serve()
         while True:
             try:
                 gevent.sleep(0)
-                if not self._report_queue.empty():
-                    data = self._report_queue.get_nowait()
-                    report_type, crash = pickle.loads(data)
-                    self._logger.debug("Received Report -> \r\n" + crash[0])
             except KeyboardInterrupt:
                 exit(0)
 
     def web_main(self, environ, start_response):
         site = WebSite()
         func = "home"
-        if environ['PATH_INFO'] == "/index.py":
+        if environ['PATH_INFO'] == "/index.py" or environ['PATH_INFO'] == "/":
             parameters = parse_qs(environ['QUERY_STRING'])
             if "func" in parameters:
                 func = parameters['func'][0] if parameters['func'][0] in site.funcs else "home"

@@ -4,29 +4,27 @@ import gevent
 import pickle
 import logging
 import os
-from communication.reportclient import ReportClient
 
 
 class ReportWorker:
-    def __init__(self, net_mode, report_queue, file_type, program, report_server="", report_server_port=0):
+    def __init__(self, report_queue, node_dict):
         self._logger = logging.getLogger(__name__)
         self._report_queue = report_queue
-        self._net_mode = net_mode
         self._greenlet = None
-        self._file_type = file_type
-        self._program = program
-        if self._net_mode:
-            self._client = ReportClient(report_server, report_server_port)
+        self._nodes = node_dict
 
     def __worker_green(self):
         while True:
             if not self._report_queue.empty():
-                report_type, crash = self._report_queue.get_nowait()
+                address, data_packed = self._report_queue.get_nowait()
+                data_unpacked = pickle.loads(data_packed)
+                report_type = data_unpacked[0]
                 if report_type == 0xFF:
-                    self.__report_crash_local(crash)
-                    if self._net_mode:
-                        data_string = pickle.dumps([report_type, self._file_type, self._program, crash], -1)
-                        self._client.send(data_string)
+                    file_type = data_unpacked[1]
+                    program = data_unpacked[2]
+                    report = data_unpacked[3]
+                    node_name = self._nodes[address].name
+                    self.__report_crash_local(node_name, file_type, program, report)
             gevent.sleep(0)
 
     def start_worker(self):
@@ -44,12 +42,12 @@ class ReportWorker:
         end = crash.find(end_marker, start)
         return crash[start:end]
 
-    def __report_crash_local(self, crash):
+    def __report_crash_local(self, node_name, file_type, program, crash):
         classification = self.__parse_string_report(crash[0], "Exploitability Classification: ")
         description = self.__parse_string_report(crash[0], "Short Description: ")
         hash_val = self.__parse_string_report(crash[0], "(Hash=", ")")
         hash_val = hash_val.split(".")
-        directory = "results\\" + classification + "\\" + description + "\\" + hash_val[0] + "\\" + hash_val[1]
+        directory = "results\\" + node_name + "\\" + classification + "\\" + description + "\\" + hash_val[0] + "\\" + hash_val[1]
         if os.path.exists(directory):
             self._logger.info("duplicated crash")
         else:
@@ -58,6 +56,6 @@ class ReportWorker:
                               " \r\n\tsaved in " + directory)
             os.makedirs(directory)
             with open(directory + "\\crash_report.txt", 'w+') as fd_rep, open(
-                                    directory + "\\crash_file." + self._file_type, "wb+") as fd_crash:
+                                    directory + "\\crash_file." + file_type, "wb+") as fd_crash:
                 fd_rep.write(crash[0])
                 fd_crash.write(crash[1])

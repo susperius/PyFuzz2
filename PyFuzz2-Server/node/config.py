@@ -8,8 +8,9 @@ class NodeConfig:
         self._tree = ET.parse("node_config.xml")
         self._root = self._tree.getroot()
         self._beacon = self._root.find("beacon")
-        self._report = self._root.find("report")
+        self._report = self._root.find("reporting")
         self._listener = self._root.find("listener")
+        self._program = self._root.find("program")
         self._fuzzer = self._root.find("fuzzer")
         self.set_node_name(node_name)
         self.set_beacon_server(beacon_server)
@@ -27,6 +28,9 @@ class NodeConfig:
     def set_beacon_server(self, server):
         self._beacon.attrib['server'] = server
 
+    def set_beacon_interval(self, interval):
+        self._beacon.attrib['interval'] = interval
+
     def set_report_server(self, server):
         self._report.attrib['server'] = server
 
@@ -35,6 +39,15 @@ class NodeConfig:
 
     def set_listener_port(self, port):
         self._listener.attrib['port'] = str(port)
+
+    def set_program_path(self, path):
+        self._program.attrib['path'] = path
+
+    def set_program_dbg_child(self, dbg_child):
+        self._program.attrib['dbg_child'] = dbg_child
+
+    def set_program_sleep_time(self, sleep_time):
+        self._program.attrib['sleep_time'] = sleep_time
 
     def set_fuzzer(self, type, arg_dict):
         self._fuzzer.attrib['type'] = type

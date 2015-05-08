@@ -31,7 +31,10 @@ class JsFuzz:
         self.__html_fuzzer = None
         self.__seed = seed
         self.__file_type = file_type
-        random.seed(seed)
+        if seed == 0:
+            random.seed()
+        else:
+            random.seed(seed)
 
     def __set_start_values(self):
         self.__js_elements = {}

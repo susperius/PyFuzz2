@@ -110,7 +110,7 @@ class PyFuzz2Node:
 
 def reboot():
     import subprocess
-    subprocess.call("shutdown /f /r /t 10")
+    subprocess.call("shutdown /f /r /t 5")
 
 
 def restart():

@@ -17,7 +17,10 @@ class ByteMutation:
         self._min_change = min_change
         self._max_change = max_change
         self._file_type = file_type
-        random.seed(self._seed)
+        if seed == 0:
+            random.seed()
+        else:
+            random.seed(self._seed)
 
     def __load_fuzz_file(self):
         with open(self._fuzz_file, "rb") as fd:

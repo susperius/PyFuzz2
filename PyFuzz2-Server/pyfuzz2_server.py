@@ -4,7 +4,6 @@ import logging
 
 import gevent
 import gevent.monkey
-import pickle
 from gevent.queue import Queue
 from communication.beaconserver import BeaconServer
 from communication.reportserver import ReportServer
@@ -57,9 +56,12 @@ class PyFuzz2Server:
             if "func" in parameters:
                 func = parameters['func'][0] if parameters['func'][0] in site.funcs else "home"
             if func == "home":
-                status, headers, html = site.home()
+                status, headers, html = site.home(self._beacon_worker.nodes)
             elif func == "node_detail":
-                status, headers, html = site.node_detail()
+                if 'node' in parameters and parameters['node'][0] in self._beacon_worker.nodes.keys():
+                    status, headers, html = site.node_detail(self._beacon_worker.nodes[parameters['node'][0]])
+                else:
+                    status, headers, html = site.file_not_found()
         elif environ['PATH_INFO'] == "/style.css":
             status, headers, html = site.get_style()
             start_response(status, headers)
@@ -70,6 +72,7 @@ class PyFuzz2Server:
         html += "<br><br>" + str(environ) + "<br><br>" + func
         # /debug
         return html
+
 
 if __name__ == "__main__":
     logging.basicConfig(format='%(levelname)s: %(message)s', level=logging.DEBUG)

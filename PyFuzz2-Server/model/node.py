@@ -10,6 +10,8 @@ class PyFuzz2Node:
         self._listener_port = listener_port
         self._is_active = True
         self._last_beacon = time.time()
+        self._crashes = 0
+        self._config = ""
 
     def check_status(self, sec=60):
         if time.time() - self._last_beacon > sec:
@@ -20,6 +22,12 @@ class PyFuzz2Node:
 
     def beacon_received(self):
         self._last_beacon = time.time()
+
+    @property
+    def info(self):
+        return {'Address': self.address, 'Crashes': str(self.crashes),
+                'Listener Port': str(self._listener_port), 'Status': 'Active' if self.status else 'Inactive',
+                'Last Contact': self.last_contact}
 
     @property
     def name(self):
@@ -48,6 +56,17 @@ class PyFuzz2Node:
     @property
     def status(self):
         return self._is_active
+
+    @property
+    def last_contact(self):
+        return time.strftime("%a, %d %b %Y %H:%M:%S", time.localtime(self._last_beacon))
+
+    @property
+    def crashes(self):
+        return self._crashes
+
+    def crashed(self):
+        self._crashes += 1
 
     def dump(self):
         return "Name: " + self._name + " Status: " + str(self._is_active) + " Last contact: " + time.strftime(

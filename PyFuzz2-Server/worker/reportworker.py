@@ -25,6 +25,7 @@ class ReportWorker:
                     report = data_unpacked[3]
                     node_name = self._nodes[address].name
                     self.__report_crash_local(node_name, file_type, program, report)
+                    self._nodes[address].crashed()
             gevent.sleep(0)
 
     def start_worker(self):

@@ -25,8 +25,9 @@ class BeaconWorker:
             gevent.sleep(0)
 
     def __beacon_worker(self, task):
-        beacon = (task.get_task()['sender'], task.get_task()['msg'].split(':')[0], task.get_task()['msg'].split(':')[0])
-        if not beacon[1] in self._node_dict:
+        beacon = (task.get_task()['sender'], task.get_task()['msg'].split(':')[0], task.get_task()['msg'].split(':')[1])
+        if not beacon[0] in self._node_dict:
+            print(beacon)
             self._node_dict[beacon[0]] = PyFuzz2Node(beacon[1], beacon[0], beacon[2])
         else:
             self._node_dict[beacon[0]].beacon_received()
@@ -37,8 +38,7 @@ class BeaconWorker:
         while True:
             for key, node in self._node_dict.items():
                 if not node.check_status() and not node.check_status(self._timeout):
-                    del self._node_dict[key]
-                    self._logger.debug("Node: " + node.name + " deleted because of inactivity")
+                    self._logger.debug("Node: " + node.name + " is inactive")
             gevent.sleep(40)
 
     @property

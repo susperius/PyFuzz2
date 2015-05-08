@@ -27,7 +27,7 @@ class ConfigParser:
             self._program_path = self._root.find("program").attrib['path']
             self._program_dbg_child = bool(self._root.find("program").attrib['dbg_child'])
             self._program_sleep_time = int(self._root.find("program").attrib['sleep_time'])
-            fuzzer = self._root.find("fuzzer")
+            fuzzer = self._root.find("fuzzing")
             self._fuzzer_type = fuzzer.attrib['type']
             self._fuzz_config = []
             if self._fuzzer_type == "bytemutation":
@@ -41,7 +41,7 @@ class ConfigParser:
                 self._fuzz_config.append(fuzzer.attrib['browser'])
                 self._fuzz_config.append(int(fuzzer.attrib['seed']))
             else:
-                raise ValueError("Unsupported fuzzer type!")
+                raise ValueError("Unsupported fuzzing type!")
             self._fuzz_config.append(fuzzer.attrib['file_type'])
         except Exception as ex:
             self._logger.error("General error occurred while parsing config: " + ex.message)

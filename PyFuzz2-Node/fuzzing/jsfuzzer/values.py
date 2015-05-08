@@ -51,7 +51,7 @@ class FuzzValues:
                   ['line-height', '2', '90%'],
                   ['list-style', 'circle', 'square', 'disc', 'upper-alpha', 'lower-alpha', 'upper-roman', 'lower-roman',
                    'decimal', 'inside', 'outside', 'none'],
-                  ['list-style-image', 'file:///c:/pyfuzz/fuzzer/background.jpg'],
+                  ['list-style-image', 'file:///c:/pyfuzz/fuzzing/background.jpg'],
                   ['list-style-position', 'inside', 'outside'],
                   ['list-style-type', 'circle', 'square', 'disc', 'upper-alpha', 'lower-alpha', 'upper-roman',
                    'lower-roman', 'decimal'],

@@ -4,13 +4,14 @@ import gevent
 import pickle
 import logging
 import os
+from worker import Worker
 
 
-class ReportWorker:
+class ReportWorker(Worker):
     def __init__(self, report_queue, node_dict):
         self._logger = logging.getLogger(__name__)
-        self._report_queue = report_queue
         self._greenlet = None
+        self._report_queue = report_queue
         self._nodes = node_dict
 
     def __worker_green(self):

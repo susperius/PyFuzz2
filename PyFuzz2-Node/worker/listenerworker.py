@@ -6,9 +6,10 @@ import logging
 from gevent.queue import Queue
 from model.task import Task
 from model.message_types import MESSAGE_TYPES
+from worker import Worker
 
 
-class ListenerWorker:
+class ListenerWorker(Worker):
     def __init__(self, listener_queue):
         self._logger = logging.getLogger(__name__)
         self._listener_queue = listener_queue
@@ -17,7 +18,7 @@ class ListenerWorker:
         self._reset = False
         self._greenlet = None
 
-    def _listener_worker_green(self):
+    def __worker_green(self):
         while True:
             if not self._listener_queue.empty():
                 actual_task = self._listener_queue.get_nowait()
@@ -60,9 +61,10 @@ class ListenerWorker:
     @property
     def reset(self):
         return self._reset
+
     def start_worker(self):
         if not self._running:
-            self._greenlet = gevent.spawn(self._listener_worker_green)
+            self._greenlet = gevent.spawn(self.__worker_green)
             self._running = True
             gevent.sleep(0)
 

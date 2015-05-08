@@ -6,7 +6,7 @@ import gevent
 import gevent.monkey
 import time
 import socket
-from fuzzer.javascript import JsFuzz
+from fuzzing.javascript import JsFuzz
 from gevent.queue import Queue
 from subprocess import Popen
 import subprocess

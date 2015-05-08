@@ -4,7 +4,8 @@ import jsfuzzer.htmlObjects as htmlObjects
 import random
 from jsfuzzer.htmlObjects import HtmlObjects
 
-TEMPLATE_FILE = "fuzzer/jsfuzzer/template.dat"
+TEMPLATE_FILE = "fuzzing/jsfuzzer/template.dat"
+
 
 class HtmlFuzzer:
 

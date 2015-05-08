@@ -8,7 +8,7 @@ import pickle
 import os
 import time
 from gevent.queue import Queue
-# from fuzzer.fuzzers import FUZZERS
+# from fuzzing.fuzzers import FUZZERS
 from communication.beaconclient import BeaconClient
 from communication.nodelistener import Listener
 from worker.listenerworker import ListenerWorker
@@ -58,12 +58,12 @@ class PyFuzz2Node:
 
     def __choose_fuzzer(self):
         if self._fuzzer_type == "bytemutation":
-            from fuzzer.bytemutation import ByteMutation
+            from fuzzing.bytemutation import ByteMutation
 
             return ByteMutation(self._fuzzer_config[0], self._fuzzer_config[1], self._fuzzer_config[2],
                                 self._fuzzer_config[3], self._fuzzer_config[4])
         elif self._fuzzer_type == "js_fuzzer":
-            from fuzzer.javascript import JsFuzz
+            from fuzzing.javascript import JsFuzz
 
             return JsFuzz(self._fuzzer_config[0], self._fuzzer_config[1],
                           self._fuzzer_config[2], self._fuzzer_config[3], self._fuzzer_config[4])

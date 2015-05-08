@@ -7,9 +7,10 @@ import psutil
 import subprocess
 import logging
 from debugging.windbg import Debugger
+from worker import Worker
 
 
-class DebuggerWorker:
+class DebuggerWorker(Worker):
     def __init__(self, program_path, fuzzer, report_queue, sleep_time, dbg_child=False):
         self._logger = logging.getLogger(__name__)
         self._greenlet = None
@@ -24,7 +25,7 @@ class DebuggerWorker:
         self._sleep_time = sleep_time
         self._dbg_child = dbg_child
 
-    def __debugger_worker_green(self):
+    def __worker_green(self):
         while True:
             self.__create_testcases()
             for filename in os.listdir("testcases/"):
@@ -69,7 +70,7 @@ class DebuggerWorker:
 
     def start_worker(self):
         if self._greenlet is None:
-            self._greenlet = gevent.spawn(self.__debugger_worker_green)
+            self._greenlet = gevent.spawn(self.__worker_green)
 
     def stop_worker(self):
         if self._greenlet is not None:

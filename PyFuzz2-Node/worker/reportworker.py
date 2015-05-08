@@ -5,9 +5,10 @@ import pickle
 import logging
 import os
 from communication.reportclient import ReportClient
+from worker import Worker
 
 
-class ReportWorker:
+class ReportWorker(Worker):
     def __init__(self, net_mode, report_queue, file_type, program, report_server="", report_server_port=0):
         self._logger = logging.getLogger(__name__)
         self._report_queue = report_queue

@@ -11,7 +11,7 @@ class NodeConfig:
         self._report = self._root.find("reporting")
         self._listener = self._root.find("listener")
         self._program = self._root.find("program")
-        self._fuzzer = self._root.find("fuzzer")
+        self._fuzzer = self._root.find("fuzzing")
         self.set_node_name(node_name)
         self.set_beacon_server(beacon_server)
         self.set_beacon_port(beacon_port)

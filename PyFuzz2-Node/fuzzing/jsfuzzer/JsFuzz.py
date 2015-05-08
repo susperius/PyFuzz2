@@ -1,100 +1,53 @@
-__author__ = 'susperius'
-
 # coding=utf8
 
-from jsfuzzer.JsDocument import *
-from jsfuzzer.JsElement import *
-from jsfuzzer.JsAttrNodeMap import *
-from jsfuzzer.domObjects import *
-from jsfuzzer.htmlObjects import *
-from jsfuzzer.values import *
-from html import HtmlFuzzer
+from JsDocument import *
+from JsElement import *
+from JsAttrNodeMap import *
+from domObjects import *
+from htmlObjects import *
+from values import *
 import random
 import os
 
-TEMPLATE_FILE = "fuzzer/jsfuzzer/template.dat"
+TEMPLATE_FILE = "fuzzing/template.dat"
 
 
 class JsFuzz:
-    NAME = "js_fuzzer"
-    CONFIG_PARAMS = ["starting_element", "total_operations", "browser", "seed", "file_type"]
-
-    def __init__(self, starting_elements, total_operations, browser, seed=31337, file_type="html"):
+    def __init__(self, starting_element_count, total_count, browser):
         self.__js_elements = {}
         self.__js_attributes = []
         self.__bool = ['true', 'false']
         self.__tag_names = []
-        self.__starting_element_count = starting_elements
-        self.__total_count = total_operations
+        self.__starting_element_count = starting_element_count
+        self.__total_count = total_count
         self.__event_listener = "dummy"
         self.__browser = browser
-        self.__html_fuzzer = None
-        self.__seed = seed
-        self.__file_type = file_type
-        if seed == 0:
-            random.seed()
-        else:
-            random.seed(seed)
 
     def __set_start_values(self):
         self.__js_elements = {}
         self.__js_attribute = []
         self.__tag_names = []
 
-    def fuzz(self, use_default_template=False):
-        if use_default_template:
-            startup = self.__create_elements(self.__starting_element_count)
-            startup += self.__create_element_method_block()
-            with open(TEMPLATE_FILE, 'r') as fd:
-                templ = fd.read()
-        else:
-            if self.__html_fuzzer is None:
-                depth = random.randint(0, self.__starting_element_count)
-                self.__html_fuzzer = HtmlFuzzer(self.__starting_element_count, depth, self.__seed)
-            startup = ""
-            html_file = self.__html_fuzzer.fuzz()
-            html_id = self.__get_html_ids(html_file)
-            startup += self.__get_elements(html_id)
-            startup += self.__create_element_method_block()
-            templ = html_file
+    def fuzz(self):
+        random.seed()
+        startup = self.__create_elements(self.__starting_element_count)
+        new_code = ""
+        for i in range(self.__total_count):
+            while new_code == "":
+                new_code = self.__create_element_method()
+            if self.__browser == "ie":
+                x = random.choice(range(1000))
+                if x < 10:
+                    new_code += "CollectGarbage();\n"
+            startup += new_code
+            new_code = ""
+        with open(TEMPLATE_FILE, 'r') as fd:
+            templ = fd.read()
         templ = templ.replace("START_UP", startup)
         templ = templ.replace("SCRIPT_BODY", "")
         templ = templ.replace("EVENT_HANDLER", "")
         self.__set_start_values()
         return templ
-
-    @property
-    def get_state(self):
-        return random.getstate()
-
-    @property
-    def file_type(self):
-        return self.__file_type
-
-    def set_state(self, state):
-        random.setstate(state)
-
-    @staticmethod
-    def __get_html_ids(html):
-        start = html.find("IDS:") + 5
-        end = html.find("-->")
-        ids = html[start:end].split("; ")
-        del(ids[-1])
-        return ids
-
-    @staticmethod
-    def __get_element(name, ident):
-        return name + " = " + JsDocument.getElementById(ident)
-
-    def __get_elements(self, html_ids):
-        code = ""
-        i = 0
-        for ident in html_ids:
-            code += self.__get_element("elem" + str(i), ident)
-            self.__js_elements["elem" + str(i)] = (JsElement("elem" + str(i)), [], [], "")
-            i += 1
-        return code
-
 
     @staticmethod
     def __create_element(name, html_obj):
@@ -105,20 +58,6 @@ class JsFuzz:
         for i in range(count):
             code += "elem" + str(i) + " = " + JsDocument.createElement(random.choice(HtmlObjects.HTML_OBJECTS))
             self.__js_elements["elem" + str(i)] = (JsElement("elem" + str(i)), [], [], "")
-        return code
-
-    def __create_element_method_block(self):
-        code = ""
-        new_code = ""
-        for i in range(self.__total_count):
-            while new_code == "":
-                new_code = self.__create_element_method()
-            if self.__browser == "ie":
-                x = random.choice(range(1000))
-                if x < 10:
-                    new_code += "CollectGarbage();\n"
-            code += new_code
-            new_code = ""
         return code
 
     def __create_element_method(self):
@@ -140,20 +79,20 @@ class JsFuzz:
         elif method == 'blur':
             code += "try{\n " + elem.blur() + "} catch(e){}\n"
         elif method == 'click':
-            code += "try{\n " + elem.click() + "}catch(e){}\n"
+            code += elem.click()
         elif method == 'cloneNode':
             deep = random.choice(self.__bool)
-            code += "try{\n " + elem.cloneNode(deep) + "} catch(e){}\n"
+            code += elem.cloneNode(deep)
         elif method == 'compareDocumentPosition':
             code += "try{\n" + elem.compareDocumentPosition(random.choice(self.__js_elements.keys())) + "}catch(e){}\n"
         elif method == 'focus':
             code += "try{\n" + elem.focus() + "}catch(e){}\n"
         elif method == 'getAttribute':
             attr = random.choice(HtmlObjects.HTML_ATTR_GENERIC)
-            code += "try{\n" + elem.getAttribute(attr) + "}catch(e){}\n"
+            code += elem.getAttribute(attr)
         elif method == 'getAttributeNode':
             attr = random.choice(HtmlObjects.HTML_ATTR_GENERIC)
-            code += "try{\n" + elem.getAttributeNode(attr) + "}catch(e){}\n"
+            code += elem.getAttributeNode(attr)
         elif method == 'getElementsByClassName':
             if class_name == "":
                 return ""
@@ -199,7 +138,7 @@ class JsFuzz:
             return ""
             code += ""
         elif method == 'normalize':
-            code += "try{\n " + elem.normalize() + "}catch(e){}\n"
+            code += elem.normalize()
         elif method == 'querySelector':
             if class_name == "":
                 return ""
@@ -212,7 +151,7 @@ class JsFuzz:
             attr = random.choice(HtmlObjects.HTML_ATTR_GENERIC)
             if attr == "class":
                 class_name = ""
-            code += "try{\n " + elem.removeAttribute(attr) + "}catch(e){}\n"
+            code += elem.removeAttribute(attr)
         elif method == 'removeAttributeNode':
             return ""
             code += ""
@@ -246,12 +185,12 @@ class JsFuzz:
             elif attr == 'style':
                 css_pack = random.choice(FuzzValues.CSS_STYLES)
                 value = css_pack[0] + "=" + random.choice(css_pack[1:])
-            code += "try{\n " + elem.setAttribute(attr, value) + "} catch(e){}\n"
+            code += elem.setAttribute(attr, value)
         elif method == 'setAttributeNode':
             return ""
             code += ""
         elif method == 'toString':
-            code += "try{\n " + elem.toString() + "} catch(e){}\n"
+            code += elem.toString()
         elif method == 'item':
             return ""
             code += ""

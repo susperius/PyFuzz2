@@ -2,9 +2,10 @@ __author__ = 'susperius'
 
 import random
 import helper
+from fuzzer import Fuzzer
 
 
-class ByteMutation:
+class ByteMutation(Fuzzer):
     NAME = "bytemutation"
     CONFIG_PARAMS = ["fuzz_file", "min_change", "max_change", "seed", "file_type"]
 

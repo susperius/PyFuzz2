@@ -27,7 +27,6 @@ class BeaconWorker:
     def __beacon_worker(self, task):
         beacon = (task.get_task()['sender'], task.get_task()['msg'].split(':')[0], task.get_task()['msg'].split(':')[1])
         if not beacon[0] in self._node_dict:
-            print(beacon)
             self._node_dict[beacon[0]] = PyFuzz2Node(beacon[1], beacon[0], beacon[2])
         else:
             self._node_dict[beacon[0]].beacon_received()

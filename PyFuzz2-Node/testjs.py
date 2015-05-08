@@ -1,6 +1,6 @@
 __author__ = 'susperius'
 
-import fuzzer.javascript as js
+import fuzzing.javascript as js
 
 fuzzy = js.JsFuzz(10, 100, "ff")
 for i in range(10):

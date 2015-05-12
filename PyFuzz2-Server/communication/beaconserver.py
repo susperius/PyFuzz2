@@ -3,10 +3,7 @@ __author__ = 'susperius'
 import logging
 import gevent
 import gevent.monkey
-
 from gevent.server import DatagramServer
-from model.task import Task
-
 
 gevent.monkey.patch_all()
 
@@ -26,8 +23,7 @@ class BeaconServer:
         self._beacon_server.serve_forever()
 
     def __beacon_receiver(self, msg, address):
-        if ord(msg[0]) == 0x01:
-            self._task_queue.put(Task(0x01, address[0], msg[1:]))
+        self._task_queue.put([address, msg])
 
     def serve(self):
         if not self._serving:

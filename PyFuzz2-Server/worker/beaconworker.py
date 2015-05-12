@@ -2,15 +2,15 @@ __author__ = 'susperius'
 
 import gevent
 import logging
-
+import pickle
 from gevent.queue import Queue
-from model.task import Task
 from model.node import PyFuzz2Node
 
 
 class BeaconWorker:
-    def __init__(self, beacon_queue, timeout):
+    def __init__(self, beacon_queue, node_worker_queue, timeout):
         self._beacon_queue = beacon_queue
+        self._node_worker_queue = node_worker_queue
         self._logger = logging.getLogger(__name__)
         self._active = False
         self._node_dict = {}
@@ -24,14 +24,18 @@ class BeaconWorker:
                     self.__beacon_worker(actual_task)
             gevent.sleep(0)
 
-    def __beacon_worker(self, task):
-        beacon = (task.get_task()['sender'], task.get_task()['msg'].split(':')[0], task.get_task()['msg'].split(':')[1])
-        if not beacon[0] in self._node_dict:
-            self._node_dict[beacon[0]] = PyFuzz2Node(beacon[1], beacon[0], beacon[2])
+    def __beacon_worker(self, task):  # task = [(ip, port), pickle_data([msg_type, [node_name, listener_port]])]
+        data_unpacked = pickle.loads(task[1])
+        node_name = data_unpacked[1][0]
+        listener_port = data_unpacked[1][1]
+        ip, port = task[0]
+        if ip not in self._node_dict:
+            self._node_dict[ip] = PyFuzz2Node(node_name, ip, listener_port)
+            self._node_worker_queue.put([(ip, listener_port), 0x03, ""])  # [(ip, port), GET_CONFIG, ""]
         else:
-            self._node_dict[beacon[0]].beacon_received()
-            self._node_dict[beacon[0]].address = beacon[0]
-        self._logger.debug(self._node_dict[beacon[0]].dump())
+            self._node_dict[ip].beacon_received()
+            self._node_dict[ip].address = ip
+        self._logger.debug(self._node_dict[ip].dump())
 
     def __check_all_beacons(self):
         while True:

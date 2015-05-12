@@ -1,3 +1,3 @@
 __author__ = 'susperius'
 
-__all__ = ['bytemutation']
+__all__ = ['bytemutation', 'javascript']

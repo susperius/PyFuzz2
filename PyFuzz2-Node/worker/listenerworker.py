@@ -2,17 +2,17 @@ __author__ = 'susperius'
 
 import gevent
 import logging
-
+import pickle
 from gevent.queue import Queue
-from model.task import Task
 from model.message_types import MESSAGE_TYPES
 from worker import Worker
 
 
 class ListenerWorker(Worker):
-    def __init__(self, listener_queue):
+    def __init__(self, listener_queue, report_queue):
         self._logger = logging.getLogger(__name__)
         self._listener_queue = listener_queue
+        self._report_queue = report_queue
         self._new_config = False
         self._running = False
         self._reset = False
@@ -22,25 +22,26 @@ class ListenerWorker(Worker):
         while True:
             if not self._listener_queue.empty():
                 actual_task = self._listener_queue.get_nowait()
-                self._listener_worker(actual_task.get_task())
+                self._listener_worker(actual_task)
             gevent.sleep(0)
 
     def _listener_worker(self, task):
-        self._logger.debug("Listener Worker -> Type:" + str(task['type']) + "| " + task['msg'])
-        if task['type'] in MESSAGE_TYPES.keys():
-            if task['type'] == 0x01:
+        msg_type, msg = pickle.loads(task[1])
+        self._logger.debug("Listener Worker -> Type:" + str(msg_type) + " | " + msg)
+        if msg_type in MESSAGE_TYPES.keys():
+            if msg_type == 0x01:
                 pass
-            elif task['type'] == 0x02:
+            elif msg_type == 0x02:  # SET_CONFIG
+                self._set_config(msg)
+            elif msg_type == 0x03:  # GET_CONFIG
+                self._report_queue.put([0x03, ""])
+            elif msg_type == 0x04:
                 pass
-            elif task['type'] == 0x03:  # SET_CONFIG
-                self._set_config(task['msg'])
-            elif task['type'] == 0x04:  # GET_CONFIG
-                pass
-            elif task['type'] == 0x05:  # RESET
+            elif msg_type == 0x05:  # RESET
                 self._reset = True
-            elif task['type'] == 0x06:
+            elif msg_type == 0x06:
                 pass
-            elif task['type'] == 0xFF:
+            elif msg_type == 0xFF:
                 pass
 
     def _set_config(self, msg):

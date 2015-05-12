@@ -22,12 +22,16 @@ class ReportWorker(Worker):
     def __worker_green(self):
         while True:
             if not self._report_queue.empty():
-                report_type, crash = self._report_queue.get_nowait()
-                if report_type == 0xFF:
-                    self.__report_crash_local(crash)
+                msg_type, msg = self._report_queue.get_nowait()
+                if msg_type == 0xFF:
+                    self.__report_crash_local(msg)
                     if self._net_mode:
-                        data_string = pickle.dumps([report_type, self._file_type, self._program, crash], -1)
+                        data_string = pickle.dumps([msg_type, self._file_type, self._program, msg], -1)
                         self._client.send(data_string)
+                elif msg_type == 0x03:
+                    with open("node_config.xml", 'r') as fd:
+                        config = fd.read()
+                    self._client.send(pickle.dumps([msg_type, config], -1))
             gevent.sleep(0)
 
     def start_worker(self):

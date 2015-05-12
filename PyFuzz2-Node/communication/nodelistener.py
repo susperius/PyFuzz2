@@ -7,7 +7,6 @@ import gevent
 import gevent.monkey
 import gevent.socket as socket
 from gevent.server import StreamServer
-
 from model.task import Task
 
 #gevent.monkey.patch_all()
@@ -32,11 +31,10 @@ class Listener:
                 fp.flush()
             else:
                 break
-        fp.write("RECV\r\n\r\n")
         sock.shutdown(socket.SHUT_WR)
         sock.close()
-        self._logger.debug("Received a job from " + address[0])
-        self._task_queue.put(Task(ord(job[0]), address[0], job[1:]))
+        self._logger.debug("Received a job from " + address[0] + str(job))
+        self._task_queue.put([address[0], job])
 
     def __serve(self):
         self._logger.info("[Listener] initialized on port " + str(self._port) + " ...")

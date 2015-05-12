@@ -1,6 +1,6 @@
 __author__ = 'susperius'
 import html
-
+from node.config import ConfigParser
 
 class WebSite:
     def __init__(self):
@@ -39,12 +39,31 @@ class WebSite:
         return self._statuses[200], self._header_html, home_html
 
     def node_detail(self, node):
+        node_config = node.info
+        from_conf_file = ConfigParser(node.config)
+        node_config += from_conf_file.dump_additional_information()
         node_detail_html = self._html_template
         node_detail_html = node_detail_html.replace("SECTION_TITLE", node.name)
-        node_details = node.info
-        nodes = ""
-        for key in node_details.keys():
-            nodes += html.BOLD.replace("CONTENTS", key) + ": " + node_details[key] + html.BR
+        nodes = html.FORM_HEADER.replace("ATTRIBS", "action=\"/index.py?func=node_detail&node=" +
+                                         node.address + "&submit=1\" method=\"post\"") + html.TABLE_HEADER
+        nodes += html.TABLE_ELEMENT.replace("CONTENTS", html.TABLE_HEAD_CAPTION.replace("CONTENTS", "") +
+                                            html.TABLE_HEAD_CAPTION.replace("CONTENTS", ""))
+        for i in range(4):
+            nodes += html.TABLE_ELEMENT.replace("CONTENTS", html.TABLE_DEFAULT_CONTENT.replace("CONTENTS",
+                                                        html.BOLD.replace("CONTENTS", node_config[i][0])) + \
+                    html.TABLE_DEFAULT_CONTENT.replace("CONTENTS", node_config[i][1]))
+        del node_config[0:4]
+        for elem in node_config:
+            single_node = html.TABLE_DEFAULT_CONTENT.replace("CONTENTS", html.BOLD.replace("CONTENTS", elem[0]+": ")) + \
+                     html.TABLE_DEFAULT_CONTENT.replace("CONTENTS",
+                                                        html.INPUT_TEXT.replace("NAME",
+                                                                                elem[0].lower()).replace("CONTENTS",
+                                                                              elem[1]).replace("ATTRIBS", "size=\"60\""))
+            nodes += html.TABLE_ELEMENT.replace("CONTENTS", single_node)
+        nodes += html.TABLE_FOOTER + html.INPUT_SUBMIT + html.FORM_FOOTER
+        nodes += html.FORM_HEADER.replace("ATTRIBS",
+                                          "action=\"/index.py?func=home&reboot=" + node.address + "\" method=\"post\"") + \
+            html.INPUT_SUBMIT.replace("Submit", "Reset Node") + html.FORM_FOOTER
         node_detail_html = node_detail_html.replace("REPLACE_ME", nodes)
         return self._statuses[200], self._header_html, node_detail_html
 

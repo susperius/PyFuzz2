@@ -1,7 +1,6 @@
 __author__ = 'susperius'
 
 import logging
-
 import gevent
 import gevent.monkey
 from gevent.queue import Queue
@@ -11,6 +10,7 @@ from communication.webserver import WebServer
 from model.config import ConfigParser
 from worker.beaconworker import BeaconWorker
 from worker.reportworker import ReportWorker
+from worker.nodeclientworker import NodeClientWorker
 from web.main import WebSite
 from urlparse import parse_qs
 
@@ -27,12 +27,14 @@ class PyFuzz2Server:
         self._report_port = self._config.report_server_config
         self._web_port = self._config.web_server_config
         self._beacon_queue = Queue()
-        self._beacon_server = BeaconServer(self._beacon_port, self._beacon_queue)
-        self._beacon_worker = BeaconWorker(self._beacon_queue, self._beacon_timeout)
+        self._node_queue = Queue()
         self._report_queue = Queue()
+        self._web_queue = Queue()
+        self._beacon_server = BeaconServer(self._beacon_port, self._beacon_queue)
+        self._beacon_worker = BeaconWorker(self._beacon_queue, self._node_queue, self._beacon_timeout)
         self._report_server = ReportServer(self._report_port, self._report_queue)
         self._report_worker = ReportWorker(self._report_queue, self._beacon_worker.nodes)
-        self._web_queue = Queue()
+        self._node_client_worker = NodeClientWorker(self._node_queue)
         self._web_server = WebServer(self._web_port, self._web_queue, self.web_main)
 
     def main(self):
@@ -42,6 +44,7 @@ class PyFuzz2Server:
         self._report_server.serve()
         self._report_worker.start_worker()
         self._web_server.serve()
+        self._node_client_worker.start_worker()
         while True:
             try:
                 gevent.sleep(0)
@@ -57,6 +60,9 @@ class PyFuzz2Server:
                 func = parameters['func'][0] if parameters['func'][0] in site.funcs else "home"
             if func == "home":
                 status, headers, html = site.home(self._beacon_worker.nodes)
+                if parameters['reboot'][0] in self._beacon_worker.nodes.keys():
+                    key = parameters['reboot'][0]
+                    self._node_queue.put([(key, self._beacon_worker.nodes[key].listener_port), 0x05, ""])
             elif func == "node_detail":
                 if 'node' in parameters and parameters['node'][0] in self._beacon_worker.nodes.keys():
                     status, headers, html = site.node_detail(self._beacon_worker.nodes[parameters['node'][0]])
@@ -69,7 +75,7 @@ class PyFuzz2Server:
             status, headers, html = site.file_not_found()
         start_response(status, headers)
         # debug
-        html += "<br><br>" + str(environ) + "<br><br>" + func
+        html += "<br><br>" + str(environ) + "<br><br>" + func + "<br><br>" + environ['wsgi.input'].read()
         # /debug
         return html
 

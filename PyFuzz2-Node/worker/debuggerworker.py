@@ -58,7 +58,7 @@ class DebuggerWorker(Worker):
                     with open(testcase_dir + filename, "rb") as fd:
                         testcase = fd.read()
                     self._report_queue.put((0xFF, (output, testcase)))
-                gevent.sleep(0)
+                gevent.sleep(1)
 
     def __create_testcases(self):
         for i in range(100):

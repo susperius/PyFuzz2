@@ -9,14 +9,14 @@ from jsfuzzer.domObjects import *
 from jsfuzzer.htmlObjects import *
 from jsfuzzer.values import *
 from html import HtmlFuzzer
-from fuzzer import Fuzzer
+import fuzzer
 import random
 import os
 
 TEMPLATE_FILE = "fuzzing/jsfuzzer/template.dat"
 
 
-class JsFuzz(Fuzzer):
+class JsFuzz(fuzzer.Fuzzer):
     NAME = "js_fuzzer"
     CONFIG_PARAMS = ["starting_element", "total_operations", "browser", "seed", "file_type"]
 
@@ -65,7 +65,7 @@ class JsFuzz(Fuzzer):
         return templ
 
     @property
-    def get_state(self):
+    def prng_state(self):
         return random.getstate()
 
     @property

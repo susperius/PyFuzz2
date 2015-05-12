@@ -8,9 +8,8 @@ import gevent.monkey
 import gevent.socket as socket
 from gevent.server import StreamServer
 
-from model.task import Task
-
 gevent.monkey.patch_all()
+
 
 class ReportServer:
     def __init__(self, port, task_queue):

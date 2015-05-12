@@ -3,6 +3,7 @@ __author__ = 'susperius'
 import time
 import gevent
 import gevent.monkey
+import pickle
 from gevent import socket
 
 #gevent.monkey.patch_all()
@@ -20,7 +21,8 @@ class BeaconClient():
     def __beacon(self):
         while True:
             sock_fd = socket.socket(type=socket.SOCK_DGRAM)
-            sock_fd.sendto("\x01" + self._node_name + ":" + str(self._tcp_listener_port), (self._beacon_server, self._beacon_port))
+            beacon_data = [0x01, [self._node_name, self._tcp_listener_port]]
+            sock_fd.sendto(pickle.dumps(beacon_data), (self._beacon_server, self._beacon_port))
             sock_fd.close()
             gevent.sleep(self._beacon_interval)
         pass

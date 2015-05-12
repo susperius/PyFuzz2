@@ -2,10 +2,10 @@ __author__ = 'susperius'
 
 import random
 import helper
-from fuzzer import Fuzzer
+import fuzzer
 
 
-class ByteMutation(Fuzzer):
+class ByteMutation(fuzzer.Fuzzer):
     NAME = "bytemutation"
     CONFIG_PARAMS = ["fuzz_file", "min_change", "max_change", "seed", "file_type"]
 
@@ -33,7 +33,7 @@ class ByteMutation(Fuzzer):
         return self._file_type
 
     @property
-    def get_state(self):
+    def prng_state(self):
         return random.getstate()
 
     def set_state(self, state):

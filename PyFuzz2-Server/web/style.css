@@ -9,7 +9,7 @@
     background-color: darkorange;
     color: black;
     line-height:30px;
-    height:500px;
+    height:800px;
     width:15%;
     float:left;
     padding:5px;
@@ -40,7 +40,7 @@
 }
 #section {
     width:80%;
-    height: 480px;
+    height: 780px;
     float:left;
     padding:10px;
     font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;

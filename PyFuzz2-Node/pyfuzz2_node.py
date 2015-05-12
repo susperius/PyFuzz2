@@ -37,7 +37,7 @@ class PyFuzz2Node:
         self._fuzzer_type = node_config.fuzzer_type
         self._fuzzer_config = node_config.fuzzer_config
         self._fuzzer = self.__choose_fuzzer()
-        if os.path.isfile("fuzz_state.pickle"):  # Load the saved state of the prng
+        if os.path.isfile("fuzz_state.pickle"):  # Load the saved state of the prng TODO: make sure it isn't a new config
             with open("fuzz_state.pickle", 'r') as fd:
                 self._fuzzer.set_state(pickle.load(fd))
             os.remove("fuzz_state.pickle")
@@ -47,7 +47,7 @@ class PyFuzz2Node:
             self._beacon_client = BeaconClient(self._beacon_server, self._beacon_port, self._node_name,
                                                self._beacon_interval, self._tcp_listener_port)
             self._tcp_listener = Listener(self._tcp_listener_port, self._listener_queue)
-            self._listener_worker = ListenerWorker(self._listener_queue)
+            self._listener_worker = ListenerWorker(self._listener_queue, self._reporter_queue)
             self._report_worker = ReportWorker(True, self._reporter_queue, self._fuzzer.file_type,
                                                node_config.program_path, self._report_server, self._report_port)
         else:
@@ -75,7 +75,7 @@ class PyFuzz2Node:
             self._beacon_client.stop_beacon()
 
     def __save_fuzz_state(self):
-        fuzz_state = self._fuzzer.get_state()
+        fuzz_state = self._fuzzer.prng_state
         with open("fuzz_state.pickle", 'w+') as fd:
             pickle.dump(fuzz_state, fd)  # Save the state of the prng
 
@@ -93,7 +93,7 @@ class PyFuzz2Node:
                 if self._node_mode == "net":
                     if self._listener_worker.new_config:
                         self.__stop_all_workers()
-                        self.__save_fuzz_state()
+                        # self.__save_fuzz_state() if there is a new config it shouldn't restore the state??
                         restart()
                     elif self._listener_worker.reset:
                         self.__stop_all_workers()

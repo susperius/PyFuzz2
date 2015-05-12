@@ -3,7 +3,7 @@ __author__ = 'susperius'
 
 class Fuzzer:
     @property
-    def get_state(self):
+    def prng_state(self):
         raise NotImplementedError("ABSTRACT METHOD")
 
     def fuzz(self):

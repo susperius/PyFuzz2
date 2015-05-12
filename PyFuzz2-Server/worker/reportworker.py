@@ -19,14 +19,17 @@ class ReportWorker(Worker):
             if not self._report_queue.empty():
                 address, data_packed = self._report_queue.get_nowait()
                 data_unpacked = pickle.loads(data_packed)
-                report_type = data_unpacked[0]
-                if report_type == 0xFF:
+                msg_type = data_unpacked[0]
+                if msg_type == 0xFF:
                     file_type = data_unpacked[1]
                     program = data_unpacked[2]
                     report = data_unpacked[3]
                     node_name = self._nodes[address].name
                     self.__report_crash_local(node_name, file_type, program, report)
                     self._nodes[address].crashed()
+                elif msg_type == 0x03:
+                    config = data_unpacked[1]
+                    self._nodes[address].config = config
             gevent.sleep(0)
 
     def start_worker(self):

@@ -32,17 +32,17 @@ class DebuggerWorker(Worker):
                 output = ""
                 testcase_dir = os.getcwd() + "\\testcases\\"
                 if self._dbg_child:
-                    process = subprocess.Popen(
+                    self._process = subprocess.Popen(
                         "python debugging\\windbg.py -p \"" + self._program_path
                         + "\" -t \"" + testcase_dir + filename + "\"",
                         stdout=subprocess.PIPE)
                 else:
-                    process = subprocess.Popen(
+                    self._process = subprocess.Popen(
                         "python debugging\\windbg.py -p \"" + self._program_path
                         + "\" -t \"" + testcase_dir + filename + "\" -c",
                         stdout=subprocess.PIPE)
                 self._logger.debug("Debugger started...")
-                util = psutil.Process(process.pid)
+                util = psutil.Process(self._process.pid)
                 start = time.time()
                 try:
                     while True:
@@ -52,8 +52,8 @@ class DebuggerWorker(Worker):
                             break
                 except:
                     pass # just ignore
-                process.kill()
-                output = process.stdout.read()
+                self._process.kill()
+                output = self._process.stdout.read()
                 if "Crash Report" in output:
                     with open(testcase_dir + filename, "rb") as fd:
                         testcase = fd.read()
@@ -67,7 +67,6 @@ class DebuggerWorker(Worker):
             with open("testcases/" + filename, "wb+") as fd:
                 fd.write(self._fuzzer.fuzz())
 
-
     def start_worker(self):
         if self._greenlet is None:
             self._greenlet = gevent.spawn(self.__worker_green)
@@ -75,4 +74,9 @@ class DebuggerWorker(Worker):
     def stop_worker(self):
         if self._greenlet is not None:
             gevent.kill(self._greenlet)
+            try:
+                self._process.kill()
+                self._process.terminate()
+            except Exception as ex:
+                self._logger.debug("Exception occured while killing Debugger: " + ex.message)
 

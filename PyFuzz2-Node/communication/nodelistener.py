@@ -48,3 +48,7 @@ class Listener:
             gevent.sleep(0)
         else:
             pass
+
+    def stop(self):
+        if self._serving:
+            self._node_server.close()

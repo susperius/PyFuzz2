@@ -3,6 +3,7 @@ __author__ = 'susperius'
 import logging
 import gevent
 import gevent.monkey
+import node.config
 from gevent.queue import Queue
 from communication.beaconserver import BeaconServer
 from communication.reportserver import ReportServer
@@ -13,6 +14,7 @@ from worker.reportworker import ReportWorker
 from worker.nodeclientworker import NodeClientWorker
 from web.main import WebSite
 from urlparse import parse_qs
+import model.message_types as message_types
 
 gevent.monkey.patch_all()
 
@@ -59,13 +61,26 @@ class PyFuzz2Server:
             if "func" in parameters:
                 func = parameters['func'][0] if parameters['func'][0] in site.funcs else "home"
             if func == "home":
-                status, headers, html = site.home(self._beacon_worker.nodes)
-                if parameters['reboot'][0] in self._beacon_worker.nodes.keys():
+                if 'reboot' in parameters:
                     key = parameters['reboot'][0]
+                    self._beacon_worker.nodes[key].status = False
                     self._node_queue.put([(key, self._beacon_worker.nodes[key].listener_port), 0x05, ""])
+                if "submit" in parameters and "node" in parameters:
+                    key = parameters['node'][0]
+                    self._logger.debug("Preparing new config")
+                    node_conf = node.config.create_config(environ['wsgi.input'].read())
+                    self._beacon_worker.nodes[key].status = False
+                    self._node_queue.put([(key, self._beacon_worker.nodes[key].listener_port), 0x02, node_conf])
+                status, headers, html = site.home(self._beacon_worker.nodes)
             elif func == "node_detail":
-                if 'node' in parameters and parameters['node'][0] in self._beacon_worker.nodes.keys():
-                    status, headers, html = site.node_detail(self._beacon_worker.nodes[parameters['node'][0]])
+                if "node" in parameters and parameters['node'][0] in self._beacon_worker.nodes.keys():
+                    key = parameters['node'][0]
+                    if "submit" in parameters:
+                        self._logger.debug("Preparing new config")
+                        node_conf = node.config.create_config(environ['wsgi.input'].read())
+                        self._beacon_worker.nodes[key].status = False
+                        self._node_queue.put([(key, self._beacon_worker.nodes[key].listener_port), 0x02, node_conf])
+                    status, headers, html = site.node_detail(self._beacon_worker.nodes[key])
                 else:
                     status, headers, html = site.file_not_found()
         elif environ['PATH_INFO'] == "/style.css":

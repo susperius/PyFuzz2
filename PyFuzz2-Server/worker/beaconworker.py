@@ -29,8 +29,15 @@ class BeaconWorker:
         node_name = data_unpacked[1][0]
         listener_port = data_unpacked[1][1]
         ip, port = task[0]
-        if ip not in self._node_dict:
+        if ip not in self._node_dict.keys():
             self._node_dict[ip] = PyFuzz2Node(node_name, ip, listener_port)
+            self._node_worker_queue.put([(ip, listener_port), 0x03, ""])  # [(ip, port), GET_CONFIG, ""]
+        elif not self._node_dict[ip].status:  # e.g. after a reboot the config also may have changed
+            self._node_dict[ip].beacon_received()
+            self._node_dict[ip].address = ip
+            self._node_dict[ip].name = node_name
+            self._node_dict[ip].listener_port = listener_port
+            self._node_dict[ip].status = True
             self._node_worker_queue.put([(ip, listener_port), 0x03, ""])  # [(ip, port), GET_CONFIG, ""]
         else:
             self._node_dict[ip].beacon_received()

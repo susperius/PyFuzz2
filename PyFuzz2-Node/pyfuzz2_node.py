@@ -73,6 +73,7 @@ class PyFuzz2Node:
         if self._node_mode == "net":
             self._listener_worker.stop_worker()
             self._beacon_client.stop_beacon()
+            self._tcp_listener.stop()
 
     def __save_fuzz_state(self):
         fuzz_state = self._fuzzer.prng_state
@@ -115,8 +116,8 @@ def reboot():
 
 
 def restart():
-    pyfuzznode = PyFuzz2Node(logger)
-    pyfuzznode.main()
+    gevent.sleep(10)
+    os.system("python pyfuzz2_node.py ")
 
 
 logging.basicConfig(format='%(levelname)s: %(message)s', level=logging.DEBUG)

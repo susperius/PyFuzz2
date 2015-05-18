@@ -13,7 +13,7 @@ class NodeConfig:
         self._report = self._root.find("reporting")
         self._listener = self._root.find("listener")
         self._program = self._root.find("program")
-        self._fuzzer = self._root.find("fuzzing")
+        self._fuzzer = self._root.find("fuzzer")
         self.set_node_name(node_name)
         self.set_beacon_server(beacon_server)
         self.set_beacon_port(beacon_port)
@@ -57,7 +57,7 @@ class NodeConfig:
             self._fuzzer.attrib[key] = arg_dict[key]
 
     def dump(self):
-        return ET.dump(self._tree)
+        return ET.tostring(self._root)
 
 
 class ConfigParser:
@@ -143,7 +143,32 @@ class ConfigParser:
         return self._fuzz_config
 
     def dump_additional_information(self):
-        general_config = [("Program Path", self.program_path), ("Debug Child", str(self.dbg_child)),
-                          ("Sleep Time", str(self.sleep_time)), ("Fuzzer Type", self.fuzzer_type)]
+        general_config = [("Beacon Server", self._beacon_server),
+                          ("Beacon Port", str(self._beacon_port)),
+                          ("Beacon Interval", str(self._beacon_interval)),
+                          ("Report Server", self._report_server),
+                          ("Report Port", str(self._report_port)),
+                          ("Program Path", self.program_path),
+                          ("Debug Child", str(self.dbg_child)),
+                          ("Sleep Time", str(self.sleep_time)),
+                          ("Fuzzer Type", self.fuzzer_type)]
         fuzz_conf = [(x[0], str(x[1])) for x in self.fuzzer_config]
         return general_config + fuzz_conf
+
+
+def create_config(data):
+    in_data = data.replace("+", " ").replace("%5C", "\\").replace("%3A", ":").split("&")
+    conf = {}
+    for elem in in_data:
+        value = elem.split("=")
+        conf[value[0].replace(" ", "_")] = value[1]
+    node_config = NodeConfig(conf.pop('node_name'), conf.pop('beacon_server'), conf.pop('beacon_port'),
+                             conf.pop('report_server'), conf.pop('report_port'), conf.pop('listener_port'),
+                             "node/node_config.xml")
+
+    node_config.set_beacon_interval(conf.pop('beacon_interval'))
+    node_config.set_program_path(conf.pop('program_path'))
+    node_config.set_program_dbg_child(conf.pop('debug_child'))
+    node_config.set_program_sleep_time(conf.pop('sleep_time'))
+    node_config.set_fuzzer(conf.pop('fuzzer_type'), conf)
+    return node_config.dump()

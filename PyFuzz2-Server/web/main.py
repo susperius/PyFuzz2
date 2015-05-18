@@ -44,7 +44,7 @@ class WebSite:
         node_config += from_conf_file.dump_additional_information()
         node_detail_html = self._html_template
         node_detail_html = node_detail_html.replace("SECTION_TITLE", node.name)
-        nodes = html.FORM_HEADER.replace("ATTRIBS", "action=\"/index.py?func=node_detail&node=" +
+        nodes = html.FORM_HEADER.replace("ATTRIBS", "action=\"/index.py?func=home&node=" +
                                          node.address + "&submit=1\" method=\"post\"") + html.TABLE_HEADER
         nodes += html.TABLE_ELEMENT.replace("CONTENTS", html.TABLE_HEAD_CAPTION.replace("CONTENTS", "") +
                                             html.TABLE_HEAD_CAPTION.replace("CONTENTS", ""))

@@ -27,7 +27,7 @@ class ListenerWorker(Worker):
 
     def _listener_worker(self, task):
         msg_type, msg = pickle.loads(task[1])
-        self._logger.debug("Listener Worker -> Type:" + str(msg_type) + " | " + msg)
+        self._logger.debug("Listener Worker -> Type:" + str(msg_type) + " | " + str(msg))
         if msg_type in MESSAGE_TYPES.keys():
             if msg_type == 0x01:
                 pass
@@ -70,5 +70,6 @@ class ListenerWorker(Worker):
             gevent.sleep(0)
 
     def stop_worker(self):
-        gevent.kill(self._greenlet)
-        self._running = False
+        if self._running:
+            gevent.kill(self._greenlet)
+            self._running = False

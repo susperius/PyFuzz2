@@ -60,6 +60,10 @@ class PyFuzz2Node:
     def status(self):
         return self._is_active
 
+    @status.setter
+    def status(self, is_active):
+        self._is_active = active
+
     @property
     def last_contact(self):
         return time.strftime("%a, %d %b %Y %H:%M:%S", time.localtime(self._last_beacon))

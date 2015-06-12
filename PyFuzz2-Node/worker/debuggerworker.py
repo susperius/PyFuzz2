@@ -42,7 +42,7 @@ class DebuggerWorker(Worker):
                         + "\" -t \"" + testcase_dir + filename + "\" -c",
                         stdout=subprocess.PIPE)
                 self._logger.debug("Debugger started...")
-                util = psutil.Process(self._process.pid)
+                util = psutil.Process(self._process.pid)  # TODO: WATCH THE CHILD NOT THE PYTHON SCRIPT!
                 start = time.time()
                 try:
                     while True:

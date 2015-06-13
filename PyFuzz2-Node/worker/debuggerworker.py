@@ -42,13 +42,22 @@ class DebuggerWorker(Worker):
                         + "\" -t \"" + testcase_dir + filename + "\" -c",
                         stdout=subprocess.PIPE)
                 self._logger.debug("Debugger started...")
-                util = psutil.Process(self._process.pid)  # TODO: WATCH THE CHILD NOT THE PYTHON SCRIPT!
+                gevent.sleep(1)
+                proc_childs = psutil.Process(self._process.pid).children()
+                for child in proc_childs:
+                    if child.exe() in self._program_path:
+                        if self._dbg_child:
+                            proc = child.children()[0]
+                        else:
+                            proc = child
+                        break
                 start = time.time()
                 try:
+                    proc.cpu_percent()
                     while True:
                         if time.time() - start > self._sleep_time:
                             break
-                        elif util.cpu_percent(1.0) == 0.0:
+                        elif proc.cpu_percent(1.0) == 0.0:
                             break
                 except:
                     pass # just ignore

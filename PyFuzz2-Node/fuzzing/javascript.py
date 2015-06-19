@@ -96,7 +96,6 @@ class JsFuzz(fuzzer.Fuzzer):
             i += 1
         return code
 
-
     @staticmethod
     def __create_element(name, html_obj):
         return name + " = " + JsDocument.createElement(html_obj)
@@ -164,15 +163,15 @@ class JsFuzz(fuzzer.Fuzzer):
                 return ""
             code += elem.getElementsByTagName(random.choice(self.__tag_names))
         elif method == 'getFeature':
+            code += "try{\n" + elem.getFeature() + "}catch(e){}\n"
             return ""
-            code += ""
         elif method == 'getUserData':
+            code += "try{\n" + elem.getUserData() + "}catch(e){}\n"
             return ""
-            code += ""
         elif method == 'hasAttribute':
             return ""
-            code += ""
         elif method == 'hasAttributes':
+            code += "try{\n" + elem.hasAttributes() + "}catch(e){}\n"
             return ""
             code += ""
         elif method == 'hasChildNode':

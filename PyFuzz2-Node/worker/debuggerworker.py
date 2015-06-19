@@ -27,7 +27,9 @@ class DebuggerWorker(Worker):
 
     def __worker_green(self):
         while True:
+            self._logger.info("Creating Testcases ...")
             self.__create_testcases()
+            self._logger("Start testing ...")
             for filename in os.listdir("testcases/"):
                 output = ""
                 testcase_dir = os.getcwd() + "\\testcases\\"

@@ -44,7 +44,11 @@ class HtmlFuzzer:
         return obj
 
     def _create_html_object(self, tag, ident):
-        text = random.choice(self._text)
-        open_tag = "<" + tag + " id=\"" + ident + "\"> "
+        text = random.choice(self._text) * random.randint(1, 30)
+        if tag == "input":
+            open_tag = "<" + tag + " id=\"" + ident + "\" type=\"" + \
+                       random.choice(HtmlObjects.HTML_INPUT_TYPES) + "\"> "
+        else:
+            open_tag = "<" + tag + " id=\"" + ident + "\"> "
         close_tag = " </" + tag + ">\n"
         return open_tag, text, close_tag

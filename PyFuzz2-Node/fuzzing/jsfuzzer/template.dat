@@ -1,4 +1,5 @@
-<html> 
+<!DOCTYPE html>
+<html>
 <head>
 <title>PyFuzz2 0.1</title>
 <meta http-equiv="Cache-control" content="no-cache"></meta>
@@ -21,7 +22,7 @@ SCRIPT_BODY
 
 </head>
 
-<body onload="startup()">
+<body id="doc_body" onload="eval(startup())">
 Hello World!
 HTML_BODY
 </body>

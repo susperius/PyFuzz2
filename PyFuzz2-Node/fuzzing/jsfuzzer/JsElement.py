@@ -5,103 +5,103 @@ class JsElement:
         self.__name = var_name
 
     def addEventListener(self, event, function):
-        return self.__name + ".addEventListener('" + event + "', " + function + ");\n"
+        return self.__name + ".addEventListener('" + event + "', " + function + ");"
 
     def appendChild(self, child_node):
-        return self.__name + ".appendChild(" + child_node + ");\n"
+        return self.__name + ".appendChild(" + child_node + ");"
 
     def blur(self):
-        return self.__name + ".blur();\n"
+        return self.__name + ".blur();"
 
     def click(self):
-        return self.__name + ".click();\n"
+        return self.__name + ".click();"
 
     def cloneNode(self, deep):
-        return self.__name + ".cloneNode(" + deep + ");\n"
+        return self.__name + ".cloneNode(" + deep + ");"
 
     def compareDocumentPosition(self, element):
-        return self.__name + ".compareDocumentPosition(" + element + ");\n"
+        return self.__name + ".compareDocumentPosition(" + element + ");"
 
     def focus(self):
-        return self.__name + ".focus();\n"
+        return self.__name + ".focus();"
 
     def getAttribute(self, attr_name):
-        return self.__name + ".getAttribute('" + attr_name + "');\n"
+        return self.__name + ".getAttribute('" + attr_name + "');"
 
     def getAttributeNode(self, attr_name):
-        return self.__name + ".getAttributeNode('" + attr_name + "');\n"
+        return self.__name + ".getAttributeNode('" + attr_name + "');"
 
     def getElementsByClassName(self, class_name):
-        return self.__name + ".getElementsByClassName('" + class_name + "');\n"
+        return self.__name + ".getElementsByClassName('" + class_name + "');"
 
     def getElementsByTagName(self, tag_name):
-        return self.__name + ".getElementsByTagName('" + tag_name + "');\n"
+        return self.__name + ".getElementsByTagName('" + tag_name + "');"
 
     def getFeature(self):
-        return self.__name + ".getFeature();\n"
+        return self.__name + ".getFeature();"
 
     def getUserData(self):
-        return self.__name + ".getUserData();\n"
+        return self.__name + ".getUserData();"
 
     def hasAttribute(self, attr_name):
-        return self.__name + ".hasAttribute('" + attr_name + "');\n"
+        return self.__name + ".hasAttribute('" + attr_name + "');"
 
     def hasAttributes(self):
-        return self.__name + ".hasAttributes();\n"
+        return self.__name + ".hasAttributes();"
 
     def hasChildNodes(self):
-        return self.__name + ".hasChildNodes();\n"
+        return self.__name + ".hasChildNodes();"
 
     def insertBefore(self, new_element, child_element):
-        return self.__name + ".insertBefore(" + new_element + ", " + child_element + ");\n"
+        return self.__name + ".insertBefore(" + new_element + ", " + child_element + ");"
 
     def isDefaultNamespace(self):
-        return self.__name + ".isDefaultNamespace();\n"
+        return self.__name + ".isDefaultNamespace();"
 
     def isEqualNode(self, node):
-        return self.__name + ".isEqualNode(" + node + ");\n"
+        return self.__name + ".isEqualNode(" + node + ");"
 
     def isSameNode(self, node):
-        return self.__name + ".isSameNode(" + node + ");\n"
+        return self.__name + ".isSameNode(" + node + ");"
 
     def isSupported(self, feature, version):
-        return self.__name + ".isSupported('" + feature + "', '" + version + ");\n"
+        return self.__name + ".isSupported('" + feature + "', '" + version + ");"
 
     def normalize(self):
-        return self.__name + ".normalize();\n"
+        return self.__name + ".normalize();"
 
     def querySelector(self, html_class_name):
-        return self.__name + ".querySelector('." + html_class_name + "');\n"
+        return self.__name + ".querySelector('." + html_class_name + "');"
 
     def querySelectorAll(self, html_class_name):
-        return self.__name + ".querySelectorAll('." + html_class_name + "');\n"
+        return self.__name + ".querySelectorAll('." + html_class_name + "');"
 
     def removeAttribute(self, attr):
-        return self.__name + ".removeAttribute('" + attr + "');\n"
+        return self.__name + ".removeAttribute('" + attr + "');"
 
     def removeChild(self, child_node):
-        return self.__name + ".removeChild(" + child_node + ");\n"
+        return self.__name + ".removeChild(" + child_node + ");"
 
     def replaceChild(self, new_node, child_node):
-        return self.__name + ".replaceChild(" + new_node + ", " + child_node + ");\n"
+        return self.__name + ".replaceChild(" + new_node + ", " + child_node + ");"
 
     def removeEventListener(self, event, function):
-        return self.__name + ".removeEventListener('" + event + "', " + function + ");\n"
+        return self.__name + ".removeEventListener('" + event + "', " + function + ");"
 
     def setAttribute(self, attr_name, attr_value):
-        return self.__name + ".setAttribute('" + attr_name + "', '" + attr_value + "');\n"
+        return self.__name + ".setAttribute('" + attr_name + "', '" + attr_value + "');"
 
     def setAttributeNode(self, attr):
-        return self.__name + ".setAtrributeNode(" + attr + ");\n"
+        return self.__name + ".setAtrributeNode(" + attr + ");"
 
     def setUserData(self, data):
-        return self.__name + ".setUserData(" + data + ");\n"
+        return self.__name + ".setUserData(" + data + ");"
 
     def toString(self):
-        return self.__name + ".toString();\n"
+        return self.__name + ".toString();"
 
     def item(self, index):
-        return self.__name + ".item(" + index + ");\n"
+        return self.__name + ".item(" + index + ");"
 
     # -----  PROPS ------
     def prop_accessKey(self):

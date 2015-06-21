@@ -4,7 +4,7 @@ class JsAttribute:
     def __init__(self, name):
         self.__name = name
 
-    def prop_isId(self):
+    def prop_is_id(self):
         return self.__name + ".isId"
 
     def prop_name(self):
@@ -21,17 +21,17 @@ class JsNamedNodeMap:
     def __init__(self, name):
         self.__name = name
 
-    def getNamedItem(self, item_name):
-        return self.__name + ".getNamedItem('" + item_name + "');\n"
+    def get_named_item(self, item_name):
+        return self.__name + ".getNamedItem('" + item_name + "');"
 
     def item(self, index):
-        return self.__name + ".item(" + index + ");\n"
+        return self.__name + ".item(" + index + ");"
 
-    def removeNamedItem(self, item_name):
-        return self.__name + ".removeItemName('" + item_name + "');\n"
+    def remove_named_item(self, item_name):
+        return self.__name + ".removeItemName('" + item_name + "');"
 
-    def setNamedItem(self, attr):
-        return self.__name + ".setNamedItem(" + attr + ");\n"
+    def set_named_item(self, attr):
+        return self.__name + ".setNamedItem(" + attr + ");"
 
     def prop_length(self):
         return self.__name + ".length"

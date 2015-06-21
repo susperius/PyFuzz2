@@ -19,14 +19,14 @@ class DomObjects:
     # START DOM ELEMENT OBJECT
     DOM_ELEMENT_METHODS = ['addEventListener', 'appendChild', 'blur', 'click', 'cloneNode', 'compareDocumentPosition',
                            'focus',
-                           'getAttribute', 'getAttributeNode', 'getElementsByClassName', 'getElementsByTagName',
-                           'getFeature',
-                           'getUserData', 'hasAttribute', 'hasAttributes', 'hasChildNode', 'insertBefore',
-                           'isDefaultNameSpace',
-                           'isEqualNode', 'isSameNode', 'isSupported', 'normalize', 'querySelector', 'querySelectorAll',
-                           'removeAttribute', 'removeAttributeNode', 'removeChild', 'replaceChild',
-                           'removeEventListener',
-                           'setAttribute', 'setAttributeNode', 'toString', 'item', 'REPLACE_EXIST_ELEMENT']
+                           'hasAttribute', 'hasChildNode', 'insertBefore',
+                           'normalize',
+                           'removeAttribute', 'removeChild', 'replaceChild',
+                           'removeEventListener', 'setAttribute', 'item', 'REPLACE_EXIST_ELEMENT', 'MIX_REFERENCES']
+    DOM_ELEMENT_AVOID_METHODS = ['getAttributeNode', 'hasAttributes', 'setAttributeNode', 'isSupported',
+                                 'querySelector', 'querySelectorAll',  'getElementsByClassName',
+                                 'getElementsByTagName', 'getAttribute', 'getFeature', 'getUserData',
+                                 'removeAttributeNode', 'toString''isDefaultNameSpace', 'isEqualNode', 'isSameNode', ]
     DOM_ELEMENT_PROPERTIES_READ_ONLY = ['attributes', 'childNodes', 'clientHeight', 'clientWidth', 'firstChild',
                                         'lastChild',
                                         'namespaceURI', 'nextSibling', 'nodeName', 'nodeType', 'offsetHeight',

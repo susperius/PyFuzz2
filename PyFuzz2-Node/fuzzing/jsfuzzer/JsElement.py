@@ -3,11 +3,36 @@
 class JsElement:
     def __init__(self, var_name):
         self.__name = var_name
+        self.__registered_events = {}
+        self.__children = []
+        self.__attributes = {}
+
+    @property
+    def name(self):
+        return self.__name
+
+    @property
+    def registered_events(self):
+        return self.__registered_events
+
+    @property
+    def children(self):
+        return self.__children
+
+    @children.setter
+    def children(self, children):
+        self.__children = children
+
+    @property
+    def attributes(self):
+        return self.__attributes
 
     def addEventListener(self, event, function):
+        self.__registered_events[event] = function
         return self.__name + ".addEventListener('" + event + "', " + function + ");"
 
     def appendChild(self, child_node):
+        self.__children.append(child_node)
         return self.__name + ".appendChild(" + child_node + ");"
 
     def blur(self):
@@ -17,7 +42,7 @@ class JsElement:
         return self.__name + ".click();"
 
     def cloneNode(self, deep):
-        return self.__name + ".cloneNode(" + deep + ");"
+        return self.__name + ".cloneNode(" + str(deep).lower() + ");"
 
     def compareDocumentPosition(self, element):
         return self.__name + ".compareDocumentPosition(" + element + ");"
@@ -77,18 +102,24 @@ class JsElement:
         return self.__name + ".querySelectorAll('." + html_class_name + "');"
 
     def removeAttribute(self, attr):
+        del self.__attributes[attr]
         return self.__name + ".removeAttribute('" + attr + "');"
 
     def removeChild(self, child_node):
+        self.__children.remove(child_node)
         return self.__name + ".removeChild(" + child_node + ");"
 
     def replaceChild(self, new_node, child_node):
+        self.__children.remove(child_node)
+        self.__children.append(new_node)
         return self.__name + ".replaceChild(" + new_node + ", " + child_node + ");"
 
     def removeEventListener(self, event, function):
+        del self.__registered_events[event]
         return self.__name + ".removeEventListener('" + event + "', " + function + ");"
 
     def setAttribute(self, attr_name, attr_value):
+        self.__attributes[attr_name] = attr_value
         return self.__name + ".setAttribute('" + attr_name + "', '" + attr_value + "');"
 
     def setAttributeNode(self, attr):

@@ -1,7 +1,5 @@
 __author__ = 'susperius'
 
-# coding=utf8
-
 from jsfuzzer.JsDocument import *
 from jsfuzzer.JsElement import *
 from jsfuzzer.JsAttrNodeMap import *
@@ -9,62 +7,34 @@ from jsfuzzer.JsGlobal import JsGlobal
 from jsfuzzer.domObjects import *
 from jsfuzzer.htmlObjects import *
 from jsfuzzer.values import *
+from jsfuzzer.browserObjects import *
 from html import HtmlFuzzer
+from jsfuzzer.values import FuzzValues
 import fuzzer
 import random
 import os
 
 TEMPLATE_FILE = "fuzzing/jsfuzzer/template.dat"
 
-NL = "\n"
-
-class JsFuzz(fuzzer.Fuzzer):
-    NAME = "js_fuzzer"
+class JsDomFuzzer(fuzzer.Fuzzer):
+    NAME = "js_dom_fuzzer"
     CONFIG_PARAMS = ["starting_element", "total_operations", "browser", "seed", "file_type"]
 
-    def __init__(self, starting_elements, total_operations, browser, seed=31337, file_type="html"):
-        self.__js_elements = {}
-        self.__js_attributes = []
-        self.__bool = ['true', 'false']
-        self.__tag_names = []
-        self.__starting_element_count = starting_elements
-        self.__total_count = total_operations
-        self.__event_listener = "dummy"
-        self.__browser = browser
-        self.__html_fuzzer = None
-        self.__seed = seed
-        self.__file_type = file_type
-        if seed == 0:
-            random.seed()
-        else:
-            random.seed(seed)
-
-    def __set_start_values(self):
-        self.__js_elements = {}
-        self.__js_attribute = []
-        self.__tag_names = []
-
-    def fuzz(self, use_default_template=False):
-        if use_default_template:
-            startup = self.__create_elements(self.__starting_element_count)
-            startup += self.__create_element_method_block()
-            with open(TEMPLATE_FILE, 'r') as fd:
-                templ = fd.read()
-        else:
-            if self.__html_fuzzer is None:
-                depth = random.randint(0, random.randint(1, 11))
-                self.__html_fuzzer = HtmlFuzzer(self.__starting_element_count, depth, self.__seed)
-            startup = ""
-            html_file = self.__html_fuzzer.fuzz()
-            html_id = self.__get_html_ids(html_file)
-            startup += self.__get_elements(html_id)
-            startup += self.__create_element_method_block()
-            templ = html_file
-        templ = templ.replace("START_UP", startup)
-        templ = templ.replace("SCRIPT_BODY", "")
-        templ = templ.replace("EVENT_HANDLER", "")
-        self.__set_start_values()
-        return templ
+    def __init__(self, starting_elements, total_operations, browser, seed=31337, file_type='html'):
+        self._starting_elements = starting_elements
+        self._total_operations = total_operations
+        self._browser = browser
+        self._html_fuzzer = HtmlFuzzer(self._starting_elements, 3, seed)
+        random.seed(seed)
+        self._file_type = file_type
+        self._function_count = 0
+        self._operations_count = 0
+        self._js_elements = {}
+        """:type dict(JsElement)"""
+        self._window_timeout = 40
+        self._occurring_events = {}
+        for event in DomObjects.DOM_EVENTS:
+            self._occurring_events[event] = 0
 
     @property
     def prng_state(self):
@@ -72,10 +42,7 @@ class JsFuzz(fuzzer.Fuzzer):
 
     @property
     def file_type(self):
-        return self.__file_type
-
-    def set_state(self, state):
-        random.setstate(state)
+        return self._file_type
 
     @staticmethod
     def __get_html_ids(html):
@@ -85,184 +52,173 @@ class JsFuzz(fuzzer.Fuzzer):
         del(ids[-1])
         return ids
 
-    @staticmethod
-    def __get_element(name, ident):
-        return name + " = " + JsDocument.getElementById(ident) + "\n"
+    def fuzz(self):
+        self._function_count = 0
+        self._operations_count = 0
+        html = self._html_fuzzer.fuzz()
+        ids = self.__get_html_ids(html)
+        js_code = self.__create_startup(ids)
+        while self._total_operations > self._operations_count:
+            js_code += self.__add_function()
+        js_code = js_code.replace(Window.setTimeout("func" + str(self._function_count) + "()", self._window_timeout),
+                                  "event_firing()")
+        js_code += self.__add_event_dipatcher()
+        js_code += self.__add_event_handlers()
+        doc = html.replace("SCRIPT_BODY", js_code)
+        return doc
 
-    def __get_elements(self, html_ids):
-        code = ""
+    def set_state(self, state):
+        random.setstate(state)
+
+    def __create_startup(self, elem_ids):
+        code = "function startup() {\n"
         i = 0
-        for ident in html_ids:
-            code += self.__get_element("elem" + str(i), ident)
-            self.__js_elements["elem" + str(i)] = (JsElement("elem" + str(i)), [], [], "")
+        for elem_id in elem_ids:
+            code += "\t" + "elem" + str(i) + " = " + JsDocument.getElementById(elem_id) + "\n"
+            self._js_elements["elem"+str(i)] = JsElement("elem"+str(i))
             i += 1
+        code += "\t" + Window.setTimeout("func0"+"()", self._window_timeout) + "\n}\n"
         return code
 
-    @staticmethod
-    def __create_element(name, html_obj):
-        return name + " = " + JsDocument.createElement(html_obj)
-
-    def __create_elements(self, count):
-        code = ""
-        code += "doc_body = " + JsDocument.getElementById("doc_body") + "\n"
-        body = JsElement("doc_body")
-        for i in range(count):
-            code += "elem" + str(i) + " = " + JsDocument.createElement(random.choice(HtmlObjects.HTML_OBJECTS)) + "\n"
-            code += body.appendChild("elem" + str(i)) + "\n"
-            self.__js_elements["elem" + str(i)] = (JsElement("elem" + str(i)), [], [], "")
+    def __add_function(self, func_name=None, event=False):
+        if not func_name:
+            func_name = "func" + str(self._function_count) + "()"
+        code = "function " + func_name + " {\n"
+        func_count = random.randint(10, 50)
+        for i in range(func_count):
+            code += "\t" + JsGlobal.try_catch_block(self.__add_element_method())
+        if not event:
+            self._function_count += 1
+            code += "\t" + Window.setTimeout("func" + str(self._function_count) + "()", self._window_timeout) + " \n"
+        code += "}\n"
         return code
 
-    def __create_element_method_block(self):
+    def __add_event_handlers(self):
         code = ""
-        new_code = ""
-        for i in range(self.__total_count):
-            while new_code == "":
-                new_code = JsGlobal.try_catch_block(self.__create_element_method(), "e")
-            if self.__browser == "ie":
-                x = random.choice(range(1000))
-                if x < 10:
-                    new_code += "CollectGarbage();\n"
-            code += new_code
-            new_code = ""
+        for event in self._occurring_events:
+            code += self.__add_function(event + "_handler" + "(event)", True)
         return code
 
-    def __create_element_method(self):
+    def __add_event_dipatcher(self):
+        code = "function event_firing() {\n"
+        for key in self._js_elements:
+            for event in self._js_elements[key].registered_events.keys():
+                if event == 'click':
+                    code += self._js_elements[key].click() + "\n"
+                elif event == 'error':
+                    pass
+                elif event == 'load':
+                    pass
+                elif event == 'scroll':
+                    code += self._js_elements[key].prop_scrollLeft() + " = 10;" + "\n"
+                elif event == 'resize' or event == 'change':
+                    code += self._js_elements[key].prop_innerHtml() + " = \"" + "A" * 100 + "\";\n"
+                elif event == 'focus' or event == 'focusin':
+                    code += self._js_elements[key].focus() + "\n"
+                elif event == 'blur':
+                    code += self._js_elements[key].blur() + "\n"
+        code += "}\n"
+        return code
+
+    def __add__new_element(self):
+        elem_name = "elem_cr" + str(len(self._js_elements))
+        code = elem_name + " = " + JsDocument.createElement(random.choice(HtmlObjects.HTML_OBJECTS)) + "\n"
+        self._js_elements[elem_name] = JsElement(elem_name)
+        return elem_name, code
+
+    def __add_element_method(self, key=None):
         code = ""
+        if not key:
+            key = random.choice(self._js_elements.keys())
         method = random.choice(DomObjects.DOM_ELEMENT_METHODS)
-        key = random.choice(self.__js_elements.keys())
-        elem, childs, events, class_name = self.__js_elements[key]
         if method == 'addEventListener':
-            event = random.choice(DomObjects.DOM_EVENTS_USABLE)
-            events.append(event)
-            code += elem.addEventListener(event, self.__event_listener)
+            event = random.choice(DomObjects.DOM_EVENTS)
+            self._occurring_events[event] += 1
+            code += self._js_elements[key].addEventListener(event, event + "_handler")
         elif method == 'appendChild':
-            new_key = "elem" + str(len(self.__js_elements))
-            childs.append(new_key)
-            self.__js_elements[new_key] = (JsElement(new_key), [], [], "")
-            code += self.__create_element(new_key, random.choice(HtmlObjects.HTML_OBJECTS)) + "\n"
-            code += elem.appendChild(new_key)
-        elif method == 'blur':
-            code += elem.blur()
-        elif method == 'click':
-            code += elem.click()
+            if random.randint(1, 100) < 80:
+                child = random.choice(self._js_elements.keys())
+                if child == key:
+                    elem_name, add_code = self.__add__new_element()
+                    code += add_code
+                    self._js_elements[elem_name] = JsElement(elem_name)
+                    child = elem_name
+                code += self._js_elements[key].appendChild(child)
+            else:
+                elem_name, add_code = self.__add__new_element()
+                code += add_code
+                self._js_elements[elem_name] = JsElement(elem_name)
+                code += self._js_elements[key].appendChild(elem_name)
         elif method == 'cloneNode':
-            deep = random.choice(self.__bool)
-            code += elem.cloneNode(deep)
-        elif method == 'compareDocumentPosition':
-            code += elem.compareDocumentPosition(random.choice(self.__js_elements.keys()))
-        elif method == 'focus':
-            code += elem.focus()
-        elif method == 'getAttribute':
-            attr = random.choice(HtmlObjects.HTML_ATTR_GENERIC)
-            code += elem.getAttribute(attr)
-        elif method == 'getAttributeNode':
-            attr = random.choice(HtmlObjects.HTML_ATTR_GENERIC)
-            code += elem.getAttributeNode(attr)
-        elif method == 'getElementsByClassName':
-            if class_name == "":
-                return ""
-            code += elem.getElementsByClassName(class_name)
-        elif method == 'getElementsByTagName':
-            if not self.__tag_names:
-                return ""
-            code += elem.getElementsByTagName(random.choice(self.__tag_names))
-        elif method == 'getFeature':
-            code += elem.getFeature()
-            return ""
-        elif method == 'getUserData':
-            code += elem.getUserData()
-            return ""
+            length = len(self._js_elements)
+            elem_name = "elem_cr" + str(length)
+            code += elem_name + " = " + self._js_elements[key].cloneNode(True)
+            self._js_elements[elem_name] = JsElement(elem_name)
+            self._js_elements[elem_name].set_children(self._js_elements[key].get_children())
         elif method == 'hasAttribute':
-            code += elem.hasAttribute(random.choice(HtmlObjects.HTML_ATTR_GENERIC))
-        elif method == 'hasAttributes':
-            code += elem.hasAttributes()
+            code += self._js_elements[key].hasAttribute(random.choice(HtmlObjects.HTML_ATTR_GENERIC))
         elif method == 'hasChildNode':
-            code += elem.hasChildNodes()
+            code += self._js_elements[key].hasChildNodes()
         elif method == 'insertBefore':
-            if not childs:
-                return ""
-            new_key = "elem" + str(len(self.__js_elements))
-            childs.append(new_key)
-            self.__js_elements[new_key] = (JsElement(new_key), [], [], "")
-            code += JsDocument.createElement(random.choice(HtmlObjects.HTML_OBJECTS))
-            code += elem.insertBefore(new_key, random.choice(childs))
-        elif method == 'isDefaultNameSpace':
-            return ""
-            code += ""
-        elif method == 'isEqualNode':
-            return ""
-            code += ""
-        elif method == 'isSameNode':
-            return ""
-            code += ""
-        elif method == 'isSupported':
-            return ""
-            code += ""
+            if not self._js_elements[key].get_children():
+                elem_name, add_code = self.__add__new_element()
+                code += add_code
+                code += "\t" + self._js_elements[key].appendChild(elem_name) + "\n"
+            elem_name, add_code = self.__add__new_element()
+            code += add_code
+            code += self._js_elements[key].insertBefore(elem_name, random.choice(self._js_elements[key].get_children()))
         elif method == 'normalize':
-            code += elem.normalize()
-        elif method == 'querySelector':
-            if class_name == "":
-                return ""
-            code += elem.querySelector(class_name)
-        elif method == 'querySelectorAll':
-            if class_name == "":
-                return ""
-            code += elem.querySelectorAll(class_name)
+            code += self._js_elements[key].normalize()
         elif method == 'removeAttribute':
-            attr = random.choice(HtmlObjects.HTML_ATTR_GENERIC)
-            if attr == "class":
-                class_name = ""
-            code += elem.removeAttribute(attr)
-        elif method == 'removeAttributeNode':
-            return ""
-            code += ""
+            if not self._js_elements[key].attributes:
+                code += self._js_elements[key].setAttribute(random.choice(HtmlObjects.HTML_ATTR_GENERIC),
+                                                            random.choice(FuzzValues.INTERESTING_VALUES))
+            else:
+                code += self._js_elements[key].removeAttribute(random.choice(self._js_elements[key].attributes.keys()))
         elif method == 'removeChild':
-            if not childs:
-                return ""
-            child = random.choice(range(len(childs)))
-            childs.remove(childs[child])
-            code += elem.removeChild(key + ".childNodes[" + str(child) + "]")
+            if not self._js_elements[key].get_children():
+                elem_name, add_code = self.__add__new_element()
+                code += add_code
+                code += self._js_elements[key].appendChild(elem_name)
+            else:
+                code += self._js_elements[key].removeChild(random.choice(self._js_elements[key].get_children()))
         elif method == 'replaceChild':
-            if not childs:
-                return ""
-            child = random.choice(range(len(childs)))
-            new_child = "elem" + str(len(self.__js_elements))
-            code += self.__create_element(new_child, random.choice(HtmlObjects.HTML_OBJECTS))
-            self.__js_elements[new_child] = (JsElement(new_child), [], [], "")
-            code += elem.replaceChild(new_child, key + ".childNodes[" + str(child) + "]")
-            childs.remove(childs[child])
-            childs.append(new_child)
+            if not self._js_elements[key].get_children():
+                elem_name, add_code = self.__add__new_element()
+                code += add_code
+                code += self._js_elements[key].appendChild(elem_name)
+            else:
+                elem_name, add_code = self.__add__new_element()
+                code += add_code
+                code += self._js_elements[key].replaceChild(elem_name,
+                                                            random.choice(self._js_elements[key].get_children()))
         elif method == 'removeEventListener':
-            if not events:
-                return ""
-            event = random.choice(events)
-            events.remove(event)
-            code += elem.removeEventListener(event, self.__event_listener)
+            if not self._js_elements[key].registered_events:
+                event = random.choice(DomObjects.DOM_EVENTS)
+                self._occurring_events[event] += 1
+                code += self._js_elements[key].addEventListener(event, event + "_handler")
+            else:
+                event = random.choice(self._js_elements[key].registered_events.keys())
+                self._occurring_events[event] -= 1
+                event = random.choice(self._js_elements[key].registered_events.keys())
+                code += self._js_elements[key].removeEventListener(event,
+                                                                   self._js_elements[key].registered_events[event])
         elif method == 'setAttribute':
             attr = random.choice(HtmlObjects.HTML_ATTR_GENERIC)
-            value = random.choice(FuzzValues.INTERESTING_VALUES)
-            if attr == 'class':
-                class_name = value
-            elif attr == 'style':
-                css_pack = random.choice(FuzzValues.CSS_STYLES)
-                value = css_pack[0] + "=" + random.choice(css_pack[1:])
-            code += elem.setAttribute(attr, value)
-        elif method == 'setAttributeNode':
-            return ""
-            code += ""
-        elif method == 'toString':
-            code += elem.toString()
-        elif method == 'item':
-            return ""
-            code += ""
+            if attr == 'style':
+                val = ""
+                for i in range(1, 50):
+                    css = random.choice(FuzzValues.CSS_STYLES)
+                    val += css[0] + ": " + random.choice(css[1:]) + "; "
+            else:
+                val = random.choice(FuzzValues.INTERESTING_VALUES)
+            code += self._js_elements[key].setAttribute(attr, val)
         elif method == 'REPLACE_EXIST_ELEMENT':
-            code += key + " = " + JsDocument.createElement(random.choice(HtmlObjects.HTML_OBJECTS))
-            childs = []
-            events = []
-            class_name = ""
+            elem_name, add_code = self.__add__new_element()
+            code += add_code
+            code += "\t" + key + " = " + elem_name + ";"
+            self._js_elements[key] = self._js_elements[elem_name]
         elif method == 'MIX_REFERENCES':
-            mixed_obj = random.choice(self.__js_elements.keys())
-            code += key + " = " + mixed_obj + ";"
-            elem, childs, events, class_name = self.__js_elements[mixed_obj]
-        self.__js_elements[key] = (elem, childs, events, class_name)
+            code += self._js_elements[key]
+        self._operations_count += 1
         return code

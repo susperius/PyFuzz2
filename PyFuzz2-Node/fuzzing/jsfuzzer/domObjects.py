@@ -18,9 +18,10 @@ class DomObjects:
     # END DOM DOCUMENT OBJECT
     # START DOM ELEMENT OBJECT
     DOM_ELEMENT_METHODS = ['addEventListener', 'appendChild', 'cloneNode',
-                           'hasAttribute', 'hasChildNodes', 'insertBefore', 'normalize',
+                           'hasAttribute', 'insertBefore', 'normalize',
                            'removeAttribute', 'removeChild', 'replaceChild',
-                           'removeEventListener', 'setAttribute', 'REPLACE_EXIST_ELEMENT', 'MIX_REFERENCES']
+                           'removeEventListener', 'setAttribute', 'REPLACE_EXIST_ELEMENT']
+    #'hasChildNodes' , 'MIX_REFERENCES'
     DOM_ELEMENT_EVENT_METHODS = ['blur', 'click', 'focus', ]
     DOM_ELEMENT_AVOID_METHODS = ['getAttributeNode', 'hasAttributes', 'setAttributeNode', 'isSupported',
                                  'querySelector', 'querySelectorAll', 'getElementsByClassName',
@@ -37,6 +38,7 @@ class DomObjects:
     DOM_ELEMENT_PROPERTIES_MODIFIABLE = ['className', 'contentEditable', 'compareDocumentPosition', 'dir', 'id',
                                          'innerHTML', 'lang', 'nodeValue',
                                          'scrollLeft', 'scrollTop', 'style', 'tabIndex', 'textContent', 'title']
+    DOM_ELEMENT_AVOID_PROPERTIES_MODIFIABLE = []
 
     DOM_ELEMENT_FUZZ_STUFF = DOM_ELEMENT_METHODS + DOM_ELEMENT_PROPERTIES_MODIFIABLE
     # END DOM ELEMENT OBJECT
@@ -68,9 +70,9 @@ class DomObjects:
     DOM_EVENTS_TRANSITION = ['transitionend']
     DOM_EVENTS_MISC = ['onmessage', 'onmousewheel', 'ononline', 'onoffline', 'onpopstate', 'onshow', 'onstoreage',
                        'ontoggle', 'onwheel']
-    DOM_EVENTS_USABLE = ['click', 'abort', 'error', 'load', 'scroll', 'resize', 'change', 'focus', 'focusin']
+    DOM_EVENTS_USABLE = ['click', 'error', 'load', 'scroll', 'resize', 'change', 'focus', 'focusin', 'blur']
 
-    DOM_EVENTS = DOM_EVENTS_MOUSE + DOM_EVENTS_KEYBOARD + DOM_EVENTS_FRAME + DOM_EVENTS_FORM + DOM_EVENTS_DRAG + DOM_EVENTS_DRAG
+    DOM_EVENTS = DOM_EVENTS_USABLE
     # END DOM EVENTS
 
     # START DOM EVENT OBJECT

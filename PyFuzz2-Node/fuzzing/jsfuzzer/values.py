@@ -4,7 +4,8 @@ __author__ = 'susperius'
 
 class FuzzValues:
     INTERESTING_VALUES = ['0', '1', '5e6', '-7e6', '8e-6', '2e100', 'null', 'pink', 'false',
-                          'true', '7500000000', '4400000000', '-4400000000', '-7500000000']
+                          'true', '7500000000', '4400000000', '-4400000000', '-7500000000',
+                          "A"*40, "B"*40]
 
     CSS_STYLES = [['background-attachment', 'fixed', 'scroll'],
                   ['background-color', '#b0c4de', 'none'],

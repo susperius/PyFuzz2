@@ -15,12 +15,10 @@ class JsElement:
     def registered_events(self):
         return self.__registered_events
 
-    @property
-    def children(self):
+    def get_children(self):
         return self.__children
 
-    @children.setter
-    def children(self, children):
+    def set_children(self, children):
         self.__children = children
 
     @property

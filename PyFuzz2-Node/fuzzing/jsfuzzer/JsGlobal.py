@@ -60,7 +60,7 @@ class JsGlobal:
         return "String("+obj_val+");"
     
     @staticmethod
-    def try_catch_block(try_code, exception_code="", catch_code=""):
+    def try_catch_block(try_code, exception_code="ex", catch_code=""):
         return "try{ " + try_code + " } catch(" + exception_code + ") { " + catch_code + " }\n"
 
     @staticmethod

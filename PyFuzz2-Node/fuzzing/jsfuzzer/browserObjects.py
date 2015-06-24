@@ -4,4 +4,4 @@ class Window:
 
     @staticmethod
     def setTimeout(function, timeout):
-        return "window.setTimeout(" + function + ", " + str(timeout) + ");"
+        return "window.setTimeout(function () { " + function + " }, " + str(timeout) + ");"

@@ -116,6 +116,9 @@ class JsElement:
         del self.__registered_events[event]
         return self.__name + ".removeEventListener('" + event + "', " + function + ");"
 
+    def select(self):
+        return self.__name + ".select();"
+
     def setAttribute(self, attr_name, attr_value):
         self.__attributes[attr_name] = attr_value
         return self.__name + ".setAttribute('" + attr_name + "', '" + attr_value + "');"

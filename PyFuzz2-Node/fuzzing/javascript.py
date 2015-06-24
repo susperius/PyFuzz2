@@ -117,6 +117,8 @@ class JsDomFuzzer(fuzzer.Fuzzer):
                     code += self._js_elements[key].focus() + "\n"
                 elif event == 'blur':
                     code += self._js_elements[key].blur() + "\n"
+                elif event == 'select':
+                    code += self._js_elements[key].select() + "\n"
         code += "}\n"
         return code
 

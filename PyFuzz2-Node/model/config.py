@@ -35,7 +35,7 @@ class ConfigParser:
                 self._fuzz_config.append(int(fuzzer.attrib['min_change']))
                 self._fuzz_config.append(int(fuzzer.attrib['max_change']))
                 self._fuzz_config.append(int(fuzzer.attrib['seed']))
-            elif self._fuzzer_type == "js_fuzzer":
+            elif self._fuzzer_type == "js_dom_fuzzer":
                 self._fuzz_config.append(int(fuzzer.attrib['starting_elements']))
                 self._fuzz_config.append(int(fuzzer.attrib['total_operations']))
                 self._fuzz_config.append(fuzzer.attrib['browser'])

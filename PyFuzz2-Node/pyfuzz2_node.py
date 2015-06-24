@@ -62,10 +62,10 @@ class PyFuzz2Node:
 
             return ByteMutation(self._fuzzer_config[0], self._fuzzer_config[1], self._fuzzer_config[2],
                                 self._fuzzer_config[3], self._fuzzer_config[4])
-        elif self._fuzzer_type == "js_fuzzer":
-            from fuzzing.javascript import JsFuzz
+        elif self._fuzzer_type == "js_dom_fuzzer":
+            from fuzzing.javascript import JsDomFuzzer
 
-            return JsFuzz(self._fuzzer_config[0], self._fuzzer_config[1],
+            return JsDomFuzzer(self._fuzzer_config[0], self._fuzzer_config[1],
                           self._fuzzer_config[2], self._fuzzer_config[3], self._fuzzer_config[4])
 
     def __stop_all_workers(self):

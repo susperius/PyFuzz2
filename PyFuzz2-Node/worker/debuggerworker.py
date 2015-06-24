@@ -26,23 +26,41 @@ class DebuggerWorker(Worker):
         self._dbg_child = dbg_child
 
     def __worker_green(self):
+        #if self._fuzzer.NAME == "js_dom_fuzzer":
+        #    web_cwd = os.getcwd() + "/testcases/"
+        #    web_process = subprocess.Popen("python -m SimpleHTTPServer 8080", cwd=web_cwd, stdout=subprocess.PIPE,
+        #                                   stderr=subprocess.PIPE)
         while True:
             self._logger.info("Creating Testcases ...")
             self.__create_testcases()
-            self._logger("Start testing ...")
+            self._logger.info("Start testing ...")
             for filename in os.listdir("testcases/"):
+                if "exe" in filename:
+                    continue
                 output = ""
                 testcase_dir = os.getcwd() + "\\testcases\\"
                 if self._dbg_child:
-                    self._process = subprocess.Popen(
-                        "python debugging\\windbg.py -p \"" + self._program_path
-                        + "\" -t \"" + testcase_dir + filename + "\"",
-                        stdout=subprocess.PIPE)
+                    if self._fuzzer.NAME == "js_dom_fuzzer":
+                        self._process = subprocess.Popen(
+                            "python debugging\\windbg.py -p \"" + self._program_path
+                            + "\" -t \"http://127.0.0.1:8080/" + filename + "\"",
+                            stdout=subprocess.PIPE)
+                    else:
+                        self._process = subprocess.Popen(
+                            "python debugging\\windbg.py -p \"" + self._program_path
+                            + "\" -t \"" + testcase_dir + filename + "\"",
+                            stdout=subprocess.PIPE)
                 else:
-                    self._process = subprocess.Popen(
-                        "python debugging\\windbg.py -p \"" + self._program_path
-                        + "\" -t \"" + testcase_dir + filename + "\" -c",
-                        stdout=subprocess.PIPE)
+                    if self._fuzzer.NAME == "js_dom_fuzzer":
+                        self._process = subprocess.Popen(
+                            "python debugging\\windbg.py -p \"" + self._program_path
+                            + "\" -t \"http://127.0.0.1:8080/" + filename + "\"",
+                            stdout=subprocess.PIPE)
+                    else:
+                        self._process = subprocess.Popen(
+                            "python debugging\\windbg.py -p \"" + self._program_path
+                            + "\" -t \"" + testcase_dir + filename + "\"",
+                            stdout=subprocess.PIPE)
                 self._logger.debug("Debugger started...")
                 gevent.sleep(1)
                 proc_childs = psutil.Process(self._process.pid).children()
@@ -59,8 +77,9 @@ class DebuggerWorker(Worker):
                     while True:
                         if time.time() - start > self._sleep_time:
                             break
-                        elif proc.cpu_percent(1.0) == 0.0:
-                            break
+                        #elif proc.cpu_percent(1.0) == 0.0:
+                        #    break
+                        gevent.sleep(1)
                 except:
                     pass # just ignore
                 self._process.kill()

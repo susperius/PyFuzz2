@@ -52,9 +52,19 @@ class JsDomFuzzer(fuzzer.Fuzzer):
         del(ids[-1])
         return ids
 
-    def fuzz(self):
+    def __reinit(self):
         self._function_count = 0
         self._operations_count = 0
+        self._function_count = 0
+        self._operations_count = 0
+        self._js_elements = {}
+        """:type dict(JsElement)"""
+        self._window_timeout = 40
+        self._occurring_events = {}
+        for event in DomObjects.DOM_EVENTS:
+            self._occurring_events[event] = 0
+
+    def fuzz(self):
         html = self._html_fuzzer.fuzz()
         ids = self.__get_html_ids(html)
         js_code = self.__create_startup(ids)
@@ -65,6 +75,7 @@ class JsDomFuzzer(fuzzer.Fuzzer):
         js_code += self.__add_event_dipatcher()
         js_code += self.__add_event_handlers()
         doc = html.replace("SCRIPT_BODY", js_code)
+        self.__reinit()
         return doc
 
     def set_state(self, state):

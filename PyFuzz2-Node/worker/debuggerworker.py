@@ -64,16 +64,10 @@ class DebuggerWorker(Worker):
                 self._logger.debug("Debugger started...")
                 gevent.sleep(1)
                 proc_childs = psutil.Process(self._process.pid).children()
-                for child in proc_childs:
-                    if child.exe() in self._program_path:
-                        if self._dbg_child:
-                            proc = child.get_children()[0]
-                        else:
-                            proc = child
-                        break
+                
                 start = time.time()
                 try:
-                    proc.cpu_percent()
+                    #proc.cpu_percent()
                     while True:
                         if time.time() - start > self._sleep_time:
                             break

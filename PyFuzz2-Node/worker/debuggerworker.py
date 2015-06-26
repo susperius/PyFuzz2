@@ -86,6 +86,7 @@ class DebuggerWorker(Worker):
                 if os.path.isfile("tmp_crash_report"):
                     with open("tmp_crash_report") as fd:
                         output = fd.read()
+                    os.remove("tmp_crash_report")
                     with open(testcase_dir + filename, "rb") as fd:
                         testcase = fd.read()
                     self._report_queue.put((0xFF, (output, testcase)))

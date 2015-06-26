@@ -43,12 +43,12 @@ class DebuggerWorker(Worker):
                     if self._fuzzer.NAME == "js_dom_fuzzer":
                         self._process = subprocess.Popen(
                             "python debugging\\windbg.py -p \"" + self._program_path
-                            + "\" -t \"http://127.0.0.1:8080/" + filename + "\"",
+                            + "\" -t \"http://127.0.0.1:8080/" + filename + "\" + -c True",
                             stdout=subprocess.PIPE)
                     else:
                         self._process = subprocess.Popen(
                             "python debugging\\windbg.py -p \"" + self._program_path
-                            + "\" -t \"" + testcase_dir + filename + "\"",
+                            + "\" -t \"" + testcase_dir + filename + "\"+ -c True",
                             stdout=subprocess.PIPE)
                 else:
                     if self._fuzzer.NAME == "js_dom_fuzzer":
@@ -83,8 +83,9 @@ class DebuggerWorker(Worker):
                 except:
                     pass # just ignore
                 self._process.kill()
-                output = self._process.stdout.read()
-                if "Crash Report" in output:
+                if os.path.isfile("tmp_crash_report"):
+                    with open("tmp_crash_report") as fd:
+                        output = fd.read()
                     with open(testcase_dir + filename, "rb") as fd:
                         testcase = fd.read()
                     self._report_queue.put((0xFF, (output, testcase)))

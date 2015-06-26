@@ -1,0 +1,102 @@
+Crash Report
+eax=00000000 ebx=0426cdc8 ecx=0cb86fd0 edx=00000000 esi=0426cd08 edi=00000000
+eip=67936907 esp=0426cccc ebp=0426ccdc iopl=0         nv up ei pl zr na pe nc
+cs=001b  ss=0023  ds=0023  es=0023  fs=003b  gs=0000             efl=00010246
+mshtml!MatchExactGetIDsOfNames+0x8332:
+67936907 8b400c          mov     eax,dword ptr [eax+0Ch] ds:0023:0000000c=????????
+
+ChildEBP RetAddr  Args to Child              
+0426ccdc 6796c844 0426cd1c 0426cd18 0cb86fd0 mshtml!MatchExactGetIDsOfNames+0x8332
+0426ccf4 6796c91e 0426cd1c 08261e80 0426cd10 mshtml!RunHTMLApplication+0x1e134
+0426cd24 67b70aac 80010045 00000000 00001200 mshtml!RunHTMLApplication+0x1e20e
+0426cd3c 679282a8 0cb86fd0 08261e80 ffffffff mshtml!DllCanUnloadNow+0x5a32a
+0426cd70 67b1f10b 0cb86fd0 07cbefd0 0ca93fd8 mshtml!Ordinal102+0x1ba28
+0426cde4 67b2a6c6 0cb86fd0 800104b3 00000002 mshtml!DllCanUnloadNow+0x8989
+0426ce34 67b2a706 0cb86fd0 800104b3 00000002 mshtml!DllCanUnloadNow+0x13f44
+0426ce60 67acbc0e 0cb86fd0 800104b3 00000002 mshtml!DllCanUnloadNow+0x13f84
+0426ceb4 69f1a26e 08c96fd8 800104b3 00000002 mshtml!Ordinal104+0x6b66f
+0426cef0 69f1a1b9 079bcd10 800104b3 00000409 jscript+0xa26e
+0426cf2c 69f1a43a 079bcd10 00000409 00000001 jscript+0xa1b9
+0426cfec 69f1a4e4 800104b3 00000001 00000000 jscript+0xa43a
+0426d020 69f2d9a8 079bcd10 0426d054 00000001 jscript+0xa4e4
+0426d06c 69f2da4f 079bcd10 00000001 00000000 jscript!DllGetClassObject+0xc804
+0426d098 69f2e4c7 079bcd10 00000000 00000001 jscript!DllGetClassObject+0xc8ab
+0426d234 69f25d7d 0426d24c 00000000 079a4f88 jscript!DllGetClassObject+0xd323
+0426d31c 69f25cdb 00000000 00000000 018d0f80 jscript!DllGetClassObject+0x4bd9
+0426d364 69f2758c 00000000 00000000 018d0f80 jscript!DllGetClassObject+0x4b37
+0426d3e8 69f24f84 079befa0 079bcd10 00000001 jscript!DllGetClassObject+0x63e8
+0426d418 69f2e4c7 079bcd10 00000000 00000001 jscript!DllGetClassObject+0x3de0
+
+
+!exploitable 1.6.0.0
+HostMachine\HostUser
+Executing Processor Architecture is x86
+Debuggee is in User Mode
+Debuggee is a live user mode debugging session on the local machine
+Event Type: Exception
+Exception Faulting Address: 0xc
+Second Chance Exception Type: STATUS_ACCESS_VIOLATION (0xC0000005)
+Exception Sub-Type: Read Access Violation
+
+Faulting Instruction:67936907 mov eax,dword ptr [eax+0ch]
+
+Basic Block:
+    67936907 mov eax,dword ptr [eax+0ch]
+       Tainted Input operands: 'eax'
+    6793690a test eax,eax
+       Tainted Input operands: 'eax'
+    6793690c je mshtml!matchexactgetidsofnames+0x981d (67937df2)
+       Tainted Input operands: 'ZeroFlag'
+
+Exception Hash (Major/Minor): 0x0be752fe.0x62268ccd
+
+ Hash Usage : Stack Trace:
+Major+Minor : mshtml!MatchExactGetIDsOfNames+0x8332
+Major+Minor : mshtml!RunHTMLApplication+0x1e134
+Major+Minor : mshtml!RunHTMLApplication+0x1e20e
+Major+Minor : mshtml!DllCanUnloadNow+0x5a32a
+Major+Minor : mshtml!Ordinal102+0x1ba28
+Minor       : mshtml!DllCanUnloadNow+0x8989
+Minor       : mshtml!DllCanUnloadNow+0x13f44
+Minor       : mshtml!DllCanUnloadNow+0x13f84
+Minor       : mshtml!Ordinal104+0x6b66f
+Minor       : jscript+0xa26e
+Minor       : jscript+0xa1b9
+Minor       : jscript+0xa43a
+Minor       : jscript+0xa4e4
+Minor       : jscript!DllGetClassObject+0xc804
+Minor       : jscript!DllGetClassObject+0xc8ab
+Minor       : jscript!DllGetClassObject+0xd323
+Minor       : jscript!DllGetClassObject+0x4bd9
+Minor       : jscript!DllGetClassObject+0x4b37
+Minor       : jscript!DllGetClassObject+0x63e8
+Minor       : jscript!DllGetClassObject+0x3de0
+Minor       : jscript!DllGetClassObject+0xd323
+Minor       : jscript!DllGetClassObject+0x4bd9
+Minor       : jscript!DllGetClassObject+0x4b37
+Minor       : jscript!DllGetClassObject+0x4d4d
+Minor       : jscript+0xf4c6
+Minor       : jscript+0xeb02
+Minor       : jscript+0x971e
+Minor       : mshtml!Ordinal104+0x321c1
+Minor       : mshtml!Ordinal104+0x322c8
+Minor       : mshtml!Ordinal104+0x2e0d3
+Minor       : mshtml!Ordinal104+0x46328
+Minor       : USER32!gapfnScSendMessage+0x1cf
+Minor       : USER32!gapfnScSendMessage+0x2cf
+Minor       : USER32!gapfnScSendMessage+0x901
+Minor       : USER32!DispatchMessageW+0xf
+Minor       : IEFRAME!Ordinal303+0x2e22
+Minor       : IEFRAME!Ordinal153+0xc3e1
+Minor       : iertutil!Ordinal405+0x2c
+Minor       : kernel32!BaseThreadInitThunk+0x12
+Excluded    : ntdll!RtlInitializeExceptionChain+0xef
+Excluded    : ntdll!RtlInitializeExceptionChain+0xc2
+Instruction Address: 0x0000000067936907
+
+Description: Read Access Violation near NULL
+Short Description: ReadAVNearNull
+Exploitability Classification: PROBABLY_NOT_EXPLOITABLE
+Recommended Bug Title: Read Access Violation near NULL starting at mshtml!MatchExactGetIDsOfNames+0x0000000000008332 (Hash=0x0be752fe.0x62268ccd)
+
+This is a user mode read access violation near null, and is probably not exploitable.

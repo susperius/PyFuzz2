@@ -1,7 +1,0 @@
-<PyFuzz2Node name="NODE01" mode="single">
-    <beacon server="192.168.1.130" port="31337" interval="10"/>
-    <reporting server="192.168.1.130" port="31338"/>
-    <listener port="32337"/>
-    <program path="C:\Program Files\Internet Explorer\iexplore.exe" dbg_child="True" sleep_time="5"/>
-    <fuzzer type="js_dom_fuzzer" starting_elements="30" total_operations="3000" seed="1337" browser="ie" file_type="html"/>
-</PyFuzz2Node>

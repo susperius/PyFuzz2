@@ -44,7 +44,7 @@ class ReportWorker(Worker):
             gevent.kill(self._greenlet)
 
     @staticmethod
-    def __parse_string_report(crash, value, end_marker="\r"):
+    def __parse_string_report(crash, value, end_marker="\n"):
         start = crash.find(value) + len(value)
         end = crash.find(end_marker, start)
         return crash[start:end]
@@ -57,7 +57,7 @@ class ReportWorker(Worker):
         if os.path.exists(directory):
             self._logger.info("duplicated crash")
         else:
-            self._logger.info("New unique crash -> \r\n\tclass = " + classification +
+            self._logger.info("New unique crash -> \r\n" +
                               " \r\n\tShort Description = " + description +
                               " \r\n\tsaved in " + directory)
             os.makedirs(directory)

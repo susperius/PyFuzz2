@@ -7,7 +7,7 @@ import gevent
 import gevent.monkey
 import gevent.socket as socket
 from gevent.server import StreamServer
-from model.task import Task
+#from model.task import Task
 
 #gevent.monkey.patch_all()
 

@@ -58,7 +58,7 @@ class Debugger:
         return self._event_handler.exception_info
 
     def involve_msec(self):
-        pykd.dbgCommand(u"!load debugging\\msec\\MSEC.dll")
+        pykd.dbgCommand(u".load C:\pyfuzz2\PyFuzz2-Node\debugging\msec\MSEC.dll")
         return pykd.dbgCommand(u"!exploitable -v")
 
     def issue_dbg_command(self, cmd):
@@ -89,6 +89,8 @@ if __name__ == "__main__":
         crash_report += dbg.issue_dbg_command(u"kb")
         crash_report += "\r\n"
         crash_report += dbg.involve_msec()
+        with open("tmp_crash_report", 'w+') as fd:
+            fd.write(crash_report)
         print crash_report
     else:
         print "No Crash"

@@ -115,21 +115,21 @@ class JsDomFuzzer(fuzzer.Fuzzer):
         for key in self._js_elements:
             for event in self._js_elements[key].registered_events.keys():
                 if event == 'click':
-                    code += self._js_elements[key].click() + "\n"
+                    code += JsGlobal.try_catch_block(self._js_elements[key].click() + "\n", "ex")
                 elif event == 'error':
                     pass
                 elif event == 'load':
                     pass
                 elif event == 'scroll':
-                    code += self._js_elements[key].prop_scrollLeft() + " = 10;" + "\n"
+                    code += JsGlobal.try_catch_block(self._js_elements[key].prop_scrollLeft() + " = 10;" + "\n", "ex")
                 elif event == 'resize' or event == 'change':
-                    code += self._js_elements[key].prop_innerHtml() + " = \"" + "A" * 100 + "\";\n"
+                    code += JsGlobal.try_catch_block(self._js_elements[key].prop_innerHtml() + " = \"" + "A" * 100 + "\";\n", "ex")
                 elif event == 'focus' or event == 'focusin':
-                    code += self._js_elements[key].focus() + "\n"
+                    code += JsGlobal.try_catch_block(self._js_elements[key].focus() + "\n", "ex")
                 elif event == 'blur':
-                    code += self._js_elements[key].blur() + "\n"
+                    code += JsGlobal.try_catch_block(self._js_elements[key].blur() + "\n", "ex")
                 elif event == 'select':
-                    code += self._js_elements[key].select() + "\n"
+                    code += JsGlobal.try_catch_block(self._js_elements[key].select() + "\n", "ex")
         code += "}\n"
         return code
 
@@ -143,7 +143,7 @@ class JsDomFuzzer(fuzzer.Fuzzer):
         code = ""
         if not key:
             key = random.choice(self._js_elements.keys())
-        method = random.choice(DomObjects.DOM_ELEMENT_METHODS)
+        method = random.choice(DomObjects.DOM_ELEMENT_FUZZ_STUFF)
         if method == 'addEventListener':
             event = random.choice(DomObjects.DOM_EVENTS)
             self._occurring_events[event] += 1
@@ -233,5 +233,34 @@ class JsDomFuzzer(fuzzer.Fuzzer):
             self._js_elements[key] = self._js_elements[elem_name]
         elif method == 'MIX_REFERENCES':
             code += self._js_elements[key]
+        elif method == 'className':
+            code += self._js_elements[key].prop_className() + " = \"" + random.choice(FuzzValues.STRINGS) + "\";"
+        elif method == 'contentEditable':
+            code += self._js_elements[key].prop_contentEditable() + " = " + random.choice(FuzzValues.BOOLEAN) + ";"
+        elif method == 'dir':
+            code += self._js_elements[key].prop_dir() + " = \"" + random.choice(FuzzValues.TEXT_DIRECTION) + "\";"
+        elif method == 'id':
+            code += self._js_elements[key].prop_id() + " = \"" + random.choice(FuzzValues.STRINGS) + "\";"
+        elif method == 'innerHTML':
+            code += self._js_elements[key].prop_innerHtml() + " = \"" + random.choice(FuzzValues.STRINGS) + "\";"
+        elif method == 'lang':
+            code += self._js_elements[key].prop_lang() + " = \"" + random.choice(FuzzValues.LANG_CODES) + "\";"
+        elif method == 'scrollLeft':
+            code += self._js_elements[key].prop_scrollLeft() + " = \"" + random.choice(FuzzValues.INTS) + "\";"
+        elif method == 'scrollTop':
+            code += self._js_elements[key].prop_scrollTop() + " = \"" + random.choice(FuzzValues.INTS) + "\";"
+        elif method == 'style':
+            value = random.choice(FuzzValues.CSS_STYLES)
+            if "-" in value[0]:
+                pos = value[0].find("-")
+                value[0] = value[0].replace("-", "")
+                value[0] = value[0][0:pos-1] + value[0][pos].upper() + value[0][pos+1:]
+            code += self._js_elements[key].prop_style() + "." + value[0] + " = \"" + random.choice(value[1:]) + "\";"
+        elif method == 'tabIndex':
+            code += self._js_elements[key].prop_tabIndex() + " = " + str(random.randint(-20, 20)) + ";"
+        elif method == 'textContent':
+            code += self._js_elements[key].prop_textContent() + " = \"" + random.choice(FuzzValues.STRINGS) + "\";"
+        elif method == 'title':
+            code += self._js_elements[key].prop_title() + " = \"" + random.choice(FuzzValues.STRINGS) + "\";"
         self._operations_count += 1
         return code

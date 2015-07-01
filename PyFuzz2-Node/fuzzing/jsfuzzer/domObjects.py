@@ -35,10 +35,10 @@ class DomObjects:
                                         'parentNode',
                                         'previousSibling', 'scrollHeight', 'scrollWidth', 'tagName', 'length',
                                         'isContentEditable']
-    DOM_ELEMENT_PROPERTIES_MODIFIABLE = ['className', 'contentEditable', 'compareDocumentPosition', 'dir', 'id',
-                                         'innerHTML', 'lang', 'nodeValue',
+    DOM_ELEMENT_PROPERTIES_MODIFIABLE = ['className', 'contentEditable', 'dir', 'id',
+                                         'innerHTML', 'lang',
                                          'scrollLeft', 'scrollTop', 'style', 'tabIndex', 'textContent', 'title']
-    DOM_ELEMENT_AVOID_PROPERTIES_MODIFIABLE = []
+    DOM_ELEMENT_AVOID_PROPERTIES_MODIFIABLE = ['compareDocumentPosition', 'nodeValue', ]
 
     DOM_ELEMENT_FUZZ_STUFF = DOM_ELEMENT_METHODS + DOM_ELEMENT_PROPERTIES_MODIFIABLE
     # END DOM ELEMENT OBJECT

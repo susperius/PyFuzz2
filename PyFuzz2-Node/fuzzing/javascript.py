@@ -114,7 +114,9 @@ class JsDomFuzzer(fuzzer.Fuzzer):
         code = "function event_firing() {\n"
         for key in self._js_elements:
             for event in self._js_elements[key].registered_events.keys():
-                if event == 'click':
+                if 'DOM' in event:
+                    continue
+                elif event == 'click':
                     code += JsGlobal.try_catch_block(self._js_elements[key].click() + "\n", "ex")
                 elif event == 'error':
                     pass

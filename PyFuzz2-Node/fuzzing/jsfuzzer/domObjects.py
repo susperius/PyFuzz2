@@ -72,7 +72,11 @@ class DomObjects:
                        'ontoggle', 'onwheel']
     DOM_EVENTS_USABLE = ['click', 'error', 'load', 'scroll', 'resize', 'change', 'focus', 'focusin', 'blur', 'select']
 
-    DOM_EVENTS = DOM_EVENTS_USABLE
+    DOM_MUTATION_EVENTS = ['DOMAttrModified', 'DOMAttributeNameChanged', 'DOMCharacterDataModified',
+                           'DOMElementNameChanged', 'DOMNodeInserted', 'DOMNodeRemoved', 'DOMNodeRemoved',
+                           'DOMNodeRemovedFromDocument', 'DOMSubtreeModified']
+
+    DOM_EVENTS = DOM_EVENTS_USABLE + DOM_MUTATION_EVENTS
     # END DOM EVENTS
 
     # START DOM EVENT OBJECT

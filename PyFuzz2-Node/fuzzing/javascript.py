@@ -25,7 +25,10 @@ class JsDomFuzzer(fuzzer.Fuzzer):
         self._total_operations = total_operations
         self._browser = browser
         self._html_fuzzer = HtmlFuzzer(self._starting_elements, 3, seed)
-        random.seed(seed)
+        if seed == 0:
+            random.seed()
+        else:
+            random.seed(seed)
         self._file_type = file_type
         self._function_count = 0
         self._operations_count = 0
@@ -85,7 +88,7 @@ class JsDomFuzzer(fuzzer.Fuzzer):
         code = "function startup() {\n"
         i = 0
         for elem_id in elem_ids:
-            code += "\t" + "elem" + str(i) + " = " + JsDocument.getElementById(elem_id) + "\n"
+            code += "\t" + "var elem" + str(i) + " = " + JsDocument.getElementById(elem_id) + "\n"
             self._js_elements["elem"+str(i)] = JsElement("elem"+str(i))
             i += 1
         code += "\t" + Window.setTimeout("func0"+"()", self._window_timeout) + "\n}\n"
@@ -137,7 +140,7 @@ class JsDomFuzzer(fuzzer.Fuzzer):
 
     def __add__new_element(self):
         elem_name = "elem_cr" + str(len(self._js_elements))
-        code = elem_name + " = " + JsDocument.createElement(random.choice(HtmlObjects.HTML_OBJECTS)) + "\n"
+        code = "var " + elem_name + " = " + JsDocument.createElement(random.choice(HtmlObjects.HTML_OBJECTS)) + "\n"
         self._js_elements[elem_name] = JsElement(elem_name)
         return elem_name, code
 

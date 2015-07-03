@@ -70,7 +70,8 @@ class DomObjects:
     DOM_EVENTS_TRANSITION = ['transitionend']
     DOM_EVENTS_MISC = ['onmessage', 'onmousewheel', 'ononline', 'onoffline', 'onpopstate', 'onshow', 'onstoreage',
                        'ontoggle', 'onwheel']
-    DOM_EVENTS_USABLE = ['click', 'error', 'load', 'scroll', 'resize', 'change', 'focus', 'focusin', 'blur', 'select']
+    DOM_EVENTS_USABLE = ['click', 'error', 'load', 'scroll', 'resize', 'change', 'focus', 'focusin', 'blur', 'select',
+                         'pageshow', 'unload', 'beforeunload']
 
     DOM_MUTATION_EVENTS = ['DOMAttrModified', 'DOMAttributeNameChanged', 'DOMCharacterDataModified',
                            'DOMElementNameChanged', 'DOMNodeInserted', 'DOMNodeRemoved', 'DOMNodeRemoved',

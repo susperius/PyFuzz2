@@ -77,7 +77,7 @@ class DomObjects:
                            'DOMElementNameChanged', 'DOMNodeInserted', 'DOMNodeRemoved', 'DOMNodeRemoved',
                            'DOMNodeRemovedFromDocument', 'DOMSubtreeModified']
 
-    DOM_EVENTS = DOM_EVENTS_USABLE + DOM_MUTATION_EVENTS
+    DOM_EVENTS = DOM_EVENTS_USABLE #+ DOM_MUTATION_EVENTS
     # END DOM EVENTS
 
     # START DOM EVENT OBJECT

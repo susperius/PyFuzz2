@@ -6,9 +6,15 @@ class FuzzValues:
     INTERESTING_VALUES = ['0', '1', '5e6', '-7e6', '8e-6', '2e100', 'null', 'pink', 'false',
                           'true', '7500000000', '4400000000', '-4400000000', '-7500000000',
                           "A" * 40, "B" * 40, '']
-    STRINGS = ["A" * 40, "B" * 40, "C" * 40, "D" * 40, '']
-    INTS = ['0', '1', '5e6', '-7e6', '8e-6', '2e100', '7500000000', '4400000000', '-4400000000', '-7500000000']
+    STRINGS = ["A" * 40, "B" * 40, "C" * 40, "D" * 40, '', '<foo/>', '{}', '[]', "0",  "1", "0xffffffff",
+               "0x10000000", "0x04000000", "0x01000000", "-1", "-4", "-10000000", "10000000", "0%",
+               "100%",  "1000%", "-1%", "(3/0)", "(0/0)", "(-3/0)", "%s%s%s%s%s%s%s%s%s",
+               "%n%n%n%n%n%n%n%n%n", "\\0", "\\n", ""]
+    INTS = ['0', '1', '5e6', '-7e6', '8e-6', '2e100', '7500000000', '4400000000', '-4400000000', '-7500000000',
+            '4500000000', '2200000000', '-2200000000', '-4500000000', '1e6', '-1e6', '1e-6', '1e100', 'Infinity',
+            'null', 'undefined', "uneval(n1)", "eval(n1)", "eval(n1, $)"]
     BOOLEAN = ['true', 'false']
+
     TEXT_DIRECTION = ['ltr', 'rtl', 'auto']
     LANG_CODES = ['ab', 'aa', 'af', 'sq', 'am', 'ar', 'an', 'hy', 'as', 'ay', 'az', 'ba', 'eu', 'bn', 'dz', 'bh', 'bi',
                   'br', 'bg', 'my', 'be', 'km', 'ca', 'zh', 'co', 'hr', 'cs', 'da', 'nl', 'en', 'eo', 'et', 'fo', 'fa',
@@ -109,5 +115,5 @@ class FuzzValues:
                   ['vertical-align', 'vertical-values'],
                   ['white-space', 'nowrap'],
                   ['width', '100pz', '100%', 'auto'],
-                  ['word-spacing', '2px'],
+                  ['word-spacing', '2px', '10px'],
                   ['z-index', '1']]

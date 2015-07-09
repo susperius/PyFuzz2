@@ -268,4 +268,6 @@ class JsDomFuzzer(fuzzer.Fuzzer):
         elif method == 'title':
             code += self._js_elements[key].prop_title() + " = \"" + random.choice(FuzzValues.STRINGS) + "\";"
         self._operations_count += 1
+        if random.randint(1, 10000) < 50:
+            code += "CollectGarbage();"
         return code

@@ -1,18 +1,16 @@
 __author__ = 'susperius'
 
+import random
+
 from jsfuzzer.JsDocument import *
 from jsfuzzer.JsElement import *
-from jsfuzzer.JsAttrNodeMap import *
 from jsfuzzer.JsGlobal import JsGlobal
 from jsfuzzer.domObjects import *
 from jsfuzzer.htmlObjects import *
-from jsfuzzer.values import *
 from jsfuzzer.browserObjects import *
 from html import HtmlFuzzer
 from jsfuzzer.values import FuzzValues
 import fuzzer
-import random
-import os
 
 TEMPLATE_FILE = "fuzzing/jsfuzzer/template.dat"
 

@@ -1,9 +1,10 @@
 __author__ = 'susperius'
 
-import gevent
 import logging
 import pickle
-from gevent.queue import Queue
+
+import gevent
+
 from model.node import PyFuzz2Node
 
 

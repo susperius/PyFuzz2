@@ -1,8 +1,10 @@
 __author__ = 'susperius'
 
-import gevent
 import logging
 import pickle
+
+import gevent
+
 from communication.nodeclient import NodeClient
 from worker import Worker
 

@@ -1,6 +1,6 @@
 __author__ = 'susperius'
 import html
-from node.config import ConfigParser
+from node.model.config import ConfigParser
 
 class WebSite:
     def __init__(self):

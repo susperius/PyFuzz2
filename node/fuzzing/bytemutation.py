@@ -1,6 +1,7 @@
 __author__ = 'susperius'
 
 import random
+
 import helper
 import fuzzer
 

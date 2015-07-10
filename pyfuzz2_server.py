@@ -1,10 +1,13 @@
 __author__ = 'susperius'
 
 import logging
+from urlparse import parse_qs
+
 import gevent
 import gevent.monkey
-import node.config
 from gevent.queue import Queue
+
+import node.model.config
 from communication.beaconserver import BeaconServer
 from communication.reportserver import ReportServer
 from communication.webserver import WebServer
@@ -13,8 +16,6 @@ from worker.beaconworker import BeaconWorker
 from worker.reportworker import ReportWorker
 from worker.nodeclientworker import NodeClientWorker
 from web.main import WebSite
-from urlparse import parse_qs
-import model.message_types as message_types
 
 gevent.monkey.patch_all()
 

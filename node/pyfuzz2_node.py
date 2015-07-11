@@ -34,9 +34,12 @@ class PyFuzz2Node:
             self._tcp_listener_port = self._node_config.listener_config
         self._fuzzer = self.__choose_fuzzer()
         if os.path.isfile("fuzz_state.pickle"):  # Load the saved state of the prng TODO: make sure it isn't a new config
-            with open("fuzz_state.pickle", 'r') as fd:
-                self._fuzzer.set_state(pickle.load(fd))
-            os.remove("fuzz_state.pickle")
+            try:
+                with open("fuzz_state.pickle", 'r') as fd:
+                    self._fuzzer.set_state(pickle.load(fd))
+                os.remove("fuzz_state.pickle")
+            except KeyError as er:
+                self._logger.error("Error while restoring the PRNG state -> " + er.message)
         self._reporter_queue = Queue()
         if self._node_config.node_mode == "net":
             self._listener_queue = Queue()
@@ -99,6 +102,7 @@ class PyFuzz2Node:
                 if time.time() - start > (6*60*60):  # Reboot after six hours
                     self.__stop_all_workers()
                     self.__save_fuzz_state()
+                    gevent.sleep(self._node_config.sleep_time + 5)
                     reboot()
                 gevent.sleep(0)
             except KeyboardInterrupt:

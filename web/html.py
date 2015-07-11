@@ -17,3 +17,6 @@ FORM_HEADER = "<form ATTRIBS >\r\n"
 FORM_FOOTER = "</form>\r\n"
 INPUT_TEXT = "<input type=\"text\" name=\"NAME\" value=\"CONTENTS\" ATTRIBS>"
 INPUT_SUBMIT = "<input type=\"submit\" value=\"Submit\">\r\n"
+
+SELECT = "<select name=\"NAME\">\r\nOPTIONS</select>\r\n"
+SELECT_OPTIONS = "<option>CONTENTS</options>\r\n"

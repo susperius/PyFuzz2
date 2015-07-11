@@ -98,15 +98,14 @@ class ConfigParser:
                           ("Report Port", str(self._report_port)),
                           ("Program Path", self.program_path),
                           ("Debug Child", str(self.dbg_child)),
-                          ("Sleep Time", str(self.sleep_time)),
-                          ("Fuzzer Type", self.fuzzer_type)]
+                          ("Sleep Time", str(self.sleep_time))]
         self._logger.debug(self._fuzz_config)
-        fuzz_conf = []
+        fuzz_conf = {"fuzzer_type": self._fuzzer_type, "fuzz_conf": {}}
         i = 0
         for opt in FUZZERS[self._fuzzer_type]:
-            fuzz_conf.append((opt, self._fuzz_config[i]))
+            fuzz_conf["fuzz_conf"][opt] = self._fuzz_config[i]
             i += 1
-        return general_config + fuzz_conf
+        return general_config, fuzz_conf
 
     @staticmethod
     def create_config(data):

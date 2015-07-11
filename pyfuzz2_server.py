@@ -76,17 +76,18 @@ class PyFuzz2Server:
             elif func == "node_detail":
                 if "node" in parameters and parameters['node'][0] in self._beacon_worker.nodes.keys():
                     key = parameters['node'][0]
-                    if "submit" in parameters:
+                    '''if "submit" in parameters:
                         self._logger.debug("Preparing new config")
-                        node_conf = node.config.create_config(environ['wsgi.input'].read())
+                        node_conf = node.model.config.ConfigParser.create_config(environ['wsgi.input'].read())
                         self._beacon_worker.nodes[key].status = False
-                        self._node_queue.put([(key, self._beacon_worker.nodes[key].listener_port), 0x02, node_conf])
+                        self._node_queue.put([(key, self._beacon_worker.nodes[key].listener_port), 0x02, node_conf])'''
                     status, headers, html = site.node_detail(self._beacon_worker.nodes[key])
                 else:
                     status, headers, html = site.file_not_found()
         elif environ['PATH_INFO'] == "/style.css":
             status, headers, html = site.get_style()
-            start_response(status, headers)
+        elif environ['PATH_INFO'] == "/scripts.js":
+            status, headers, html = site.get_scripts()
         else:
             status, headers, html = site.file_not_found()
         start_response(status, headers)

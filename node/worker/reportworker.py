@@ -18,9 +18,10 @@ class ReportWorker(Worker):
         self._program = program
         if self._net_mode:
             self._client = ReportClient(report_server, report_server_port)
+        self._running = False
 
     def __worker_green(self):
-        while True:
+        while self._running:
             if not self._report_queue.empty():
                 msg_type, msg = self._report_queue.get_nowait()
                 if msg_type == 0xFF:
@@ -36,6 +37,7 @@ class ReportWorker(Worker):
 
     def start_worker(self):
         if self._greenlet is None:
+            self._running = True
             self._greenlet = gevent.spawn(self.__worker_green)
             gevent.sleep(0)
 

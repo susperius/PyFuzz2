@@ -19,7 +19,7 @@ class ListenerWorker(Worker):
         self._greenlet = None
 
     def __worker_green(self):
-        while True:
+        while self._running:
             if not self._listener_queue.empty():
                 actual_task = self._listener_queue.get_nowait()
                 self._listener_worker(actual_task)
@@ -27,7 +27,7 @@ class ListenerWorker(Worker):
 
     def _listener_worker(self, task):
         msg_type, msg = pickle.loads(task[1])
-        self._logger.debug("Listener Worker -> Type:" + str(msg_type) + " | " + str(msg))
+        self._logger.debug("Listener Worker -> Type:" + str(msg_type))
         if msg_type in MESSAGE_TYPES.keys():
             if msg_type == 0x01:
                 pass
@@ -47,7 +47,7 @@ class ListenerWorker(Worker):
     def _set_config(self, msg):
         with open("node_config.xml", 'w+') as fd:
             fd.write(msg)
-        #trigger reload the config
+        # trigger reload the config
         self._new_config = True
         pass
 
@@ -65,11 +65,12 @@ class ListenerWorker(Worker):
 
     def start_worker(self):
         if not self._running:
-            self._greenlet = gevent.spawn(self.__worker_green)
             self._running = True
+            self._greenlet = gevent.spawn(self.__worker_green)
             gevent.sleep(0)
 
     def stop_worker(self):
         if self._running:
-            gevent.kill(self._greenlet)
             self._running = False
+            gevent.kill(self._greenlet)
+

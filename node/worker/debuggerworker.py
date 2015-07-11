@@ -24,17 +24,20 @@ class DebuggerWorker(Worker):
         self._report_queue = report_queue
         self._sleep_time = sleep_time
         self._dbg_child = dbg_child
+        self._running = False
 
     def __worker_green(self):
         #if self._fuzzer.NAME == "js_dom_fuzzer":
         #    web_cwd = os.getcwd() + "/testcases/"
         #    web_process = subprocess.Popen("python -m SimpleHTTPServer 8080", cwd=web_cwd, stdout=subprocess.PIPE,
         #                                   stderr=subprocess.PIPE)
-        while True:
+        while self._running:
             self._logger.info("Creating Testcases ...")
             self.__create_testcases()
             self._logger.info("Start testing ...")
             for filename in os.listdir("testcases/"):
+                if not self._running:
+                    break
                 if "exe" in filename:
                     continue
                 output = ""
@@ -95,10 +98,12 @@ class DebuggerWorker(Worker):
 
     def start_worker(self):
         if self._greenlet is None:
+            self._running = True
             self._greenlet = gevent.spawn(self.__worker_green)
 
     def stop_worker(self):
         if self._greenlet is not None:
+            self._running = False
             gevent.kill(self._greenlet)
             try:
                 self._process.kill()

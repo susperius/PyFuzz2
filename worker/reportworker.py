@@ -52,7 +52,7 @@ class ReportWorker(Worker):
         description = self.__parse_string_report(crash[0], "Short Description: ")
         hash_val = self.__parse_string_report(crash[0], "(Hash=", ")")
         hash_val = hash_val.split(".")
-        directory = "results\\" + node_name + "\\" + classification + "\\" + description + "\\" + hash_val[0] + "\\" + hash_val[1]
+        directory = "results\\" + node_name + "\\" + description + "\\" + hash_val[0] + "\\" + hash_val[1]
         if os.path.exists(directory):
             self._logger.info("duplicated crash")
         else:

@@ -69,7 +69,7 @@ class PyFuzz2Server:
                 if "submit" in parameters and "node" in parameters:
                     key = parameters['node'][0]
                     self._logger.debug("Preparing new config")
-                    node_conf = node.config.create_config(environ['wsgi.input'].read())
+                    node_conf = node.model.config.ConfigParser.create_config(environ['wsgi.input'].read())
                     self._beacon_worker.nodes[key].status = False
                     self._node_queue.put([(key, self._beacon_worker.nodes[key].listener_port), 0x02, node_conf])
                 status, headers, html = site.home(self._beacon_worker.nodes)

@@ -33,7 +33,7 @@ class Listener:
                 break
         sock.shutdown(socket.SHUT_WR)
         sock.close()
-        self._logger.debug("Received a job from " + address[0] + str(job))
+        self._logger.debug("Received a job from " + address[0])
         self._task_queue.put([address[0], job])
 
     def __serve(self):

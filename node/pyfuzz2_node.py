@@ -27,50 +27,46 @@ pyfuzznode = None
 class PyFuzz2Node:
     def __init__(self, logger, config_filename=CONFIG_FILENAME):
         self._logger = logger
-        node_config = ConfigParser(config_filename)
-        self._node_name = node_config.node_name
-        self._node_mode = node_config.node_mode
-        if self._node_mode == "net":
-            self._beacon_server, self._beacon_port, self._beacon_interval = node_config.beacon_config
-            self._report_server, self._report_port = node_config.report_config
-            self._tcp_listener_port = node_config.listener_config
-        self._fuzzer_type = node_config.fuzzer_type
-        self._fuzzer_config = node_config.fuzzer_config
+        self._node_config = ConfigParser(config_filename)
+        if self._node_config.node_mode == "net":
+            self._beacon_server, self._beacon_port, self._beacon_interval = self._node_config.beacon_config
+            self._report_server, self._report_port = self._node_config.report_config
+            self._tcp_listener_port = self._node_config.listener_config
         self._fuzzer = self.__choose_fuzzer()
         if os.path.isfile("fuzz_state.pickle"):  # Load the saved state of the prng TODO: make sure it isn't a new config
             with open("fuzz_state.pickle", 'r') as fd:
                 self._fuzzer.set_state(pickle.load(fd))
             os.remove("fuzz_state.pickle")
         self._reporter_queue = Queue()
-        if self._node_mode == "net":
+        if self._node_config.node_mode == "net":
             self._listener_queue = Queue()
-            self._beacon_client = BeaconClient(self._beacon_server, self._beacon_port, self._node_name,
+            self._beacon_client = BeaconClient(self._beacon_server, self._beacon_port, self._node_config.node_name,
                                                self._beacon_interval, self._tcp_listener_port)
             self._tcp_listener = Listener(self._tcp_listener_port, self._listener_queue)
             self._listener_worker = ListenerWorker(self._listener_queue, self._reporter_queue)
             self._report_worker = ReportWorker(True, self._reporter_queue, self._fuzzer.file_type,
-                                               node_config.program_path, self._report_server, self._report_port)
+                                               self._node_config.program_path, self._report_server, self._report_port)
         else:
             self._report_worker = ReportWorker(False, self._reporter_queue, self._fuzzer.file_type,
-                                               node_config.program_path)
-        self._debugger_worker = DebuggerWorker(node_config.program_path, self._fuzzer, self._reporter_queue,
-                                               node_config.sleep_time, node_config.dbg_child)
+                                               self._node_config.program_path)
+        self._debugger_worker = DebuggerWorker(self._node_config.program_path, self._fuzzer, self._reporter_queue,
+                                               self._node_config.sleep_time, self._node_config.dbg_child)
 
     def __choose_fuzzer(self):
-        if self._fuzzer_type == "bytemutation":
+        if self._node_config.fuzzer_type == "bytemutation":
             from fuzzing.bytemutation import ByteMutation
-
-            return ByteMutation(self._fuzzer_config[0], self._fuzzer_config[1], self._fuzzer_config[2],
-                                self._fuzzer_config[3], self._fuzzer_config[4])
-        elif self._fuzzer_type == "js_dom_fuzzer":
+            return ByteMutation(self._node_config.fuzzer_config[0], self._node_config.fuzzer_config[1],
+                                self._node_config.fuzzer_config[2], self._node_config.fuzzer_config[3],
+                                self._node_config.fuzzer_config[4])
+        elif self._node_config.fuzzer_type == "js_dom_fuzzer":
             from fuzzing.javascript import JsDomFuzzer
-
-            return JsDomFuzzer(self._fuzzer_config[0], self._fuzzer_config[1],
-                          self._fuzzer_config[2], self._fuzzer_config[3], self._fuzzer_config[4])
+            return JsDomFuzzer(self._node_config.fuzzer_config[0], self._node_config.fuzzer_config[1],
+                               self._node_config.fuzzer_config[2], self._node_config.fuzzer_config[3],
+                               self._node_config.fuzzer_config[4])
 
     def __stop_all_workers(self):
         self._debugger_worker.stop_worker()
-        if self._node_mode == "net":
+        if self._node_config.node_mode == "net":
             self._listener_worker.stop_worker()
             self._beacon_client.stop_beacon()
             self._tcp_listener.stop()
@@ -83,7 +79,7 @@ class PyFuzz2Node:
     def main(self):
         start = time.time()
         self._logger.info("PyFuzz 2 Node started ...")
-        if self._node_mode == "net":
+        if self._node_config.node_mode == "net":
             self._beacon_client.start_beacon()
             self._tcp_listener.serve()
             self._listener_worker.start_worker()
@@ -91,11 +87,11 @@ class PyFuzz2Node:
         self._debugger_worker.start_worker()
         while True:
             try:
-                if self._node_mode == "net":
+                if self._node_config.node_mode == "net":
                     if self._listener_worker.new_config:
                         self.__stop_all_workers()
                         # self.__save_fuzz_state() if there is a new config it shouldn't restore the state??
-                        restart()
+                        restart(self._node_config.sleep_time + 5)
                     elif self._listener_worker.reset:
                         self.__stop_all_workers()
                         self.__save_fuzz_state()
@@ -115,8 +111,8 @@ def reboot():
     subprocess.call("shutdown /f /r /t 5")
 
 
-def restart():
-    gevent.sleep(10)
+def restart(wait_time):
+    gevent.sleep(wait_time)
     os.system("python pyfuzz2_node.py ")
 
 

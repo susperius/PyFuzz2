@@ -2,6 +2,7 @@ __author__ = 'susperius'
 
 import xml.etree.ElementTree as ET
 import logging
+from fuzzing.fuzzers import FUZZERS
 
 
 class ConfigParser:
@@ -30,19 +31,11 @@ class ConfigParser:
             fuzzer = self._root.find("fuzzer")
             self._fuzzer_type = fuzzer.attrib['type']
             self._fuzz_config = []
-            if self._fuzzer_type == "bytemutation":
-                self._fuzz_config.append(fuzzer.attrib['fuzz_file'])
-                self._fuzz_config.append(int(fuzzer.attrib['min_change']))
-                self._fuzz_config.append(int(fuzzer.attrib['max_change']))
-                self._fuzz_config.append(int(fuzzer.attrib['seed']))
-            elif self._fuzzer_type == "js_dom_fuzzer":
-                self._fuzz_config.append(int(fuzzer.attrib['starting_elements']))
-                self._fuzz_config.append(int(fuzzer.attrib['total_operations']))
-                self._fuzz_config.append(fuzzer.attrib['browser'])
-                self._fuzz_config.append(int(fuzzer.attrib['seed']))
+            if self._fuzzer_type not in FUZZERS.keys():
+                raise ValueError("Unsupported fuzzing type")
             else:
-                raise ValueError("Unsupported fuzzing type!")
-            self._fuzz_config.append(fuzzer.attrib['file_type'])
+                for elem in FUZZERS[self._fuzzer_type]:
+                    self._fuzz_config.append(fuzzer.attrib[elem])
         except Exception as ex:
             self._logger.error("General error occurred while parsing config: " + ex.message + str(ex.args))
             quit()

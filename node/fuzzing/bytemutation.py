@@ -15,9 +15,9 @@ class ByteMutation(fuzzer.Fuzzer):
         self._data = ""
         self._count = 0
         self.__load_fuzz_file()
-        self._seed = seed
-        self._min_change = min_change
-        self._max_change = max_change
+        self._seed = int(seed)
+        self._min_change = int(min_change)
+        self._max_change = int(max_change)
         self._file_type = file_type
         if seed == 0:
             random.seed()

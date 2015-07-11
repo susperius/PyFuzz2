@@ -16,17 +16,17 @@ TEMPLATE_FILE = "fuzzing/jsfuzzer/template.dat"
 
 class JsDomFuzzer(fuzzer.Fuzzer):
     NAME = "js_dom_fuzzer"
-    CONFIG_PARAMS = ["starting_element", "total_operations", "browser", "seed", "file_type"]
+    CONFIG_PARAMS = ["starting_elements", "total_operations", "browser", "seed", "file_type"]
 
     def __init__(self, starting_elements, total_operations, browser, seed=31337, file_type='html'):
-        self._starting_elements = starting_elements
-        self._total_operations = total_operations
+        self._starting_elements = int(starting_elements)
+        self._total_operations = int(total_operations)
         self._browser = browser
         self._html_fuzzer = HtmlFuzzer(self._starting_elements, 3, seed)
         if seed == 0:
             random.seed()
         else:
-            random.seed(seed)
+            random.seed(int(seed))
         self._file_type = file_type
         self._function_count = 0
         self._operations_count = 0

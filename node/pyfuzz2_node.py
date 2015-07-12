@@ -37,10 +37,10 @@ class PyFuzz2Node:
         self._fuzzer_type = node_config.fuzzer_type
         self._fuzzer_config = node_config.fuzzer_config
         self._fuzzer = self.__choose_fuzzer()
-        if os.path.isfile("fuzz_state.pickle"):  # Load the saved state of the prng TODO: make sure it isn't a new config
+        '''if os.path.isfile("fuzz_state.pickle"):  # Load the saved state of the prng TODO: make sure it isn't a new config
             with open("fuzz_state.pickle", 'r') as fd:
                 self._fuzzer.set_state(pickle.load(fd))
-            os.remove("fuzz_state.pickle")
+            os.remove("fuzz_state.pickle")'''
         self._reporter_queue = Queue()
         if self._node_mode == "net":
             self._listener_queue = Queue()

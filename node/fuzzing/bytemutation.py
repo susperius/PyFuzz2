@@ -40,6 +40,9 @@ class ByteMutation(fuzzer.Fuzzer):
     def set_state(self, state):
         random.setstate(state)
 
+    def set_seed(self, seed=0):
+        random.seed(seed)
+
     def fuzz(self):
         data_length = len(self._data)
         changes = min(random.randint(self._min_change, self._max_change), data_length)

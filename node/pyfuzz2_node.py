@@ -40,6 +40,7 @@ class PyFuzz2Node:
                 os.remove("fuzz_state.pickle")
             except KeyError as er:
                 self._logger.error("Error while restoring the PRNG state -> " + er.message)
+                self._fuzzer.set_seed()
         self._reporter_queue = Queue()
         if self._node_config.node_mode == "net":
             self._listener_queue = Queue()

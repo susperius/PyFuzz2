@@ -53,6 +53,9 @@ class JsDomFuzzer(fuzzer.Fuzzer):
         del(ids[-1])
         return ids
 
+    def set_seed(self, seed=0):
+        random.seed(seed)
+
     def __reinit(self):
         self._function_count = 0
         self._operations_count = 0

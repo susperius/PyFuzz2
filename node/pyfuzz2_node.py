@@ -54,7 +54,7 @@ class PyFuzz2Node:
                     self._logger.error("Error while restoring the PRNG state -> " + er.message)
                     self._fuzzer.set_seed()
             self._operation_worker = FuzzingWorker(self._node_config.program_path, self._fuzzer, self._reporter_queue,
-                                                 self._node_config.sleep_time, self._node_config.dbg_child)
+                                                   self._node_config.sleep_time, self._node_config.dbg_child)
         else:
             self._operation_worker = ReducingWorker()
 

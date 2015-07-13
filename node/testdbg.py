@@ -6,7 +6,7 @@ import gevent
 import gevent.monkey
 import time
 import socket
-from fuzzing.javascript import JsFuzz
+from fuzzing.javascript import JsDomFuzz
 from gevent.queue import Queue
 from subprocess import Popen
 import subprocess
@@ -18,7 +18,7 @@ if __name__ == "__main__":
     logging.basicConfig(format='%(levelname)s: %(message)s', level=logging.DEBUG)
     logger = logging.getLogger(__name__)
     logger.setLevel(logging.DEBUG)
-    fuz = JsFuzz(10, 1000, "ie")
+    fuz = JsDomFuzz(10, 1000, "ie")
     rep_q = Queue()
     #dbg_w = dbgworker.DebuggerWorker("C:\\Program Files\\Tracker Software\\PDF Viewer\\PDFXcview.exe\" -t \"testcases\\test.pdf", fuz, rep_q, 5)
     dbg_w = dbgworker.FuzzingWorker("C:\\Program Files\\Internet Explorer\\iexplore.exe", fuz, rep_q, 5, True)

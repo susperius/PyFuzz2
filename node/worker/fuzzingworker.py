@@ -10,7 +10,7 @@ from debugging.windbg import Debugger
 from worker import Worker
 
 
-class DebuggerWorker(Worker):
+class FuzzingWorker(Worker):
     def __init__(self, program_path, fuzzer, report_queue, sleep_time, dbg_child=False):
         self._logger = logging.getLogger(__name__)
         self._greenlet = None

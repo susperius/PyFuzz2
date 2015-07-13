@@ -1,7 +1,18 @@
-<PyFuzz2Node name="NODE01" mode="single">
+<PyFuzz2Node name="NODE01" net_mode="single" op_mode="fuzzing">
     <beacon server="192.168.1.130" port="31337" interval="10"/>
     <reporting server="192.168.1.130" port="31338"/>
     <listener port="32337"/>
     <program path="C:\Program Files\Internet Explorer\iexplore.exe" dbg_child="True" sleep_time="20"/>
     <fuzzer type="js_dom_fuzzer" starting_elements="30" total_operations="3000" seed="260620151818" browser="ie" file_type="html"/>
 </PyFuzz2Node>
+
+<!--
+<PyFuzz2Node name="NODE01" net_mode="single" (single or net) op_mode="fuzzing" (fuzzing or reducing)>
+    <beacon server="192.168.1.130" port="31337" interval="10"/> Beacon server config
+    <reporting server="192.168.1.130" port="31338"/> Report receiving server
+    <listener port="32337"/> Local listening port
+    <program path="C:\Program Files\Internet Explorer\iexplore.exe" dbg_child="True" sleep_time="20"/> Program, which is fuzzed or the testcases are reduced for
+    <fuzzer type="js_dom_fuzzer" starting_elements="30" total_operations="3000" seed="260620151818" browser="ie" file_type="html"/> Fuzzer config
+    <reducer type="js_dom_reducer"> Reducer config
+</PyFuzz2Node>
+-->

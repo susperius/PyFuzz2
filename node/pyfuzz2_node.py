@@ -12,10 +12,10 @@ from gevent.queue import Queue
 from communication.beaconclient import BeaconClient
 from communication.nodelistener import Listener
 from worker.listenerworker import ListenerWorker
-from worker.debuggerworker import DebuggerWorker
+from worker.fuzzingworker import FuzzingWorker
+from worker.reducingworker import ReducingWorker
 from worker.reportworker import ReportWorker
 from model.config import ConfigParser
-
 
 
 gevent.monkey.patch_all()
@@ -28,33 +28,35 @@ class PyFuzz2Node:
     def __init__(self, logger, config_filename=CONFIG_FILENAME):
         self._logger = logger
         self._node_config = ConfigParser(config_filename)
-        if self._node_config.node_mode == "net":
-            self._beacon_server, self._beacon_port, self._beacon_interval = self._node_config.beacon_config
-            self._report_server, self._report_port = self._node_config.report_config
-            self._tcp_listener_port = self._node_config.listener_config
-        self._fuzzer = self.__choose_fuzzer()
-        if os.path.isfile("fuzz_state.pickle"):  # Load the saved state of the prng TODO: make sure it isn't a new config
-            try:
-                with open("fuzz_state.pickle", 'r') as fd:
-                    self._fuzzer.set_state(pickle.load(fd))
-                os.remove("fuzz_state.pickle")
-            except KeyError as er:
-                self._logger.error("Error while restoring the PRNG state -> " + er.message)
-                self._fuzzer.set_seed()
         self._reporter_queue = Queue()
-        if self._node_config.node_mode == "net":
+        if self._node_config.node_net_mode == "net":
+            beacon_server, beacon_port, beacon_interval = self._node_config.beacon_config
+            report_server, report_port = self._node_config.report_config
+            tcp_listener_port = self._node_config.listener_config
             self._listener_queue = Queue()
-            self._beacon_client = BeaconClient(self._beacon_server, self._beacon_port, self._node_config.node_name,
-                                               self._beacon_interval, self._tcp_listener_port)
-            self._tcp_listener = Listener(self._tcp_listener_port, self._listener_queue)
+            self._beacon_client = BeaconClient(beacon_server, beacon_port, self._node_config.node_name,
+                                               beacon_interval, tcp_listener_port)
+            self._tcp_listener = Listener(tcp_listener_port, self._listener_queue)
             self._listener_worker = ListenerWorker(self._listener_queue, self._reporter_queue)
             self._report_worker = ReportWorker(True, self._reporter_queue, self._fuzzer.file_type,
-                                               self._node_config.program_path, self._report_server, self._report_port)
-        else:
+                                               self._node_config.program_path, report_server, report_port)
+        else:  # else single mode
             self._report_worker = ReportWorker(False, self._reporter_queue, self._fuzzer.file_type,
                                                self._node_config.program_path)
-        self._debugger_worker = DebuggerWorker(self._node_config.program_path, self._fuzzer, self._reporter_queue,
-                                               self._node_config.sleep_time, self._node_config.dbg_child)
+        if self._node_config.node_op_mode == 'fuzzing':
+            self._fuzzer = self.__choose_fuzzer()
+            if os.path.isfile("fuzz_state.pickle"):
+                try:
+                    with open("fuzz_state.pickle", 'r') as fd:
+                        self._fuzzer.set_state(pickle.load(fd))
+                    os.remove("fuzz_state.pickle")
+                except KeyError as er:
+                    self._logger.error("Error while restoring the PRNG state -> " + er.message)
+                    self._fuzzer.set_seed()
+            self._operation_worker = FuzzingWorker(self._node_config.program_path, self._fuzzer, self._reporter_queue,
+                                                 self._node_config.sleep_time, self._node_config.dbg_child)
+        else:
+            self._operation_worker = ReducingWorker()
 
     def __choose_fuzzer(self):
         if self._node_config.fuzzer_type == "bytemutation":
@@ -69,8 +71,8 @@ class PyFuzz2Node:
                                self._node_config.fuzzer_config[4])
 
     def __stop_all_workers(self):
-        self._debugger_worker.stop_worker()
-        if self._node_config.node_mode == "net":
+        self._operation_worker.stop_worker()
+        if self._node_config.node_net_mode == "net":
             self._listener_worker.stop_worker()
             self._beacon_client.stop_beacon()
             self._tcp_listener.stop()
@@ -83,15 +85,15 @@ class PyFuzz2Node:
     def main(self):
         start = time.time()
         self._logger.info("PyFuzz 2 Node started ...")
-        if self._node_config.node_mode == "net":
+        if self._node_config.node_net_mode == "net":
             self._beacon_client.start_beacon()
             self._tcp_listener.serve()
             self._listener_worker.start_worker()
         self._report_worker.start_worker()
-        self._debugger_worker.start_worker()
+        self._operation_worker.start_worker()
         while True:
             try:
-                if self._node_config.node_mode == "net":
+                if self._node_config.node_net_mode == "net":
                     if self._listener_worker.new_config:
                         self.__stop_all_workers()
                         # self.__save_fuzz_state() if there is a new config it shouldn't restore the state??

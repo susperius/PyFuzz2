@@ -22,8 +22,9 @@ class ConfigParser:
             else:
                 self._root = ET.fromstring(config_filename)
             self._node_name = self._root.attrib['name']
-            self._node_mode = self._root.attrib['mode']
-            if self._node_mode == "net":
+            self._node_net_mode = self._root.attrib['net_mode']
+            self._node_op_mode = self._root.attrib['op_mode']
+            if self._node_net_mode == "net":
                 beacon = self._root.find("beacon")
                 reporting = self._root.find("reporting")
                 listener = self._root.find("listener")
@@ -33,19 +34,24 @@ class ConfigParser:
                 self._report_server = reporting.attrib['server']
                 self._report_port = reporting.attrib['port']
                 self._listener_port = int(listener.attrib['port'])
-            elif self._node_mode != "single":
+            elif self._node_net_mode != "single":
                 raise ValueError("Only net and single are available modes for node!")
             self._program_path = self._root.find("program").attrib['path']
             self._program_dbg_child = bool(self._root.find("program").attrib['dbg_child'])
             self._program_sleep_time = int(self._root.find("program").attrib['sleep_time'])
-            fuzzer = self._root.find("fuzzer")
-            self._fuzzer_type = fuzzer.attrib['type']
-            self._fuzz_config = []
-            if self._fuzzer_type not in FUZZERS.keys():
-                raise ValueError("Unsupported fuzzing type")
+            if self._node_op_mode == 'fuzzing':
+                fuzzer = self._root.find("fuzzer")
+                self._fuzzer_type = fuzzer.attrib['type']
+                self._fuzz_config = []
+                if self._fuzzer_type not in FUZZERS.keys():
+                    raise ValueError("Unsupported fuzzing type")
+                else:
+                    for elem in FUZZERS[self._fuzzer_type]:
+                        self._fuzz_config.append(fuzzer.attrib[elem])
+            elif self._node_op_mode == 'reducing':
+                pass
             else:
-                for elem in FUZZERS[self._fuzzer_type]:
-                    self._fuzz_config.append(fuzzer.attrib[elem])
+                raise ValueError('Unsupported Operation Mode!')
         except Exception as ex:
             self._logger.error("General error occurred while parsing config: " + ex.message + str(ex.args))
             quit()
@@ -55,20 +61,24 @@ class ConfigParser:
         return self._node_name
 
     @property
-    def node_mode(self):
-        return self._node_mode
+    def node_net_mode(self):
+        return self._node_net_mode
+
+    @property
+    def node_op_mode(self):
+        return self._node_op_mode
 
     @property
     def beacon_config(self):
-        return self._beacon_server, self._beacon_port, self._beacon_interval if self._node_mode == "net" else None
+        return self._beacon_server, self._beacon_port, self._beacon_interval if self._node_net_mode == "net" else None
 
     @property
     def report_config(self):
-        return self._report_server, self._report_port if self._node_mode == "net" else None
+        return self._report_server, self._report_port if self._node_net_mode == "net" else None
 
     @property
     def listener_config(self):
-        return self._listener_port if self._node_mode == "net" else None
+        return self._listener_port if self._node_net_mode == "net" else None
 
     @property
     def program_path(self):
@@ -131,7 +141,7 @@ class NodeConfig:
                  report_port="32337", listener_port="32337", input_conf="node_config.xml"):
         self._tree = ET.parse(input_conf)
         self._root = self._tree.getroot()
-        self._root.attrib["mode"] = "net"
+        self._root.attrib["net_mode"] = "net"
         self._beacon = self._root.find("beacon")
         self._report = self._root.find("reporting")
         self._listener = self._root.find("listener")

@@ -13,7 +13,10 @@ class HtmlFuzzer:
         self._text = ["AAAAAAAAAA", "BBBBBBBBBB", "CCCCCCCCCC", "DDDDDDDDDD", "EEEEEEEEEE"]
         self._count = count
         self._depth = depth
-        random.seed(seed)
+        if seed == 0:
+            random.seed()
+        else:
+            random.seed(seed)
 
     def fuzz(self):
         id_comment = "<!-- IDS: "

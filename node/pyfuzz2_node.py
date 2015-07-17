@@ -28,6 +28,20 @@ class PyFuzz2Node:
     def __init__(self, logger, config_filename=CONFIG_FILENAME):
         self._logger = logger
         self._node_config = ConfigParser(config_filename)
+        node_config = ConfigParser(config_filename)
+        self._node_name = node_config.node_name
+        self._node_mode = node_config.node_mode
+        if self._node_mode == "net":
+            self._beacon_server, self._beacon_port, self._beacon_interval = node_config.beacon_config
+            self._report_server, self._report_port = node_config.report_config
+            self._tcp_listener_port = node_config.listener_config
+        self._fuzzer_type = node_config.fuzzer_type
+        self._fuzzer_config = node_config.fuzzer_config
+        self._fuzzer = self.__choose_fuzzer()
+        '''if os.path.isfile("fuzz_state.pickle"):  # Load the saved state of the prng TODO: make sure it isn't a new config
+            with open("fuzz_state.pickle", 'r') as fd:
+                self._fuzzer.set_state(pickle.load(fd))
+            os.remove("fuzz_state.pickle")'''
         self._reporter_queue = Queue()
         if self._node_config.node_net_mode == "net":
             beacon_server, beacon_port, beacon_interval = self._node_config.beacon_config

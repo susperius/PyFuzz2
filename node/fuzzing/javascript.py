@@ -22,6 +22,7 @@ class JsDomFuzzer(fuzzer.Fuzzer):
         self._starting_elements = int(starting_elements)
         self._total_operations = int(total_operations)
         self._browser = browser
+        seed = int(seed)
         self._html_fuzzer = HtmlFuzzer(self._starting_elements, 3, seed)
         if seed == 0:
             random.seed()

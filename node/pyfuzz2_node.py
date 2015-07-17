@@ -41,7 +41,7 @@ class PyFuzz2Node:
             self._report_worker = ReportWorker(True, self._reporter_queue, self._fuzzer.file_type,
                                                self._node_config.program_path, report_server, report_port)
         else:  # else single mode
-            self._report_worker = ReportWorker(False, self._reporter_queue, self._fuzzer.file_type,
+            self._report_worker = ReportWorker(False, self._reporter_queue, self._node_config.file_type,
                                                self._node_config.program_path)
         if self._node_config.node_op_mode == 'fuzzing':
             self._fuzzer = self.__choose_fuzzer()
@@ -55,8 +55,13 @@ class PyFuzz2Node:
                     self._fuzzer.set_seed()
             self._operation_worker = FuzzingWorker(self._node_config.program_path, self._fuzzer, self._reporter_queue,
                                                    self._node_config.sleep_time, self._node_config.dbg_child)
+        elif self._node_config.node_op_mode == 'reducing':
+            self._reducer = self.__choose_reducer()
+            self._operation_worker = ReducingWorker(self._reducer, self._node_config.program_path,
+                                                    self._node_config.sleep_time, self._node_config.dbg_child,
+                                                    self._reporter_queue)
         else:
-            self._operation_worker = ReducingWorker()
+            raise ValueError('Unsupported operation mode!')
 
     def __choose_fuzzer(self):
         if self._node_config.fuzzer_type == "bytemutation":
@@ -69,6 +74,12 @@ class PyFuzz2Node:
             return JsDomFuzzer(self._node_config.fuzzer_config[0], self._node_config.fuzzer_config[1],
                                self._node_config.fuzzer_config[2], self._node_config.fuzzer_config[3],
                                self._node_config.fuzzer_config[4])
+
+    def __choose_reducer(self):
+        if self._node_config.reducer_type == "js_reducer":
+            from reducing.javascript import JsReducer
+            return JsReducer(self._node_config.reducer_config[0], self._node_config.reducer_config[1],
+                             self._node_config.reducer_config[2])
 
     def __stop_all_workers(self):
         self._operation_worker.stop_worker()

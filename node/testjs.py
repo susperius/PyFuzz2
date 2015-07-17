@@ -1,9 +1,24 @@
 __author__ = 'susperius'
 
-import fuzzing.javascript as js
+import fuzzing.javascript as fuzz_js
+import reducing.javascript as red_js
 
-fuzzy = js.JsDomFuzzer(100, 2000, "ie")
+fuzzy = fuzz_js.JsDomFuzzer(10, 100, "ie")
 
-for i in range(10):
+
+'''for i in range(10):
     with open('test'+str(i)+'.html', 'w+') as fd:
-        fd.write(fuzzy.fuzz())
+        fd.write(fuzzy.fuzz())'''
+
+case = fuzzy.fuzz()
+reducer = red_js.JsReducer(case, 'abc')
+
+for i in range(30):
+    print(i)
+    with open('red_case'+str(i)+'.html', 'w+') as fd:
+        red = reducer.reduce()
+        if red is not None:
+            fd.write(reducer.reduce())
+        else:
+            quit()
+    reducer.crashed(True)

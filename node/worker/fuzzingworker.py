@@ -38,7 +38,7 @@ class FuzzingWorker(Worker):
             for filename in os.listdir("testcases/"):
                 if not self._running:
                     break
-                if "exe" in filename:
+                if ("exe" in filename) or ("py" in filename):
                     continue
                 output = ""
                 testcase_dir = os.getcwd() + "\\testcases\\"
@@ -46,12 +46,12 @@ class FuzzingWorker(Worker):
                     if self._fuzzer.NAME == "js_dom_fuzzer":
                         self._process = subprocess.Popen(
                             "python debugging\\windbg.py -p \"" + self._program_path
-                            + "\" -t \"http://127.0.0.1:8080/" + filename + "\" + -c True",
+                            + "\" -t \"http://127.0.0.1:8080/" + filename + "\" -c True",
                             stdout=subprocess.PIPE)
                     else:
                         self._process = subprocess.Popen(
                             "python debugging\\windbg.py -p \"" + self._program_path
-                            + "\" -t \"" + testcase_dir + filename + "\"+ -c True",
+                            + "\" -t \"" + testcase_dir + filename + "\" -c True",
                             stdout=subprocess.PIPE)
                 else:
                     if self._fuzzer.NAME == "js_dom_fuzzer":
@@ -65,20 +65,7 @@ class FuzzingWorker(Worker):
                             + "\" -t \"" + testcase_dir + filename + "\"",
                             stdout=subprocess.PIPE)
                 self._logger.debug("Debugger started...")
-                gevent.sleep(1)
-                proc_childs = psutil.Process(self._process.pid).children()
-                
-                start = time.time()
-                try:
-                    #proc.cpu_percent()
-                    while True:
-                        if time.time() - start > self._sleep_time:
-                            break
-                        #elif proc.cpu_percent(1.0) == 0.0:
-                        #    break
-                        gevent.sleep(1)
-                except:
-                    pass # just ignore
+                gevent.sleep(self._sleep_time)
                 self._process.kill()
                 if os.path.isfile("tmp_crash_report"):
                     with open("tmp_crash_report") as fd:

@@ -10,6 +10,14 @@ try:
     from fuzzing.fuzzers import FUZZERS
 except ImportError:
     pass
+try:
+    from node.reducing.reducers import REDUCERS
+except ImportError:
+    pass
+try:
+    from reducing.reducers import REDUCERS
+except ImportError:
+    pass
 
 
 class ConfigParser:
@@ -45,15 +53,22 @@ class ConfigParser:
                 self._fuzz_config = []
                 if self._fuzzer_type not in FUZZERS.keys():
                     raise ValueError("Unsupported fuzzing type")
-                else:
-                    for elem in FUZZERS[self._fuzzer_type]:
-                        self._fuzz_config.append(fuzzer.attrib[elem])
+                for elem in FUZZERS[self._fuzzer_type]:
+                    self._fuzz_config.append(fuzzer.attrib[elem])
+                self._file_type = fuzzer.attrib['file_type']
             elif self._node_op_mode == 'reducing':
-                pass
+                reducer = self._root.find('reducer')
+                self._reducer_type = reducer.attrib['type']
+                self._reducer_config = []
+                if self._reducer_type not in REDUCERS.keys():
+                    raise ValueError('Unsupported reducing type')
+                for elem in REDUCERS[self._reducer_type]:
+                    self._reducer_config.append(reducer.attrib[elem])
+                self._file_type = reducer.attrib['file_type']
             else:
                 raise ValueError('Unsupported Operation Mode!')
         except Exception as ex:
-            self._logger.error("General error occurred while parsing config: " + ex.message + str(ex.args))
+            self._logger.error("General error occurred while parsing config: " + str(ex.message) + str(ex.args))
             quit()
 
     @property
@@ -93,12 +108,24 @@ class ConfigParser:
         return self._program_sleep_time
 
     @property
+    def file_type(self):
+        return self._file_type
+
+    @property
     def fuzzer_type(self):
         return self._fuzzer_type
 
     @property
     def fuzzer_config(self):
         return self._fuzz_config
+
+    @property
+    def reducer_type(self):
+        return self._reducer_type
+
+    @property
+    def reducer_config(self):
+        return self._reducer_config
 
     def dump_additional_information(self):
         general_config = [("Beacon Server", self._beacon_server),

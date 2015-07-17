@@ -58,7 +58,7 @@ class Debugger:
         return self._event_handler.exception_info
 
     def involve_msec(self):
-        pykd.dbgCommand(u".load C:\pyfuzz2\PyFuzz2-Node\debugging\msec\MSEC.dll")
+        pykd.dbgCommand(u".load C:\pyfuzz2\\node\debugging\msec\MSEC.dll")
         return pykd.dbgCommand(u"!exploitable -v")
 
     def issue_dbg_command(self, cmd):

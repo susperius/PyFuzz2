@@ -136,13 +136,13 @@ class ConfigParser:
                           ("Program Path", self.program_path),
                           ("Debug Child", str(self.dbg_child)),
                           ("Sleep Time", str(self.sleep_time))]
-        self._logger.debug(self._fuzz_config)
-        fuzz_conf = {"fuzzer_type": self._fuzzer_type, "fuzz_conf": {}}
-        i = 0
-        for opt in FUZZERS[self._fuzzer_type]:
-            fuzz_conf["fuzz_conf"][opt] = self._fuzz_config[i]
-            i += 1
-        return general_config, fuzz_conf
+        if self.node_op_mode == 'fuzzing':
+            op_mode_conf = {"fuzzer_type": self._fuzzer_type, "fuzz_conf": {}}
+            i = 0
+            for opt in FUZZERS[self._fuzzer_type]:
+                op_mode_conf["fuzz_conf"][opt] = self._fuzz_config[i]
+                i += 1
+        return general_config, op_mode_conf
 
     @staticmethod
     def create_config(data):
@@ -169,11 +169,15 @@ class NodeConfig:
         self._tree = ET.parse(input_conf)
         self._root = self._tree.getroot()
         self._root.attrib["net_mode"] = "net"
+        self._op_mode = self._root.attrib['op_mode']
         self._beacon = self._root.find("beacon")
         self._report = self._root.find("reporting")
         self._listener = self._root.find("listener")
         self._program = self._root.find("program")
-        self._fuzzer = self._root.find("fuzzer")
+        if self._op_mode == "fuzzing":
+            self._fuzzer = self._root.find("fuzzer")
+        elif self._op_mode == "reducing":
+            self._reducer = self._root.find('reducer')
         self.set_node_name(node_name)
         self.set_beacon_server(beacon_server)
         self.set_beacon_port(beacon_port)

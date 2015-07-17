@@ -28,7 +28,6 @@ class PyFuzz2Node:
     def __init__(self, logger, config_filename=CONFIG_FILENAME):
         self._logger = logger
         self._node_config = ConfigParser(config_filename)
-        self._fuzzer = self.__choose_fuzzer()
         self._reporter_queue = Queue()
         if self._node_config.node_net_mode == "net":
             beacon_server, beacon_port, beacon_interval = self._node_config.beacon_config
@@ -79,8 +78,7 @@ class PyFuzz2Node:
     def __choose_reducer(self):
         if self._node_config.reducer_type == "js_reducer":
             from reducing.javascript import JsReducer
-            return JsReducer(self._node_config.reducer_config[0], self._node_config.reducer_config[1],
-                             self._node_config.reducer_config[2])
+            return JsReducer(self._node_config.reducer_config[0], self._node_config.reducer_config[1])
 
     def __stop_all_workers(self):
         self._operation_worker.stop_worker()

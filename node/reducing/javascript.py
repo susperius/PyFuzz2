@@ -7,20 +7,17 @@ import logging
 
 class JsReducer(Reducer):
     NAME = 'js_reducer'
-    CONFIG_PARAMS = ['test_case_path', 'crash_report_path', 'file_type']
+    CONFIG_PARAMS = ['path', 'file_type']
 
-    def __init__(self, test_case_path, crash_report_path, file_type):
+    def __init__(self, path, file_type):
         self._logger = logging.getLogger(__name__)
-        self._logger.debug(test_case_path)
-        self._logger.debug(crash_report_path)
-        with open(test_case_path, 'r') as fd:
-            self._test_case = fd.read()
-        with open(crash_report_path, 'r') as fd:
-            self._crash_report = fd.read()
         self._file_type = file_type
+        self._path = path
         self._reduced_case = ""
-        self._functions = self.__find_functions()
-        self._event_handler = self.__find_event_handler()
+        self._test_case = ""
+        self._crash_report = ""
+        self._functions = []
+        self._event_handler = []
         self._start = 0
         self._crashed = False
         self._phase = 0
@@ -32,9 +29,24 @@ class JsReducer(Reducer):
         3 - Determine which html objects are necessary
         '''
 
+    def set_case(self, test_case, crash_report):
+        with open(self._path + test_case, 'rb') as case_fd, open(self._path + crash_report, 'rb') as report_fd:
+            self._test_case = case_fd.read()
+            self._crash_report = report_fd.read()
+            self._reduced_case = ""
+            self._functions = self.__find_functions()
+            self._event_handler = self.__find_event_handler()
+            self._start = 0
+            self._crashed = False
+            self._phase = 0
+
     @property
     def file_type(self):
         return self._file_type
+
+    @property
+    def path(self):
+        return self._path
 
     @property
     def crash_report(self):

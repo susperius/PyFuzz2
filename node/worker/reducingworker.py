@@ -66,8 +66,8 @@ class ReducingWorker(Worker):
                         self._reducer.crashed(False)
                     os.remove('tmp/reduced.html')
                 case = self._reducer.reduce()
-                os.remove(self._reducer.path + elem)
-                os.remove(self._reducer.path + report)
+            os.remove(self._reducer.path + elem)
+            os.remove(self._reducer.path + report)
             self._logger.info('Reduced the Testcase!')
         quit()
 

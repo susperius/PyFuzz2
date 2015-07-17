@@ -19,7 +19,6 @@ class ReducingWorker(Worker):
         self._process = None
         self._dbg_child = dbg_child
         self._report_queue = report_queue
-        self._actual_file = []
 
     def __worker_green(self):
         cases = os.listdir(self._reducer.path)
@@ -51,7 +50,6 @@ class ReducingWorker(Worker):
                         red_maj_hash, red_min_hash = self.__get_report_hashes(output)
                         if red_maj_hash == maj_hash:
                             self._reducer.crashed(True)
-                            self._actual_file.append((case, output))
                             with open(directory + 'red_' + elem, 'wb+') as case_fd, open(directory + 'red_' + report,
                                                                                          'wb+') as output_fd:
                                 case_fd.write(case)

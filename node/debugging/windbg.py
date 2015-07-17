@@ -27,9 +27,9 @@ class ExceptionHandler(pykd.eventHandler):
         return self.exception_info
 
     def onException(self, exceptInfo):
-        if (exceptInfo.ExceptionCode in self.interesting_exceptions.keys()) and not exceptInfo.FirstChance:
-            self.exception_info = (exceptInfo.ExceptionCode, self.interesting_exceptions[exceptInfo.ExceptionCode],
-                                   exceptInfo)
+        if not exceptInfo.FirstChance:
+            #self.exception_info = (exceptInfo.ExceptionCode, self.interesting_exceptions[exceptInfo.ExceptionCode],
+            #                       exceptInfo)
             self.exception_occurred = True
             return pykd.eventResult.Break
         return pykd.eventResult.NoChange

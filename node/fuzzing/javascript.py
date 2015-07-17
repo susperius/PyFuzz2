@@ -27,7 +27,7 @@ class JsDomFuzzer(fuzzer.Fuzzer):
         if seed == 0:
             random.seed()
         else:
-            random.seed(int(seed))
+            random.seed(seed)
         self._file_type = file_type
         self._function_count = 0
         self._operations_count = 0

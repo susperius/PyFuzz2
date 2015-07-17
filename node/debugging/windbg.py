@@ -84,6 +84,7 @@ if __name__ == "__main__":
     crash_report = ""
     if dbg.crashed:
         crash_report += "Crash Report\r\n"
+        crash_report += dbg.issue_dbg_command(u"ub eip")
         crash_report += dbg.issue_dbg_command(u"r")
         crash_report += "\r\n"
         crash_report += dbg.issue_dbg_command(u"kb")

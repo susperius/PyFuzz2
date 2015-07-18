@@ -38,7 +38,7 @@ class PyFuzz2Node:
                                                beacon_interval, tcp_listener_port)
             self._tcp_listener = Listener(tcp_listener_port, self._listener_queue)
             self._listener_worker = ListenerWorker(self._listener_queue, self._reporter_queue)
-            self._report_worker = ReportWorker(True, self._reporter_queue, self._fuzzer.file_type,
+            self._report_worker = ReportWorker(True, self._reporter_queue, self._node_config.file_type,
                                                self._node_config.program_path, report_server, report_port)
         else:  # else single mode
             self._report_worker = ReportWorker(False, self._reporter_queue, self._node_config.file_type,

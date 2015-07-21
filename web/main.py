@@ -3,6 +3,7 @@ import html
 from node.model.config import ConfigParser
 from node.fuzzing.fuzzers import FUZZERS
 
+
 class WebSite:
     def __init__(self):
         self._funcs = ['home', 'node_detail']

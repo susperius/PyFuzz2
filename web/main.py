@@ -26,7 +26,7 @@ class WebSite:
             table_caption += html.TABLE_HEAD_CAPTION.replace("CONTENTS", element)
         table_caption = html.TABLE_ELEMENT.replace("CONTENTS", table_caption)
         node_table = ""
-        for key in nodes.keys():
+        for key in sorted(nodes.keys()):
             node_name = html.NODE_LINK.replace("CONTENTS", nodes[key].name)
             node_name = node_name.replace("NAME", nodes[key].address)
             node = html.TABLE_DEFAULT_CONTENT.replace("CONTENTS", node_name) + \

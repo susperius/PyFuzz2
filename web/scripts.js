@@ -4,8 +4,25 @@
 
 FUZZERS
 
-function changeFuzzer(){
 
+function changeFuzzer(){
+    var x = -1;
+    var fuzz_table = document.getElementById("fuzz_table");
+    var old_inputs = document.getElementById("fuzz_config");
+    var new_inputs = document.createElement("div");
+    new_inputs.id = "fuzz_config";
+    for(i=0; i<fuzzers.length; i+2){
+        if(fuzzers[i] == fuzz_select.value){
+            x = i + 1;
+        }
+    }
+    for(i=0; i<fuzzers[x].length; i++){
+        var input = document.createElement("input");
+        input.type = "text";
+        input.name = fuzzers[x][i];
+        new_inputs.appendChild(input);
+    }
+    fuzz_table.replaceChild(new_inputs, old_inputs);
 }
 
 function set_select_value(name){

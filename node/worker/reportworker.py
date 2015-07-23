@@ -46,9 +46,11 @@ class ReportWorker(Worker):
             gevent.kill(self._greenlet)
 
     @staticmethod
-    def parse_string_report(crash, value, end_marker="\n"):
+    def __parse_string_report(crash, value, end_marker="\r"):
         start = crash.find(value) + len(value)
         end = crash.find(end_marker, start)
+        if end_marker=="\r" and end == -1:
+            end = crash.find("\n", start)
         return crash[start:end]
 
     def __report_crash_local(self, crash):

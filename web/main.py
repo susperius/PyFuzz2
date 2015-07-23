@@ -3,6 +3,7 @@ import html
 from node.model.config import ConfigParser
 from node.fuzzing.fuzzers import FUZZERS
 
+
 class WebSite:
     def __init__(self):
         self._funcs = ['home', 'node_detail']
@@ -26,7 +27,7 @@ class WebSite:
             table_caption += html.TABLE_HEAD_CAPTION.replace("CONTENTS", element)
         table_caption = html.TABLE_ELEMENT.replace("CONTENTS", table_caption)
         node_table = ""
-        for key in nodes.keys():
+        for key in sorted(nodes.keys()):
             node_name = html.NODE_LINK.replace("CONTENTS", nodes[key].name)
             node_name = node_name.replace("NAME", nodes[key].address)
             node = html.TABLE_DEFAULT_CONTENT.replace("CONTENTS", node_name) + \
@@ -69,11 +70,13 @@ class WebSite:
                            "onLoad=\"set_select_value('" + fuzzer_conf["fuzzer_type"] + "')\" " + \
                            " name=\"fuzzer_type\" onChange=\"changeFuzzer()\">\r\n" + \
                            fuzz_types_options+"</select>\r\n</td>\r\n</tr>\r\n"
+        node_conf_table += "<div id=\"fuzz_config\">"
         for key in FUZZERS[fuzzer_conf["fuzzer_type"]]:
             node_conf_table += "<tr>\r\n<td><b>" + key + "</b></td>\r\n" + \
                                "<td><input type=\"text\" value=\"" + fuzzer_conf["fuzz_conf"][key] + "\" name=\"" + \
                                key + "\" >"
         # table end
+        node_conf_table += "</div>"
         node_conf_table += "</table>\r\n<input type=\"submit\" value=\"Submit\">\r\n</form>\r\n"
         node_conf_table += "<form action=\"/index.py?func=home&reboot=" + node.address + "\" method=\"post\">\r\n" + \
                            "<input type=\"submit\" value=\"Reboot node\">\r\n</form>\r\n"

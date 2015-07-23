@@ -110,11 +110,14 @@ class PyFuzz2Node:
                         restart(self._node_config.sleep_time + 5)
                     elif self._listener_worker.reset:
                         self.__stop_all_workers()
+                        gevent.sleep(5)
                         if self._node_config.node_op_mode == "fuzzing":
                             self.__save_fuzz_state()
+                        gevent.sleep(self._node_config.sleep_time + 5)
                         reboot()
                 if time.time() - start > (8*60*60):  # Reboot after six hours
                     self.__stop_all_workers()
+                    gevent.sleep(5)
                     if self._node_config.node_op_mode == "fuzzing":
                         self.__save_fuzz_state()
                     gevent.sleep(self._node_config.sleep_time + 5)
@@ -134,10 +137,13 @@ def restart(wait_time):
     gevent.sleep(wait_time)
     os.system("python pyfuzz2_node.py ")
 
-
+formatter = logging.Formatter("%(levelname)s: %(message)s")
 logging.basicConfig(format='%(levelname)s: %(message)s', level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
+file_handler = logging.FileHandler("log/node.log")
+file_handler.setFormatter(formatter)
+logger.addHandler(file_handler)
 if __name__ == "__main__":
     pyfuzznode = PyFuzz2Node(logger)
     pyfuzznode.main()

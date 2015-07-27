@@ -19,6 +19,7 @@ class ReducingWorker(Worker):
         self._process = None
         self._dbg_child = dbg_child
         self._report_queue = report_queue
+        self._actual_file = {}
 
     def __worker_green(self):
         cases = os.listdir(self._reducer.path)
@@ -27,7 +28,7 @@ class ReducingWorker(Worker):
                 continue
             report = elem.replace('file', 'report').replace(self._reducer.file_type, 'txt')
             self._reducer.set_case(elem, report)
-            self._actual_file.append((elem, report))
+            self._actual_file['origin'] = (elem, report)
             case = self._reducer.reduce()
             maj_hash, min_hash = self.__get_report_hashes(self._reducer.crash_report)
             directory = "reduced/" + self.__get_short_description(self._reducer.crash_report) + "/" + maj_hash + "/"
@@ -47,11 +48,12 @@ class ReducingWorker(Worker):
                         with open("tmp_crash_report") as fd:
                             output = fd.read()
                         os.remove("tmp_crash_report")
+                        self._actual_file['case'] = (case, output)
                         red_maj_hash, red_min_hash = self.__get_report_hashes(output)
                         if red_maj_hash == maj_hash:
                             self._reducer.crashed(True)
                             with open(directory + 'red_' + elem, 'wb+') as case_fd, open(directory + 'red_' + report,
-                                                                                         'wb+') as output_fd:
+                                                                                         'w+') as output_fd:
                                 case_fd.write(case)
                                 output_fd.write(output)
                             if red_min_hash != min_hash:
@@ -74,10 +76,10 @@ class ReducingWorker(Worker):
             self._running = False
             gevent.kill(self._greenlet)
             try:
-                with open(self._reducer.path + self._actual_file[0][0], 'wb+') as case_fd, open(self._reducer.path + self._actual_file[0][1], 'wb+') as report_fd:
-                    case_fd.write(self._actual_file[1][0])
-                    report_fd.write(self._actual_file[1[1]])
-            except KeyError:
+                with open(self._reducer.path + self._actual_file['origin'][0], 'wb+') as case_fd, open(self._reducer.path + self._actual_file['origin'][1], 'w+') as report_fd:
+                    case_fd.write(self._actual_file['case'][0])
+                    report_fd.write(self._actual_file['case'][1])
+            except:
                 pass  # Just ignore perhaps there is in this moment no reduced file
 
     def start_worker(self):

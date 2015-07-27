@@ -115,7 +115,7 @@ class PyFuzz2Node:
                             self.__save_fuzz_state()
                         gevent.sleep(self._node_config.sleep_time + 5)
                         reboot()
-                if time.time() - start > (8*60*60):  # Reboot after six hours
+                if time.time() - start > (8*60*60):  # Reboot after eight hours
                     self.__stop_all_workers()
                     gevent.sleep(5)
                     if self._node_config.node_op_mode == "fuzzing":

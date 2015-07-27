@@ -70,13 +70,13 @@ class WebSite:
                            "onLoad=\"set_select_value('" + fuzzer_conf["fuzzer_type"] + "')\" " + \
                            " name=\"fuzzer_type\" onChange=\"changeFuzzer()\">\r\n" + \
                            fuzz_types_options+"</select>\r\n</td>\r\n</tr>\r\n"
-        node_conf_table += "<div id=\"fuzz_config\">"
+        node_conf_table += "<div id=\"fuzz_config\">\r\n"
         for key in FUZZERS[fuzzer_conf["fuzzer_type"]]:
             node_conf_table += "<tr>\r\n<td><b>" + key + "</b></td>\r\n" + \
                                "<td><input type=\"text\" value=\"" + fuzzer_conf["fuzz_conf"][key] + "\" name=\"" + \
                                key + "\" >"
         # table end
-        node_conf_table += "</div>"
+        node_conf_table += "\r\n</div>\r\n"
         node_conf_table += "</table>\r\n<input type=\"submit\" value=\"Submit\">\r\n</form>\r\n"
         node_conf_table += "<form action=\"/index.py?func=home&reboot=" + node.address + "\" method=\"post\">\r\n" + \
                            "<input type=\"submit\" value=\"Reboot node\">\r\n</form>\r\n"

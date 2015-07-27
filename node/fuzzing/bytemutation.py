@@ -24,6 +24,10 @@ class ByteMutation(fuzzer.Fuzzer):
         else:
             random.seed(self._seed)
 
+    @classmethod
+    def from_list(cls, params):
+        return cls(params[0], params[1], params[2], params[3], params[4])
+
     def __load_fuzz_file(self):
         with open(self._fuzz_file, "rb") as fd:
             self._data = fd.read()

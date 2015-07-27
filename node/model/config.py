@@ -53,7 +53,7 @@ class ConfigParser:
                 self._fuzz_config = []
                 if self._fuzzer_type not in FUZZERS.keys():
                     raise ValueError("Unsupported fuzzing type")
-                for elem in FUZZERS[self._fuzzer_type]:
+                for elem in FUZZERS[self._fuzzer_type][0]:
                     self._fuzz_config.append(fuzzer.attrib[elem])
                 self._file_type = fuzzer.attrib['file_type']
             elif self._node_op_mode == 'reducing':
@@ -139,9 +139,11 @@ class ConfigParser:
         if self.node_op_mode == 'fuzzing':
             op_mode_conf = {"fuzzer_type": self._fuzzer_type, "fuzz_conf": {}}
             i = 0
-            for opt in FUZZERS[self._fuzzer_type]:
+            for opt in FUZZERS[self._fuzzer_type][0]:
                 op_mode_conf["fuzz_conf"][opt] = self._fuzz_config[i]
                 i += 1
+        else:
+            op_mode_conf = None
         return general_config, op_mode_conf
 
     @staticmethod

@@ -71,7 +71,7 @@ class WebSite:
                            " name=\"fuzzer_type\" onChange=\"changeFuzzer()\">\r\n" + \
                            fuzz_types_options+"</select>\r\n</td>\r\n</tr>\r\n"
         node_conf_table += "<div id=\"fuzz_config\">\r\n"
-        for key in FUZZERS[fuzzer_conf["fuzzer_type"]]:
+        for key in FUZZERS[fuzzer_conf["fuzzer_type"]][0]:
             node_conf_table += "<tr>\r\n<td><b>" + key + "</b></td>\r\n" + \
                                "<td><input type=\"text\" value=\"" + fuzzer_conf["fuzz_conf"][key] + "\" name=\"" + \
                                key + "\" >"
@@ -101,7 +101,7 @@ class WebSite:
         fuzzers = "var fuzzers = [ "
         for key in FUZZERS.keys():
             fuzzers += "'" + key + "', [ "
-            for elem in FUZZERS[key]:
+            for elem in FUZZERS[key][0]:
                 fuzzers += "'" + elem + "',"
             fuzzers = fuzzers[:-1]
             fuzzers += "],"

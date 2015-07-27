@@ -16,6 +16,7 @@ from worker.fuzzingworker import FuzzingWorker
 from worker.reducingworker import ReducingWorker
 from worker.reportworker import ReportWorker
 from model.config import ConfigParser
+from fuzzing.fuzzers import FUZZERS
 
 
 gevent.monkey.patch_all()
@@ -64,16 +65,7 @@ class PyFuzz2Node:
             raise ValueError('Unsupported operation mode!')
 
     def __choose_fuzzer(self):
-        if self._node_config.fuzzer_type == "bytemutation":
-            from fuzzing.bytemutation import ByteMutation
-            return ByteMutation(self._node_config.fuzzer_config[0], self._node_config.fuzzer_config[1],
-                                self._node_config.fuzzer_config[2], self._node_config.fuzzer_config[3],
-                                self._node_config.fuzzer_config[4])
-        elif self._node_config.fuzzer_type == "js_dom_fuzzer":
-            from fuzzing.javascript import JsDomFuzzer
-            return JsDomFuzzer(self._node_config.fuzzer_config[0], self._node_config.fuzzer_config[1],
-                               self._node_config.fuzzer_config[2], self._node_config.fuzzer_config[3],
-                               self._node_config.fuzzer_config[4])
+        return FUZZERS[self._node_config.fuzzer_type][1].from_list(self._node_config.fuzzer_config)
 
     def __choose_reducer(self):
         if self._node_config.reducer_type == "js_reducer":

@@ -49,13 +49,13 @@ class ReportWorker(Worker):
     def __parse_string_report(crash, value, end_marker="\r"):
         start = crash.find(value) + len(value)
         end = crash.find(end_marker, start)
-        if end_marker=="\r" and end == -1:
+        if end_marker == "\r" and end == -1:
             end = crash.find("\n", start)
         return crash[start:end]
 
     def __report_crash_local(self, crash):
-        description = self.parse_string_report(crash[0], "Short Description: ")
-        hash_val = self.parse_string_report(crash[0], "(Hash=", ")")
+        description = self.__parse_string_report(crash[0], "Short Description: ")
+        hash_val = self.__parse_string_report(crash[0], "(Hash=", ")")
         hash_val = hash_val.split(".")
         directory = "results\\" + description + "\\" + hash_val[0] + "\\" + hash_val[1]
         if os.path.exists(directory):

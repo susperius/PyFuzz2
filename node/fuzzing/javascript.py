@@ -33,10 +33,14 @@ class JsDomFuzzer(fuzzer.Fuzzer):
         self._operations_count = 0
         self._js_elements = {}
         """:type dict(JsElement)"""
-        self._window_timeout = 40
+        self._window_timeout = 20
         self._occurring_events = {}
         for event in DomObjects.DOM_EVENTS:
             self._occurring_events[event] = 0
+
+    @classmethod
+    def from_list(cls, params):
+        return cls(params[0], params[1], params[2], params[3], params[4])
 
     @property
     def prng_state(self):
@@ -64,7 +68,7 @@ class JsDomFuzzer(fuzzer.Fuzzer):
         self._operations_count = 0
         self._js_elements = {}
         """:type dict(JsElement)"""
-        self._window_timeout = 40
+        self._window_timeout = 20
         self._occurring_events = {}
         for event in DomObjects.DOM_EVENTS:
             self._occurring_events[event] = 0

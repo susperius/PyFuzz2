@@ -1,9 +1,16 @@
 __author__ = 'susperius'
 
+"""
+Abstract class used to implement own fuzzers
+"""
 
 class Fuzzer:
     NAME = []
     CONFIG_PARAMS = []
+
+    @classmethod
+    def from_list(cls, params):
+        raise NotImplementedError("ABSTRACT METHOD")
 
     @property
     def prng_state(self):

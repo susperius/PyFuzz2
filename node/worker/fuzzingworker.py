@@ -35,7 +35,8 @@ class FuzzingWorker(Worker):
             self._logger.info("Creating Testcases ...")
             self.__create_testcases()
             self._logger.info("Start testing ...")
-            for filename in os.listdir("testcases/"):
+            dir_listing = os.listdir("testcases/")
+            for filename in dir_listing:
                 if not self._running:
                     break
                 if self._fuzzer.file_type not in filename:
@@ -73,17 +74,17 @@ class FuzzingWorker(Worker):
                     os.remove("tmp_crash_report")
                     with open(testcase_dir + filename, "rb") as fd:
                         testcase = fd.read()
+                    test_file = filename.split(".")
+                    for single_file in dir_listing:
+                        if single_file.startswith(test_file[0]) and test_file[1] not in single_file:
+                            with open(testcase_dir + single_file, "rb") as add_fd:
+                                testcase += "-" * 50 + "\r\n\r\nNEW FILE:" + single_file + "\r\n\r\n" + "-" * 50 + "\r\n"
+                                testcase += add_fd.read()
                     self._report_queue.put((0xFF, (output, testcase)))
                 gevent.sleep(1)
 
     def __create_testcases(self):
         self._fuzzer.create_testcases(100, "testcases")
-        '''for i in range(100):
-            filename = "test" + str(i) if i > 9 else "test0" + str(i)
-            filename += "." + self._fuzzer.file_type
-            with open("testcases/" + filename, "wb+") as fd:
-                fd.write(self._fuzzer.fuzz())
-            gevent.sleep(0)  # Get a chance to do other things'''
 
     def start_worker(self):
         if self._greenlet is None:

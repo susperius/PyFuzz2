@@ -77,7 +77,7 @@ class JsDomFuzzer(fuzzer.Fuzzer):
 
     def create_testcases(self, count, directory):
         for i in range(count):
-            test_name = "/test" + str(i)
+            test_name = "/test" + str(i) if i > 10 else "/test0" + str(i)
             with open(directory + test_name + "." + self._file_type, "wb+") as html_fd, open(directory + test_name + ".css", "wb+") as css_fd:
                 html, css = self.fuzz()
                 html = html.replace("TESTCASE", test_name)

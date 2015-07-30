@@ -62,7 +62,7 @@ class PyFuzz2Node:
 
     @status.setter
     def status(self, is_active):
-        self._is_active = active
+        self._is_active = is_active
 
     @property
     def last_contact(self):

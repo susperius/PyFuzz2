@@ -9,6 +9,7 @@ from jsfuzzer.domObjects import *
 from jsfuzzer.htmlObjects import *
 from jsfuzzer.browserObjects import *
 from html import HtmlFuzzer
+from css import CssFuzzer
 from jsfuzzer.values import FuzzValues
 import fuzzer
 
@@ -24,6 +25,7 @@ class JsDomFuzzer(fuzzer.Fuzzer):
         self._browser = browser
         seed = int(seed)
         self._html_fuzzer = HtmlFuzzer(self._starting_elements, 3, seed)
+        self._css_fuzzer = CssFuzzer(seed)
         if seed == 0:
             random.seed()
         else:
@@ -73,8 +75,19 @@ class JsDomFuzzer(fuzzer.Fuzzer):
         for event in DomObjects.DOM_EVENTS:
             self._occurring_events[event] = 0
 
+    def create_testcases(self, count, directory):
+        for i in range(count):
+            test_name = "/test" + str(i)
+            with open(directory + test_name + "." + self._file_type, "wb+") as html_fd, open(directory + test_name + ".css", "wb+") as css_fd:
+                html, css = self.fuzz()
+                html = html.replace("TESTCASE", test_name)
+                html_fd.write(html)
+                css_fd.write(css)
+
     def fuzz(self):
         html = self._html_fuzzer.fuzz()
+        self._css_fuzzer.set_tags(self._html_fuzzer.tags)
+        css = self._css_fuzzer.fuzz()
         ids = self.__get_html_ids(html)
         js_code = self.__create_startup(ids)
         while self._total_operations > self._operations_count:
@@ -85,7 +98,7 @@ class JsDomFuzzer(fuzzer.Fuzzer):
         js_code += self.__add_event_handlers()
         doc = html.replace("SCRIPT_BODY", js_code)
         self.__reinit()
-        return doc
+        return (doc, css)
 
     def set_state(self, state):
         random.setstate(state)

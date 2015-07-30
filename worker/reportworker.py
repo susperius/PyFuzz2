@@ -52,7 +52,6 @@ class ReportWorker(Worker):
 
     def __report_crash_local(self, node_name, file_type, program, crash):
         program = program.split("\\")[-1].split(".")[0]
-        self._logger.debug(program)
         classification = self.__parse_string_report(crash[0], "Exploitability Classification: ")
         description = self.__parse_string_report(crash[0], "Short Description: ")
         hash_val = self.__parse_string_report(crash[0], "(Hash=", ")")
@@ -61,7 +60,7 @@ class ReportWorker(Worker):
         if os.path.exists(directory):
             self._logger.info("duplicated crash")
         else:
-            self._logger.info("New unique crash -> \r\n\tclass = " + classification +
+            self._logger.info("New unique crash in " + program + "-> \r\n\tclass = " + classification +
                               " \r\n\tShort Description = " + description +
                               " \r\n\tsaved in " + directory)
             os.makedirs(directory)

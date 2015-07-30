@@ -25,6 +25,9 @@ class Fuzzer:
     def set_seed(self, seed):
         raise NotImplementedError("ABSTRACT METHOD")
 
+    def create_testcases(self, count, directory):
+        raise NotImplementedError("ABSTRACT METHOD")
+
     @property
     def file_type(self):
         raise NotImplementedError("ABSTRACT METHOD")

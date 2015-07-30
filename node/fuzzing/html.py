@@ -13,17 +13,24 @@ class HtmlFuzzer:
         self._text = ["AAAAAAAAAA", "BBBBBBBBBB", "CCCCCCCCCC", "DDDDDDDDDD", "EEEEEEEEEE"]
         self._count = count
         self._depth = depth
+        self._tags = []
         seed = int(seed)
         if seed == 0:
             random.seed()
         else:
             random.seed(seed)
 
+    @property
+    def tags(self):
+        return self._tags
+
     def fuzz(self):
+        self._tags = []
         id_comment = "<!-- IDS: "
         objects = ""
         for i in range(self._count):
             obj = self._get_no_script_tag()
+            self._tags.append(obj)
             open_tag, inner, close_tag = self._create_html_object(obj, "id"+str(i))
             id_comment += "id" + str(i) + "; "
             open_tag += "\n"

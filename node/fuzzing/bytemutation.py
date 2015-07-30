@@ -47,6 +47,9 @@ class ByteMutation(fuzzer.Fuzzer):
     def set_seed(self, seed=0):
         random.seed(seed)
 
+    def create_testcases(self, count, directory):
+        pass
+
     def fuzz(self):
         data_length = len(self._data)
         changes = min(random.randint(self._min_change, self._max_change), data_length)

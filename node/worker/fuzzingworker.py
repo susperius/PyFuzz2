@@ -38,7 +38,7 @@ class FuzzingWorker(Worker):
             for filename in os.listdir("testcases/"):
                 if not self._running:
                     break
-                if ("exe" in filename) or ("py" in filename):
+                if self._fuzzer.file_type not in filename:
                     continue
                 output = ""
                 testcase_dir = os.getcwd() + "\\testcases\\"
@@ -77,12 +77,13 @@ class FuzzingWorker(Worker):
                 gevent.sleep(1)
 
     def __create_testcases(self):
-        for i in range(100):
+        self._fuzzer.create_testcases(100, "testcases")
+        '''for i in range(100):
             filename = "test" + str(i) if i > 9 else "test0" + str(i)
             filename += "." + self._fuzzer.file_type
             with open("testcases/" + filename, "wb+") as fd:
                 fd.write(self._fuzzer.fuzz())
-            gevent.sleep(0)  # Get a chance to do other things
+            gevent.sleep(0)  # Get a chance to do other things'''
 
     def start_worker(self):
         if self._greenlet is None:

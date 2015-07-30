@@ -46,16 +46,18 @@ class ReportWorker(Worker):
     def __parse_string_report(crash, value, end_marker="\r"):
         start = crash.find(value) + len(value)
         end = crash.find(end_marker, start)
-        if end_marker=="\r" and end == -1:
+        if end_marker == "\r" and end == -1:
             end = crash.find("\n", start)
         return crash[start:end]
 
     def __report_crash_local(self, node_name, file_type, program, crash):
+        program = program.split("\\")[-1].split(".")[0]
+        self._logger.debug(program)
         classification = self.__parse_string_report(crash[0], "Exploitability Classification: ")
         description = self.__parse_string_report(crash[0], "Short Description: ")
         hash_val = self.__parse_string_report(crash[0], "(Hash=", ")")
         hash_val = hash_val.split(".")
-        directory = "results\\" + node_name + "\\" + description + "\\" + hash_val[0] + "\\" + hash_val[1]
+        directory = "results/" + program + "/" + description + "/" + hash_val[0] + "/" + hash_val[1]
         if os.path.exists(directory):
             self._logger.info("duplicated crash")
         else:
@@ -63,7 +65,7 @@ class ReportWorker(Worker):
                               " \r\n\tShort Description = " + description +
                               " \r\n\tsaved in " + directory)
             os.makedirs(directory)
-            with open(directory + "\\crash_report.txt", 'w+') as fd_rep, open(
-                                    directory + "\\crash_file." + file_type, "wb+") as fd_crash:
+            with open(directory + "/crash_report.txt", 'w+') as fd_rep, open(
+                                    directory + "/crash_file." + file_type, "wb+") as fd_crash:
                 fd_rep.write(crash[0])
                 fd_crash.write(crash[1])

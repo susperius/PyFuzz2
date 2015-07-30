@@ -72,6 +72,9 @@ class PyFuzz2Server:
                     node_conf = node.model.config.ConfigParser.create_config(environ['wsgi.input'].read())
                     self._beacon_worker.nodes[key].status = False
                     self._node_queue.put([(key, self._beacon_worker.nodes[key].listener_port), 0x02, node_conf])
+                if "del" in parameters:
+                    key = parameters['del'][0]
+                    del(self._beacon_worker.nodes[key])
                 status, headers, html = site.home(self._beacon_worker.nodes)
             elif func == "node_detail":
                 if "node" in parameters and parameters['node'][0] in self._beacon_worker.nodes.keys():

@@ -43,9 +43,11 @@ class WebSite:
 
     def node_detail(self, node):
         node_config = node.info
-        from_conf_file = ConfigParser(node.config)
-        add_config, fuzzer_conf = from_conf_file.dump_additional_information()
-        node_config += add_config
+        fuzzer_conf = ""
+        if node.config != "":
+            from_conf_file = ConfigParser(node.config)
+            add_config, fuzzer_conf = from_conf_file.dump_additional_information()
+            node_config += add_config
         node_detail_html = self._html_template
         node_detail_html = node_detail_html.replace("SECTION_TITLE", node.name)
         node_conf_table = "<form action=\"/index.py?func=home&node=" + node.address + \
@@ -61,25 +63,33 @@ class WebSite:
                           "<td><input type=\"text\" name=\"" + elem[0].lower() + "\" value=\"" + \
                           elem[1] + "\" size=\"60\"></td>\r\n"
             node_conf_table += "<tr>\r\n" + single_node + "</tr>\r\n"
-        node_conf_table += "</table>\r\n<table id=\"fuzz_table\" >\r\n<tr><th/><th/></tr>\r\n"
-        # fuzzer settings
-        fuzz_types_options = ""
-        for key in FUZZERS.keys():
-            fuzz_types_options += "<option>"+key+"</option>\r\n"
-        node_conf_table += "<tr>\r\n<td><b>Fuzzer Type</b></td>\r\n<td><select id=\"fuzzers\" " + \
-                           "onLoad=\"set_select_value('" + fuzzer_conf["fuzzer_type"] + "')\" " + \
-                           " name=\"fuzzer_type\" onChange=\"changeFuzzer()\">\r\n" + \
-                           fuzz_types_options+"</select>\r\n</td>\r\n</tr>\r\n"
-        node_conf_table += "<div id=\"fuzz_config\">\r\n"
-        for key in FUZZERS[fuzzer_conf["fuzzer_type"]][0]:
-            node_conf_table += "<tr>\r\n<td><b>" + key + "</b></td>\r\n" + \
-                               "<td><input type=\"text\" value=\"" + fuzzer_conf["fuzz_conf"][key] + "\" name=\"" + \
-                               key + "\" >"
-        # table end
-        node_conf_table += "\r\n</div>\r\n"
-        node_conf_table += "</table>\r\n<input type=\"submit\" value=\"Submit\">\r\n</form>\r\n"
+        node_conf_table += "</table>\r\n"
+        if fuzzer_conf != "":
+            node_conf_table += "<table id=\"fuzz_table\" >\r\n<tr><th/><th/></tr>\r\n"
+            # fuzzer settings
+            fuzz_types_options = ""
+            for key in FUZZERS.keys():
+                fuzz_types_options += "<option>"+key+"</option>\r\n"
+                node_conf_table += "<tr>\r\n<td><b>Fuzzer Type</b></td>\r\n<td><select id=\"fuzzers\" " + \
+                                   "onLoad=\"set_select_value('" + fuzzer_conf["fuzzer_type"] + "')\" " + \
+                                   " name=\"fuzzer_type\" onChange=\"changeFuzzer()\">\r\n" + \
+                                   fuzz_types_options+"</select>\r\n</td>\r\n</tr>\r\n"
+            node_conf_table += "<div id=\"fuzz_config\">\r\n"
+            for key in FUZZERS[fuzzer_conf["fuzzer_type"]][0]:
+                node_conf_table += "<tr>\r\n<td><b>" + key + "</b></td>\r\n" + \
+                                   "<td><input type=\"text\" value=\"" + fuzzer_conf["fuzz_conf"][key] + "\" name=\"" + \
+                                   key + "\" >"
+            # table end
+            node_conf_table += "\r\n</div>\r\n"
+            node_conf_table += "</table>\r\n"
+        else:
+            node_conf_table += "<br><br><b>No additional information received by now</b>\r\n"
+        node_conf_table += "<br>\r\n"
+        node_conf_table += "<input type=\"submit\" value=\"Submit\">\r\n</form>\r\n"
         node_conf_table += "<form action=\"/index.py?func=home&reboot=" + node.address + "\" method=\"post\">\r\n" + \
                            "<input type=\"submit\" value=\"Reboot node\">\r\n</form>\r\n"
+        node_conf_table += "<form action=\"/index.py?func=home&del=" + node.address + "\" method=\"post\">\r\n" + \
+                           "<input type=\"submit\" value=\"Delete node\">\r\n</form>\r\n"
         node_detail_html = node_detail_html.replace("REPLACE_ME", node_conf_table)
         return self._statuses[200], self._header_html, node_detail_html
 

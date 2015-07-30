@@ -6,6 +6,7 @@ import logging
 import os
 from communication.reportclient import ReportClient
 from worker import Worker
+from model.message_types import MESSAGE_TYPES
 
 
 class ReportWorker(Worker):
@@ -24,12 +25,13 @@ class ReportWorker(Worker):
         while self._running:
             if not self._report_queue.empty():
                 msg_type, msg = self._report_queue.get_nowait()
-                if msg_type == 0xFF:
+                self._logger.debug("Report job Type --> " + str(msg_type))
+                if MESSAGE_TYPES['CRASH'] == msg_type:
                     self.__report_crash_local(msg)
                     if self._net_mode:
                         data_string = pickle.dumps([msg_type, self._file_type, self._program, msg], -1)
                         self._client.send(data_string)
-                elif msg_type == 0x03:
+                elif MESSAGE_TYPES['GET_CONFIG'] == msg_type:
                     with open("node_config.xml", 'r') as fd:
                         config = fd.read()
                     self._client.send(pickle.dumps([msg_type, config], -1))

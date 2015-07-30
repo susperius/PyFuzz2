@@ -27,22 +27,16 @@ class ListenerWorker(Worker):
 
     def _listener_worker(self, task):
         msg_type, msg = pickle.loads(task[1])
-        self._logger.debug("Listener Worker -> Type:" + str(msg_type))
-        if msg_type in MESSAGE_TYPES.keys():
-            if msg_type == 0x01:
-                pass
-            elif msg_type == 0x02:  # SET_CONFIG
-                self._set_config(msg)
-            elif msg_type == 0x03:  # GET_CONFIG
-                self._report_queue.put([0x03, ""])
-            elif msg_type == 0x04:
-                pass
-            elif msg_type == 0x05:  # RESET
-                self._reset = True
-            elif msg_type == 0x06:
-                pass
-            elif msg_type == 0xFF:
-                pass
+        if msg_type == 0x01:
+            pass
+        elif MESSAGE_TYPES['SET_CONFIG'] == msg_type:
+            self._set_config(msg)
+        elif MESSAGE_TYPES['GET_CONFIG'] == msg_type:
+            self._report_queue.put([MESSAGE_TYPES['GET_CONFIG'], ""])
+        elif MESSAGE_TYPES['OK'] == msg_type:
+            pass
+        elif MESSAGE_TYPES['RESET'] == msg_type:
+            self._reset = True
 
     def _set_config(self, msg):
         with open("node_config.xml", 'w+') as fd:

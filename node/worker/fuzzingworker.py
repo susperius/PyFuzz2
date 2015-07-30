@@ -82,6 +82,7 @@ class FuzzingWorker(Worker):
             filename += "." + self._fuzzer.file_type
             with open("testcases/" + filename, "wb+") as fd:
                 fd.write(self._fuzzer.fuzz())
+            gevent.sleep(0)  # Get a chance to do other things
 
     def start_worker(self):
         if self._greenlet is None:

@@ -16,7 +16,7 @@ from worker.beaconworker import BeaconWorker
 from worker.reportworker import ReportWorker
 from worker.nodeclientworker import NodeClientWorker
 from web.main import WebSite
-
+from node.model.message_types import MESSAGE_TYPES
 gevent.monkey.patch_all()
 
 CONFIG_FILENAME = "server_config.xml"
@@ -65,13 +65,15 @@ class PyFuzz2Server:
                 if 'reboot' in parameters:
                     key = parameters['reboot'][0]
                     self._beacon_worker.nodes[key].status = False
-                    self._node_queue.put([(key, self._beacon_worker.nodes[key].listener_port), 0x05, ""])
+                    self._node_queue.put([(key, self._beacon_worker.nodes[key].listener_port), MESSAGE_TYPES['RESET'],
+                                          ""])
                 if "submit" in parameters and "node" in parameters:
                     key = parameters['node'][0]
                     self._logger.debug("Preparing new config")
                     node_conf = node.model.config.ConfigParser.create_config(environ['wsgi.input'].read())
                     self._beacon_worker.nodes[key].status = False
-                    self._node_queue.put([(key, self._beacon_worker.nodes[key].listener_port), 0x02, node_conf])
+                    self._node_queue.put([(key, self._beacon_worker.nodes[key].listener_port),
+                                         MESSAGE_TYPES['SET_CONFIG'], node_conf])
                 if "del" in parameters:
                     key = parameters['del'][0]
                     del(self._beacon_worker.nodes[key])
@@ -79,11 +81,6 @@ class PyFuzz2Server:
             elif func == "node_detail":
                 if "node" in parameters and parameters['node'][0] in self._beacon_worker.nodes.keys():
                     key = parameters['node'][0]
-                    '''if "submit" in parameters:
-                        self._logger.debug("Preparing new config")
-                        node_conf = node.model.config.ConfigParser.create_config(environ['wsgi.input'].read())
-                        self._beacon_worker.nodes[key].status = False
-                        self._node_queue.put([(key, self._beacon_worker.nodes[key].listener_port), 0x02, node_conf])'''
                     status, headers, html = site.node_detail(self._beacon_worker.nodes[key])
                 else:
                     status, headers, html = site.file_not_found()
@@ -94,9 +91,8 @@ class PyFuzz2Server:
         else:
             status, headers, html = site.file_not_found()
         start_response(status, headers)
-        # debug
-        html += "<br><br>" + str(environ) + "<br><br>" + func + "<br><br>" + environ['wsgi.input'].read()
-        # /debug
+        if self._logger.level == logging.DEBUG:
+            html += "<br><br>" + str(environ) + "<br><br>" + func + "<br><br>" + environ['wsgi.input'].read()
         return html
 
 

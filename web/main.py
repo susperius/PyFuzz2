@@ -70,10 +70,10 @@ class WebSite:
             fuzz_types_options = ""
             for key in FUZZERS.keys():
                 fuzz_types_options += "<option>"+key+"</option>\r\n"
-                node_conf_table += "<tr>\r\n<td><b>Fuzzer Type</b></td>\r\n<td><select id=\"fuzzers\" " + \
-                                   "onLoad=\"set_select_value('" + fuzzer_conf["fuzzer_type"] + "')\" " + \
-                                   " name=\"fuzzer_type\" onChange=\"changeFuzzer()\">\r\n" + \
-                                   fuzz_types_options+"</select>\r\n</td>\r\n</tr>\r\n"
+            node_conf_table += "<tr>\r\n<td><b>Fuzzer Type</b></td>\r\n<td><select id=\"fuzzers\" " + \
+                               "onLoad=\"set_select_value('" + fuzzer_conf["fuzzer_type"] + "')\" " + \
+                               " name=\"fuzzer_type\" onChange=\"changeFuzzer()\">\r\n" + \
+                               fuzz_types_options+"</select>\r\n</td>\r\n</tr>\r\n"
             node_conf_table += "<div id=\"fuzz_config\">\r\n"
             for key in FUZZERS[fuzzer_conf["fuzzer_type"]][0]:
                 node_conf_table += "<tr>\r\n<td><b>" + key + "</b></td>\r\n" + \

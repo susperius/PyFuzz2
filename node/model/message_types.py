@@ -1,3 +1,3 @@
 __author__ = 'susperius'
 
-MESSAGE_TYPES = {0x01: "BEACON", 0x02: "SET_CONFIG", 0x03: "GET_CONFIG", 0x04: "OK", 0x05: "RESET", 0x06: "", 0xFF: "CRASH"}
+MESSAGE_TYPES = {"BEACON": 0x01, "SET_CONFIG": 0x02, "GET_CONFIG": 0x03, "OK": 0x04, "RESET": 0x05, "CRASH": 0xFF }

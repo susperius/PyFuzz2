@@ -7,6 +7,7 @@ import os
 from communication.reportclient import ReportClient
 from worker import Worker
 from model.message_types import MESSAGE_TYPES
+from utils.html_css_splitter import is_two_files, split_files
 
 
 class ReportWorker(Worker):
@@ -66,7 +67,13 @@ class ReportWorker(Worker):
                               " \r\n\tShort Description = " + description +
                               " \r\n\tsaved in " + directory)
             os.makedirs(directory)
-            with open(directory + "\\crash_report.txt", 'w+') as fd_rep, open(
-                                    directory + "\\crash_file." + self._file_type, "wb+") as fd_crash:
+            if is_two_files(crash[1]):
+                files = split_files(crash[1], "crash_file." + self._file_type)
+                with open(directory + "/" + files.keys()[0], 'wb+') as file1_fd, open(directory + "/" + files.keys()[1], 'wb+') as file2_fd:
+                    file1_fd.write(files[files.keys()[0]])
+                    file2_fd.write(files[files.keys()[1]])
+            else:
+                with open(directory + "/crash_file." + self._file_type, "wb+") as fd_crash:
+                    fd_crash.write(crash[1])
+            with open(directory + "/crash_report.txt", 'w+') as fd_rep:
                 fd_rep.write(crash[0])
-                fd_crash.write(crash[1])

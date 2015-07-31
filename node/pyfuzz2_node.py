@@ -114,7 +114,7 @@ class PyFuzz2Node:
                         self.__save_fuzz_state()
                     gevent.sleep(self._node_config.sleep_time + 5)
                     reboot()
-                gevent.sleep(0)
+                gevent.sleep(5)  # It's enough to check the above stuff every 5 seconds instead of burning cpu time
             except KeyboardInterrupt:
                 self.__stop_all_workers()
                 quit()

@@ -17,21 +17,20 @@ class ReportWorker(Worker):
 
     def __worker_green(self):
         while True:
-            if not self._report_queue.empty():
-                address, data_packed = self._report_queue.get_nowait()
-                data_unpacked = pickle.loads(data_packed)
-                msg_type = data_unpacked[0]
-                if MESSAGE_TYPES['CRASH'] == msg_type:
-                    file_type = data_unpacked[1]
-                    program = data_unpacked[2]
-                    report = data_unpacked[3]
-                    node_name = self._nodes[address].name
-                    self.__report_crash_local(node_name, file_type, program, report)
-                    self._nodes[address].crashed()
-                elif MESSAGE_TYPES['GET_CONFIG'] == msg_type:
-                    config = data_unpacked[1]
-                    self._nodes[address].config = config
-            gevent.sleep(0)
+            address, data_packed = self._report_queue.get()
+            data_unpacked = pickle.loads(data_packed)
+            msg_type = data_unpacked[0]
+            if MESSAGE_TYPES['CRASH'] == msg_type:
+                file_type = data_unpacked[1]
+                program = data_unpacked[2]
+                report = data_unpacked[3]
+                node_name = self._nodes[address].name
+                self.__report_crash_local(node_name, file_type, program, report)
+                self._nodes[address].crashed()
+            elif MESSAGE_TYPES['GET_CONFIG'] == msg_type:
+                config = data_unpacked[1]
+                self._nodes[address].config = config
+            gevent.sleep(1)
 
     def start_worker(self):
         if self._greenlet is None:

@@ -27,10 +27,6 @@ class FuzzingWorker(Worker):
         self._running = False
 
     def __worker_green(self):
-        #if self._fuzzer.NAME == "js_dom_fuzzer":
-        #    web_cwd = os.getcwd() + "/testcases/"
-        #    web_process = subprocess.Popen("python -m SimpleHTTPServer 8080", cwd=web_cwd, stdout=subprocess.PIPE,
-        #                                   stderr=subprocess.PIPE)
         while self._running:
             self._logger.info("Creating Testcases ...")
             self.__create_testcases()

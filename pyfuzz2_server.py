@@ -50,7 +50,7 @@ class PyFuzz2Server:
         self._node_client_worker.start_worker()
         while True:
             try:
-                gevent.sleep(0)
+                gevent.wait()
             except KeyboardInterrupt:
                 exit(0)
 

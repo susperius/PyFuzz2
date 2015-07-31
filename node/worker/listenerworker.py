@@ -20,9 +20,8 @@ class ListenerWorker(Worker):
 
     def __worker_green(self):
         while self._running:
-            if not self._listener_queue.empty():
-                actual_task = self._listener_queue.get_nowait()
-                self._listener_worker(actual_task)
+            actual_task = self._listener_queue.get()
+            self._listener_worker(actual_task)
             gevent.sleep(0)
 
     def _listener_worker(self, task):

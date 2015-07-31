@@ -20,9 +20,8 @@ class BeaconWorker:
 
     def __beacon_worker_green(self):
         while True:
-            if not self._beacon_queue.empty():
-                    actual_task = self._beacon_queue.get_nowait()
-                    self.__beacon_worker(actual_task)
+            actual_task = self._beacon_queue.get()
+            self.__beacon_worker(actual_task)
             gevent.sleep(0)
 
     def __beacon_worker(self, task):  # task = [(ip, port), pickle_data([msg_type, [node_name, listener_port]])]

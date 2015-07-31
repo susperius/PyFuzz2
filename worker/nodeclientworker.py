@@ -18,14 +18,13 @@ class NodeClientWorker(Worker):
 
     def __worker_green(self):
         while True:
-            if not self._queue.empty():
-                to_do = self._queue.get_nowait()  # [(ip, socket), msg_type, msg])
-                address = to_do[0]
-                msg_type = to_do[1]
-                msg = to_do[2]
-                node_client = NodeClient(address[0], address[1])
-                node_client.send(pickle.dumps([msg_type, msg], -1))
-            gevent.sleep(0)
+            to_do = self._queue.get()  # [(ip, socket), msg_type, msg])
+            address = to_do[0]
+            msg_type = to_do[1]
+            msg = to_do[2]
+            node_client = NodeClient(address[0], address[1])
+            node_client.send(pickle.dumps([msg_type, msg], -1))
+            gevent.sleep(1)
 
     def start_worker(self):
         if self._greenlet is None:

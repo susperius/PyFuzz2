@@ -260,7 +260,7 @@ class JsDomFuzzer(fuzzer.Fuzzer):
         elif method == 'className':
             code += self._js_elements[key].prop_className() + " = \"" + random.choice(FuzzValues.STRINGS) + "\";"
         elif method == 'contentEditable':
-            code += self._js_elements[key].prop_contentEditable() + " = " + random.choice(FuzzValues.BOOLEAN) + ";"
+            code += self._js_elements[key].prop_contentEditable() + " = " + random.choice(FuzzValues.BOOL) + ";"
         elif method == 'dir':
             code += self._js_elements[key].prop_dir() + " = \"" + random.choice(FuzzValues.TEXT_DIRECTION) + "\";"
         elif method == 'id':

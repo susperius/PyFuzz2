@@ -3,6 +3,18 @@ __author__ = 'susperius'
 
 
 class FuzzValues:
+    #  Types: APP_DATA, BOOL, BUTTON_TYPE, CHAR, CHARACTER_SET, COORDS, CSS, CSS_CLASS, DATETIME, DIRECTION, ELEM_ID, FORM_ID, FORM_METHOD, FORM_TARGET,
+    #         FORM_ENCTYPE, HEADERS_ID, HTML_CODE, HTTP_EQUIV, INT, ID, LANG, MAP_NAME, MEDIA_TYPE, MEDIA_QUERY, MENU, METADATA_NAME, ONOFF, PIXELS, PRELOAD, REL, SCROLLING, SHAPE,
+    #         SANDBOX, SORTED, STRING, TABLE_SCOPE, TARGET, TRACK_KIND, URL, WRAP
+    #
+    TYPES_DICT = {'APP_DATA': '', 'BOOL': BOOL, 'BUTTON_TYPE': '', 'CHAR': '',
+                  'CHARACTER_SET': '', 'COORDS': '', 'CSS': '', 'CSS_CLASS': '', 'DATETIME': '', 'DIRECTION': TEXT_DIRECTION,
+                  'ELEM_ID' : '', 'FORM_ID': '', 'FORM_METHOD': '', 'FORM_TARGET': '', 'FORM_ENCTYPE': '',
+                  'HEADERS_ID': '', 'HTML_CODE': '', 'HTTP_EQUIV': '', 'INT': '', 'ID': '', 'LANG': '',
+                  'MAP_NAME': '', 'MEDIA_TYPE': '', 'MEDIA_QUERY': '', 'MENU': '', 'METADATA_NAME': '',
+                  'ONOFF': ONOFF'', 'PIXELS': '', 'PRELOAD': '', 'REL': '', 'SCROLLING': '', 'SHAPE': '', 'SANDBOX': '', 'SORTED': '',
+                  'STRING': STRINGS, 'TABLE_SCOPE': '', 'TARGET': '', 'TRACK_KIND': '', 'URL': '', 'WRAP': ''}
+
     INTERESTING_VALUES = ['0', '1', '5e6', '-7e6', '8e-6', '2e100', 'null', 'pink', 'false',
                           'true', '7500000000', '4400000000', '-4400000000', '-7500000000',
                           "A" * 40, "B" * 40, '']
@@ -14,9 +26,13 @@ class FuzzValues:
     INTS = ['0', '1', '5e6', '-7e6', '8e-6', '2e100', '7500000000', '4400000000', '-4400000000', '-7500000000',
             '4500000000', '2200000000', '-2200000000', '-4500000000', '1e6', '-1e6', '1e-6', '1e100', 'Infinity',
             'null', 'undefined', "uneval(n1)", "eval(n1)", "eval(n1, $)"]
-    BOOLEAN = ['true', 'false']
+
+    BOOL = ['true', 'false']
+
+    ONOFF = ['on', 'off']
 
     TEXT_DIRECTION = ['ltr', 'rtl', 'auto']
+
     LANG_CODES = ['ab', 'aa', 'af', 'sq', 'am', 'ar', 'an', 'hy', 'as', 'ay', 'az', 'ba', 'eu', 'bn', 'dz', 'bh', 'bi',
                   'br', 'bg', 'my', 'be', 'km', 'ca', 'zh', 'co', 'hr', 'cs', 'da', 'nl', 'en', 'eo', 'et', 'fo', 'fa',
                   'fj', 'fi', 'fr', 'fy', 'gl', 'gd', 'gv', 'ka', 'de', 'el', 'kl', 'gn', 'gu', 'ht', 'ha', 'hi', 'hu',

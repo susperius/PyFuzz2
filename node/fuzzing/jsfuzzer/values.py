@@ -32,6 +32,12 @@ class FuzzValues:
 
     CHARACTER_SET = ['UTF-8', 'UTF-16']
 
+    FORM_ENCTYPE = ['application/x-www-form-urlencoded', 'multipart/form-data', 'text/plain']
+
+    FORM_TARGET = ['_blank', '_self', '_parent', '_top']
+
+    FORM_METHOD = ['get', 'post']
+
     ONOFF = ['on', 'off']
 
     TEXT_DIRECTION = ['ltr', 'rtl', 'auto']

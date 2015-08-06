@@ -9,8 +9,8 @@ class Html5Fuzzer:
     TYPES_DICT = {'APP_DATA': None, 'BOOL': FuzzValues.BOOL, 'BUTTON_TYPE': FuzzValues.BUTTON_TYPE,
                   'CHAR': FuzzValues.CHARS, 'CHARACTER_SET': FuzzValues.CHARACTER_SET, 'COORDS': None, 'CSS': None,
                   'CSS_CLASS': None, 'DATETIME': None, 'DIRECTION': FuzzValues.TEXT_DIRECTION,
-                  'ELEM_ID' : None, 'FORM_ID': None, 'FORM_METHOD': '', 'FORM_TARGET': '', 'FORM_ENCTYPE': '',
-                  'HEADERS_ID': '', 'HTML_CODE': '', 'HTTP_EQUIV': '', 'INT': '', 'ID': '', 'LANG': '',
+                  'ELEM_ID' : None, 'FORM_ID': None, 'FORM_METHOD': FuzzValues.FORM_METHOD, 'FORM_TARGET': FuzzValues.FORM_TARGET, 'FORM_ENCTYPE': FuzzValues.FORM_ENCTYPE,
+                  'HEADERS_ID': '', 'HTML_CODE': '', 'HTTP_EQUIV': '', 'INT': FuzzValues.INTS, 'ID': '', 'LANG': FuzzValues.LANG_CODES,
                   'MAP_NAME': '', 'MEDIA_TYPE': '', 'MEDIA_QUERY': '', 'MENU': '', 'METADATA_NAME': '',
                   'ONOFF': FuzzValues.ONOFF, 'PIXELS': '', 'PRELOAD': '', 'REL': '', 'SCROLLING': '', 'SHAPE': '', 'SANDBOX': '', 'SORTED': '',
                   'STRING': FuzzValues.STRINGS, 'TABLE_SCOPE': '', 'TARGET': '', 'TRACK_KIND': '', 'URL': '', 'WRAP': ''}
@@ -56,4 +56,4 @@ class Html5Fuzzer:
         return random.choice(self._elem_id)
 
     def __get_form_id(self):
-        retrun random.choice(self._form_id)
+        return random.choice(self._form_id)

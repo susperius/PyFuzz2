@@ -38,9 +38,38 @@ class FuzzValues:
 
     FORM_METHOD = ['get', 'post']
 
+    HTTP_EQUIV = ['content-type', 'default-style', 'refresh']
+
+    MEDIA_TYPE = ['video/mpeg', 'audio/mpeg', 'video/webm', 'application/javascript', 'text/css', 'text/html',
+                  'text/xml']
+
+    METADATA_NAME = ['application-name', 'author', 'description', 'generator', 'keywords']
+
     ONOFF = ['on', 'off']
 
+    PRELOAD = ['auto', 'metadata', 'none']
+
+    REL = ['alternate', 'author', 'bookmark', 'help', 'license', 'next', 'nofollow', 'noreferrer', 'prefetch',
+           'prev', 'search', 'tag']
+
+    SCROLLING = ['yes', 'no', 'auto']
+
+    SANDBOX = ['allow-forms', 'allow-pointer-lock', 'allow-popups', 'allow-same-origin', 'allow-scripts',
+               'allow-top-navigation']
+
+    SHAPE = ['default', 'rect', 'circle', 'poly']
+
+    SORTED = ['reversed', 'number', 'reversed number', 'number reversed']
+
+    TABLE_SCOPE = ['col', 'colgroup', 'row', 'rowgroup']
+
+    TARGET = ['_blank', '_parent', '_self', '_top']
+
     TEXT_DIRECTION = ['ltr', 'rtl', 'auto']
+
+    TRACK_KIND = ['captions', 'chapters', 'descriptions', 'metadata', 'subtitles']
+
+    WRAP = ['hard', 'soft']
 
     LANG_CODES = ['ab', 'aa', 'af', 'sq', 'am', 'ar', 'an', 'hy', 'as', 'ay', 'az', 'ba', 'eu', 'bn', 'dz', 'bh', 'bi',
                   'br', 'bg', 'my', 'be', 'km', 'ca', 'zh', 'co', 'hr', 'cs', 'da', 'nl', 'en', 'eo', 'et', 'fo', 'fa',

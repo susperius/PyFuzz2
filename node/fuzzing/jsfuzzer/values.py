@@ -17,8 +17,10 @@ class FuzzValues:
                "%n%n%n%n%n%n%n%n%n", "\\0", "\\n", "", 'Infinity', 'null', 'undefined', "uneval(n1)",
                "eval(n1)", "eval(n1, $)"]
     INTS = ['0', '1', '5e6', '-7e6', '8e-6', '2e100', '7500000000', '4400000000', '-4400000000', '-7500000000',
-            '4500000000', '2200000000', '-2200000000', '-4500000000', '1e6', '-1e6', '1e-6', '1e100', 'Infinity',
-            'null', 'undefined', "uneval(n1)", "eval(n1)", "eval(n1, $)"]
+            '4500000000', '2200000000', '-2200000000', '-4500000000', '1e6', '-1e6', '1e-6', '1e100']
+
+    PURE_INTS = ['0', '1', '7500000000', '4400000000', '-4400000000', '-7500000000',
+                 '4500000000', '2200000000', '-2200000000', '-4500000000']
 
     BUTTON_TYPE = ['button', 'submit', 'reset']
 
@@ -39,6 +41,10 @@ class FuzzValues:
     FORM_METHOD = ['get', 'post']
 
     HTTP_EQUIV = ['content-type', 'default-style', 'refresh']
+
+    INPUT_TYPES = ['password', 'button', 'checkbox', 'color', 'date', 'datetime', 'datetime-local', 'email',
+                        'file', 'hidden', 'image', 'month', 'number', 'radio', 'range', 'reset', 'search', 'submit',
+                        'text', 'time', 'url', 'week']
 
     MEDIA_TYPE = ['video/mpeg', 'audio/mpeg', 'video/webm', 'application/javascript', 'text/css', 'text/html',
                   'text/xml']
@@ -68,6 +74,8 @@ class FuzzValues:
     TEXT_DIRECTION = ['ltr', 'rtl', 'auto']
 
     TRACK_KIND = ['captions', 'chapters', 'descriptions', 'metadata', 'subtitles']
+
+    YESNO = ['yes', 'no']
 
     WRAP = ['hard', 'soft']
 

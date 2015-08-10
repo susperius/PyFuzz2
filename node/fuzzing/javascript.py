@@ -8,7 +8,7 @@ from jsfuzzer.JsGlobal import JsGlobal
 from jsfuzzer.domObjects import *
 from jsfuzzer.htmlObjects import *
 from jsfuzzer.browserObjects import *
-from html import HtmlFuzzer
+from html5 import Html5Fuzzer
 from css import CssFuzzer
 from jsfuzzer.values import FuzzValues
 import fuzzer
@@ -24,7 +24,8 @@ class JsDomFuzzer(fuzzer.Fuzzer):
         self._total_operations = int(total_operations)
         self._browser = browser
         seed = int(seed)
-        self._html_fuzzer = HtmlFuzzer(self._starting_elements, 3, seed)
+        #self._html_fuzzer = HtmlFuzzer(self._starting_elements, 3, seed)
+        self._html_fuzzer = Html5Fuzzer(int(seed), self._starting_elements, 10, 5, file_type)
         self._css_fuzzer = CssFuzzer(seed)
         if seed == 0:
             random.seed()
@@ -88,7 +89,7 @@ class JsDomFuzzer(fuzzer.Fuzzer):
         html = self._html_fuzzer.fuzz()
         self._css_fuzzer.set_tags(self._html_fuzzer.tags)
         css = self._css_fuzzer.fuzz()
-        ids = self.__get_html_ids(html)
+        ids = self._html_fuzzer.elem_ids
         js_code = self.__create_startup(ids)
         while self._total_operations > self._operations_count:
             js_code += self.__add_function()

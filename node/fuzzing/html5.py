@@ -94,6 +94,7 @@ class Html5Fuzzer(Fuzzer):
         tag, self._head, close_head = self.__build_tag("head")
         tag, title_open, title_close = self.__build_tag("title", ignore_outer_tag=True)
         self._head += title_open + random.choice(FuzzValues.STRINGS) + title_close + "\r\n"
+        self._head += "<link rel=\"stylesheet\" href=\"TESTCASE.css\">\r\n"
         self._head += "<script type='text/javascript'>\r\nSCRIPT_BODY\r\n</script>\r\n"
         tag, self._body, close_body = self.__build_tag("body")
         self._body = self._body[:-2] + " onload=\"eval(startup())\">\r\n"

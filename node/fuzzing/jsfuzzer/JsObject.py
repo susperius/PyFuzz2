@@ -1,9 +1,10 @@
 __author__ = 'martin'
 
-JS_OBJECTS = ['String', 'Number', 'Date', 'Array']
+JS_OBJECTS = ['String', 'Number', 'Date', 'Array', 'domElem']
 
 class JsObject:
     CONSTRUCTOR = []
+
     def __init__(self, name, js_type, value):
         self._name = name
         self._type = js_type

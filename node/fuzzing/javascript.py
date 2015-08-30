@@ -24,7 +24,7 @@ class JsDomFuzzer(fuzzer.Fuzzer):
         self._total_operations = int(total_operations)
         self._browser = browser
         seed = int(seed)
-        #self._html_fuzzer = HtmlFuzzer(self._starting_elements, 3, seed)
+        #  self._html_fuzzer = HtmlFuzzer(self._starting_elements, 3, seed)
         self._html_fuzzer = Html5Fuzzer(int(seed), self._starting_elements, 10, 5, file_type)
         self._css_fuzzer = CssFuzzer(seed)
         if seed == 0:

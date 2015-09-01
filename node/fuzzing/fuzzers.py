@@ -1,6 +1,6 @@
 __author__ = 'susperius'
 
-import javascript
+import browser.javascript as javascript
 import bytemutation
 
 """

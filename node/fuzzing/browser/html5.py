@@ -1,10 +1,10 @@
 __author__ = 'susperius'
 
-
 import random
+
 from jsfuzzer.htmlObjects import HtmlObjects
 from jsfuzzer.values import FuzzValues
-from fuzzer import Fuzzer
+from ..fuzzer import Fuzzer
 
 
 class Html5Fuzzer(Fuzzer):
@@ -29,7 +29,7 @@ class Html5Fuzzer(Fuzzer):
                   'YESNO': FuzzValues.YESNO}
 
     #  Not supported by major browser: MEDIA_QUERY MENU
-    #  TODO: DATALIST_ID, REGEXP, URL ... table creation ...
+    #  TODO: DATALIST_ID, REGEXP, URL ... dl creation ...
 
     NO_SINGLE_USE_TAGS = ['head', 'body', 'th', 'tr', 'td', 'tfoot', 'tbody', 'thead', 'title', 'dt', 'dd']
     NO_CHILD_LIST = ['select', 'time', 'iframe']
@@ -54,7 +54,7 @@ class Html5Fuzzer(Fuzzer):
 
     @classmethod
     def from_list(cls, params):
-        pass
+        pass  # TODO: implement
 
     @property
     def elem_ids(self):

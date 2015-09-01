@@ -77,9 +77,14 @@ if __name__ == "__main__":
     parser.add_option("-p", "--path", dest="path", help="The path of the executable", metavar="PATH")
     parser.add_option("-t", "--testcase", dest="testcase", help="The path of the testcase", metavar="TESTCASE")
     parser.add_option("-c", "--child", dest="dbg_child", action="store_true", default=False)
+    parser.add_option("-i", "--instruction", dest="instruction", help="Debugger instruction to run before start",
+                      default=None)
     (options, args) = parser.parse_args()
     dbg = Debugger(options.path, options.dbg_child)
     dbg.start_process(options.testcase)
+    if options.instruction is not None:
+        options.instruction = options.instruction.replace("'", '"')
+        dbg.issue_dbg_command(options.instruction)
     dbg.run()
     crash_report = ""
     if dbg.crashed:

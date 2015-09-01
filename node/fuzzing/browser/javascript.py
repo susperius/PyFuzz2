@@ -11,11 +11,12 @@ from jsfuzzer.browserObjects import *
 from html5 import Html5Fuzzer
 from css import CssFuzzer
 from jsfuzzer.values import FuzzValues
-import fuzzer
+from ..fuzzer import Fuzzer
 
 TEMPLATE_FILE = "fuzzing/jsfuzzer/template.dat"
 
-class JsDomFuzzer(fuzzer.Fuzzer):
+
+class JsDomFuzzer(Fuzzer):
     NAME = "js_dom_fuzzer"
     CONFIG_PARAMS = ["starting_elements", "total_operations", "browser", "seed", "file_type"]
 

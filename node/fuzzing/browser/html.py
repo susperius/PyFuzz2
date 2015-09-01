@@ -1,7 +1,7 @@
 __author__ = 'susperius'
 
-import jsfuzzer.htmlObjects as htmlObjects
 import random
+
 from jsfuzzer.htmlObjects import HtmlObjects
 
 TEMPLATE_FILE = "fuzzing/jsfuzzer/template.dat"

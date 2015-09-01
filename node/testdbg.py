@@ -1,16 +1,13 @@
 __author__ = 'susperius'
 
-import debugging.windbg as wdbg
-import worker.fuzzingworker as dbgworker
+import logging
+
 import gevent
 import gevent.monkey
-import time
-import socket
-from fuzzing.javascript import JsDomFuzz
 from gevent.queue import Queue
-from subprocess import Popen
-import subprocess
-import logging
+
+import worker.fuzzingworker as dbgworker
+from node.fuzzing.browser.javascript import JsDomFuzz
 
 gevent.monkey.patch_all()
 

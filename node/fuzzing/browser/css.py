@@ -1,7 +1,8 @@
 __author__ = 'susperius'
 #  TODO: Make it pretty and functional as fuzzer
 import random
-from fuzzer import Fuzzer
+
+from ..fuzzer import Fuzzer
 from jsfuzzer.values import FuzzValues
 
 

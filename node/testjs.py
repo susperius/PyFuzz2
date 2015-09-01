@@ -1,7 +1,6 @@
 __author__ = 'susperius'
 
-import fuzzing.javascript as fuzz_js
-import reducing.javascript as red_js
+import node.fuzzing.browser.javascript as fuzz_js
 
 fuzzy = fuzz_js.JsDomFuzzer(600, 5000, "ie")
 

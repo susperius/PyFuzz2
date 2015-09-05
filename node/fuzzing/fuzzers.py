@@ -9,6 +9,6 @@ After this add a column for your fuzzer.
 The dictionary key is the fuzzers name and the contents is a tupel with all the necessary configuration
 parameters as first value and a reference to your fuzzers class as the second value.
 """
-
+#  FUZZERS = {FuzzerName: (CONFIG_PARAMS, CONSTRUCTOR())}
 FUZZERS = {bytemutation.ByteMutation.NAME: (bytemutation.ByteMutation.CONFIG_PARAMS, bytemutation.ByteMutation),
            javascript.JsDomFuzzer.NAME: (javascript.JsDomFuzzer.CONFIG_PARAMS, javascript.JsDomFuzzer)}

@@ -16,6 +16,7 @@ necessary methods. After this you add your fuzzer to the dictionary in *fuzzing.
 own fuzzer.
 
 For the client/server you need the following modules and software installed:
+
 * WinDbg
 * PyKd
 * Gevent

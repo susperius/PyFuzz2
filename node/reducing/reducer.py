@@ -5,6 +5,10 @@ class Reducer:
     NAME = []
     CONFIG_PARAMS = []
 
+    @classmethod
+    def from_list(cls, params):
+        raise NotImplementedError('ABSTRACT CLASS')
+
     @property
     def path(self):
          raise NotImplementedError('ABSTRACT CLASS')

@@ -17,6 +17,7 @@ from worker.reducingworker import ReducingWorker
 from worker.reportworker import ReportWorker
 from model.config import ConfigParser
 from fuzzing.fuzzers import FUZZERS
+from reducing.reducers import REDUCERS
 
 
 gevent.monkey.patch_all()
@@ -68,9 +69,7 @@ class PyFuzz2Node:
         return FUZZERS[self._node_config.fuzzer_type][1].from_list(self._node_config.fuzzer_config)
 
     def __choose_reducer(self):
-        if self._node_config.reducer_type == "js_reducer":
-            from reducing.javascript import JsReducer
-            return JsReducer(self._node_config.reducer_config[0], self._node_config.reducer_config[1])
+        return REDUCERS[self._node_config.reducer_type][1].from_list(self._node_config.reducer_config)
 
     def __stop_all_workers(self):
         self._operation_worker.stop_worker()

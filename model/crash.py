@@ -2,7 +2,7 @@ __author__ = 'susperius'
 
 
 class Crash:
-    def __init__(self, node_address, program, maj_hash, min_hash, short_description, classification):
+    def __init__(self, node_address, program, maj_hash, min_hash, short_description, classification, count=1):
         self._node_addresses = set()
         self._node_addresses.add(node_address)
         self._program = program
@@ -10,6 +10,7 @@ class Crash:
         self._min_hash = min_hash
         self._short_descr = short_description
         self._classification = classification
+        self._count = count
 
     def add_node_address(self, node_address):
         self._node_addresses.add(node_address)
@@ -33,3 +34,8 @@ class Crash:
     @property
     def classification(self):
         return self._classification
+
+    @property
+    def count(self):
+        return self._count
+

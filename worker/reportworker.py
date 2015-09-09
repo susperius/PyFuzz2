@@ -11,12 +11,12 @@ from model.crash import Crash
 
 
 class ReportWorker(Worker):
-    def __init__(self, report_queue, node_dict):
+    def __init__(self, report_queue, node_dict, crash_dict=None):
         self._logger = logging.getLogger(__name__)
         self._greenlet = None
         self._report_queue = report_queue
         self._nodes = node_dict
-        self._crashes = {}
+        self._crashes = {} if crash_dict is None else crash_dict
 
     def __worker_green(self):
         while True:

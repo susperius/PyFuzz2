@@ -9,12 +9,12 @@ from model.node import PyFuzz2Node
 
 
 class BeaconWorker:
-    def __init__(self, beacon_queue, node_worker_queue, timeout):
+    def __init__(self, beacon_queue, node_worker_queue, timeout, node_dict=None):
         self._beacon_queue = beacon_queue
         self._node_worker_queue = node_worker_queue
         self._logger = logging.getLogger(__name__)
         self._active = False
-        self._node_dict = {}
+        self._node_dict = {} if node_dict is None else node_dict
         self._timeout = timeout
         self._greenlets = []
 

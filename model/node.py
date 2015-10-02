@@ -73,6 +73,10 @@ class PyFuzz2Node:
         return len(self._crashes.keys())
 
     @property
+    def crash_hashes(self):
+        return self._crashes.keys()
+
+    @property
     def config(self):
         return self._config
 

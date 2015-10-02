@@ -92,7 +92,18 @@ class DatabaseWorker(Worker):
                                          "(program_maj_hash, min_hash, description, classification, count, node_addr)"
                                          " VALUES (?, ?, ?, ?, ?, ?)", data)
             elif db_type == DB_TYPES['NODE']:
-                pass
+                key = msg
+                if self.node_exists(key):
+                    data = [self._node_dict[key].name, self._node_dict[key].listener_port, self._node_dict[key].status,
+                            self._node_dict[key].crash_hashes, self._node_dict[key].config, key]
+                    self._cursor.execute("UPDATE nodes SET name=?, listener_port=?, status=?, crashes=?, config=? "
+                                         "WHERE address=?", data)
+                else:
+                    data = [key, self._node_dict[key].name, self._node_dict[key].listener_port, self._node_dict[key].status,
+                            self._node_dict[key].crash_hashes, self._node_dict[key].config]
+                    self._cursor.execute("INSERT INTO nodes (address, name, listener_port, status, crashes, config) "
+                                         "VALUES (?, ?, ?, ?, ?, ?)", data)
+            self._db_conn.commit()
 
 
 

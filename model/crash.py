@@ -20,7 +20,7 @@ class Crash:
         self._node_addresses.add(node_address)
 
     @property
-    def node_address(self):
+    def node_addresses(self):
         return self._node_addresses
 
     @property
@@ -42,4 +42,8 @@ class Crash:
     @property
     def count(self):
         return self._count
+
+    @property
+    def program(self):
+        return self._program
 

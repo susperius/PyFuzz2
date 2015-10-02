@@ -40,9 +40,10 @@ class PyFuzz2Server:
         self._db_worker = DatabaseWorker(self._db_queue, self._node_dict, self._crash_dict)
         self._db_worker.load()
         self._beacon_server = BeaconServer(self._beacon_port, self._beacon_queue)
-        self._beacon_worker = BeaconWorker(self._beacon_queue, self._node_queue, self._beacon_timeout, self._node_dict)
+        self._beacon_worker = BeaconWorker(self._beacon_queue, self._node_queue, self._db_queue,
+                                           self._beacon_timeout, self._node_dict)
         self._report_server = ReportServer(self._report_port, self._report_queue)
-        self._report_worker = ReportWorker(self._report_queue, self._beacon_worker.nodes, self._crash_dict)
+        self._report_worker = ReportWorker(self._report_queue, self._db_queue, self._node_dict, self._crash_dict)
         self._node_client_worker = NodeClientWorker(self._node_queue)
         self._web_server = WebServer(self._web_port, self._web_queue, self.web_main)
 

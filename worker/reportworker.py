@@ -5,16 +5,18 @@ import pickle
 import logging
 import os
 from worker import Worker
+from databaseworker import DB_TYPES, SEPARATOR
 from node.model.message_types import MESSAGE_TYPES
 from node.utils.html_css_splitter import split_files, is_two_files
 from model.crash import Crash
 
 
 class ReportWorker(Worker):
-    def __init__(self, report_queue, node_dict, crash_dict=None):
+    def __init__(self, report_queue, db_queue, node_dict, crash_dict=None):
         self._logger = logging.getLogger(__name__)
         self._greenlet = None
         self._report_queue = report_queue
+        self._db_queue = db_queue
         self._nodes = node_dict
         self._crashes = {} if crash_dict is None else crash_dict
 
@@ -27,7 +29,6 @@ class ReportWorker(Worker):
                 file_type = data_unpacked[1]
                 program = data_unpacked[2]
                 report = data_unpacked[3]
-                node_name = self._nodes[address].name
                 self.__report_crash_local(address, file_type, program, report)
             elif MESSAGE_TYPES['GET_CONFIG'] == msg_type:
                 config = data_unpacked[1]
@@ -62,11 +63,13 @@ class ReportWorker(Worker):
         hash_val = self.__parse_string_report(crash[0], "(Hash=", ")")
         hash_val = hash_val.split(".")
         self._nodes[node_address].crashed(hash_val[0])
-        if (program + "_" + hash_val[0]) not in self._crashes.keys():
-            self._crashes[(program + "_" + hash_val[0])] = Crash(node_address, program, hash_val[0], hash_val[1],
+        crash_key = program + SEPARATOR + hash_val[0]
+        if crash_key not in self._crashes.keys():
+            self._crashes[crash_key] = Crash(node_address, program, hash_val[0], hash_val[1],
                                                                  description, classification)
         else:
-            self._crashes[(program + "_" + hash_val[0])].add_node_address(node_address)
+            self._crashes[crash_key].add_node_address(node_address)
+        self._db_queue.put((DB_TYPES['CRASH'], crash_key))
         directory = "results/" + program + "/" + description + "/" + hash_val[0] + "/" + hash_val[1]
         if os.path.exists(directory):
             self._logger.info("duplicated crash")

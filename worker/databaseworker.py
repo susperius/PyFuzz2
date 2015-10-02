@@ -6,6 +6,10 @@ from worker import Worker
 from model.crash import Crash
 from model.node import PyFuzz2Node
 
+DB_TYPES = {'CRASH': 0x01, 'NODE': 0x02}
+SEPARATOR = "_;_"
+
+
 class DatabaseWorker(Worker):
     def __init__(self, db_queue, node_dict=None, crash_dict=None):
         self._db_queue = db_queue
@@ -46,7 +50,7 @@ class DatabaseWorker(Worker):
         result = self._cursor.fetchall()
         if len(result) > 0:
             for row in result:
-                program, maj_hash = row[0].split("_")
+                program, maj_hash = row[0].split(SEPARATOR)
                 node_addresses = row[5].split(",")
                 self._crash_dict[row[0]] = Crash(node_addresses[0], program, maj_hash, row[1], row[2], row[3], row[4])
                 self._node_dict[node_addresses[0]].crashed(maj_hash)
@@ -56,6 +60,7 @@ class DatabaseWorker(Worker):
                     self._crash_dict[row[0]].add_node_address(addr)
 
     def __worker_green(self):
-        pass
+        while True:
+            db_type, msg = self._db_queue.get()
 
 

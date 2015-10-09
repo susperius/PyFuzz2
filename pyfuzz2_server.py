@@ -55,6 +55,7 @@ class PyFuzz2Server:
         self._report_worker.start_worker()
         self._web_server.serve()
         self._node_client_worker.start_worker()
+        self._db_worker.start_worker()
         while True:
             try:
                 gevent.wait()
@@ -97,10 +98,10 @@ class PyFuzz2Server:
             status, headers, html = site.get_scripts()
         else:
             status, headers, html = site.file_not_found()
-        start_response(status, headers)
         if self._logger.level == logging.DEBUG:
             html += "<br><br>" + str(environ) + "<br><br>" + func + "<br><br>" + environ['wsgi.input'].read()
-        return html
+        start_response(status, headers)
+        return [html]
 
 
 if __name__ == "__main__":

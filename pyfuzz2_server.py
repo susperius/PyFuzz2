@@ -101,7 +101,7 @@ class PyFuzz2Server:
         if self._logger.level == logging.DEBUG:
             html += "<br><br>" + str(environ) + "<br><br>" + func + "<br><br>" + environ['wsgi.input'].read()
         start_response(status, headers)
-        return [html]
+        return [str(html)]
 
 
 if __name__ == "__main__":

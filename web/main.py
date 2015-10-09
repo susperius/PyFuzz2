@@ -1,11 +1,13 @@
 __author__ = 'susperius'
 import html
+import logging
 from node.model.config import ConfigParser
 from node.fuzzing.fuzzers import FUZZERS
 
 
 class WebSite:
     def __init__(self):
+        self._logger = logging.getLogger(__name__)
         self._funcs = ['home', 'node_detail']
         self._statuses = {200: '200 OK', 404: '404 FILE NOT FOUND'}
         self._header_html = [('Content-Type', 'text/html')]

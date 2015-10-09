@@ -12,6 +12,7 @@ from communication.beaconserver import BeaconServer
 from communication.reportserver import ReportServer
 from communication.webserver import WebServer
 from model.config import ConfigParser
+from worker.databaseworker import DatabaseWorker
 from worker.beaconworker import BeaconWorker
 from worker.reportworker import ReportWorker
 from worker.nodeclientworker import NodeClientWorker
@@ -24,6 +25,8 @@ CONFIG_FILENAME = "server_config.xml"
 
 class PyFuzz2Server:
     def __init__(self, logger, config_filename=CONFIG_FILENAME):
+        self._node_dict = {}
+        self._crash_dict = {}
         self._logger = logger
         self._config = ConfigParser(config_filename)
         self._beacon_port, self._beacon_timeout = self._config.beacon_config
@@ -33,10 +36,14 @@ class PyFuzz2Server:
         self._node_queue = Queue()
         self._report_queue = Queue()
         self._web_queue = Queue()
+        self._db_queue = Queue()
+        self._db_worker = DatabaseWorker(self._db_queue, self._node_dict, self._crash_dict)
+        self._db_worker.load()
         self._beacon_server = BeaconServer(self._beacon_port, self._beacon_queue)
-        self._beacon_worker = BeaconWorker(self._beacon_queue, self._node_queue, self._beacon_timeout)
+        self._beacon_worker = BeaconWorker(self._beacon_queue, self._node_queue, self._db_queue,
+                                           self._beacon_timeout, self._node_dict)
         self._report_server = ReportServer(self._report_port, self._report_queue)
-        self._report_worker = ReportWorker(self._report_queue, self._beacon_worker.nodes)
+        self._report_worker = ReportWorker(self._report_queue, self._db_queue, self._node_dict, self._crash_dict)
         self._node_client_worker = NodeClientWorker(self._node_queue)
         self._web_server = WebServer(self._web_port, self._web_queue, self.web_main)
 
@@ -48,6 +55,7 @@ class PyFuzz2Server:
         self._report_worker.start_worker()
         self._web_server.serve()
         self._node_client_worker.start_worker()
+        self._db_worker.start_worker()
         while True:
             try:
                 gevent.wait()
@@ -90,10 +98,10 @@ class PyFuzz2Server:
             status, headers, html = site.get_scripts()
         else:
             status, headers, html = site.file_not_found()
-        start_response(status, headers)
         if self._logger.level == logging.DEBUG:
             html += "<br><br>" + str(environ) + "<br><br>" + func + "<br><br>" + environ['wsgi.input'].read()
-        return html
+        start_response(status, headers)
+        return [str(html)]
 
 
 if __name__ == "__main__":

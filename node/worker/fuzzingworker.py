@@ -45,6 +45,7 @@ class FuzzingWorker(Worker):
                             "python debugging\\windbg.py -p \"" + self._program_path
                             + "\" -t \"http://127.0.0.1:8080/" + filename + "\" -c True",
                             stdout=subprocess.PIPE)
+                        #  TODO: make sure a web server is running
                     else:
                         self._process = subprocess.Popen(
                             "python debugging\\windbg.py -p \"" + self._program_path

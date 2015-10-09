@@ -29,6 +29,10 @@ class JsReducer(Reducer):
         3 - Determine which html objects are necessary
         '''
 
+    @classmethod
+    def from_list(cls, params):
+        return cls(params[0], params[1])
+
     def set_case(self, test_case, crash_report):
         with open(self._path + test_case, 'rb') as case_fd, open(self._path + crash_report, 'rb') as report_fd:
             self._test_case = case_fd.read()

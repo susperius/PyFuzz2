@@ -10,7 +10,7 @@ class PyFuzz2Node:
         self._listener_port = listener_port
         self._is_active = True
         self._last_beacon = time.time()
-        self._crashes = 0
+        self._crashes = {}
         self._config = ""
 
     def check_status(self, sec=60):
@@ -70,7 +70,11 @@ class PyFuzz2Node:
 
     @property
     def crashes(self):
-        return self._crashes
+        return len(self._crashes.keys())
+
+    @property
+    def crash_hashes(self):
+        return self._crashes.keys()
 
     @property
     def config(self):
@@ -80,8 +84,11 @@ class PyFuzz2Node:
     def config(self, config):
         self._config = config
 
-    def crashed(self):
-        self._crashes += 1
+    def crashed(self, major_hash):
+        if major_hash in self._crashes.keys():
+            self._crashes[major_hash] += 1
+        else:
+            self._crashes[major_hash] = 0
 
     def dump(self):
         return "Name: " + self._name + " Status: " + str(self._is_active) + " Last contact: " + time.strftime(

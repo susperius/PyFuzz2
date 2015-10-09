@@ -17,6 +17,7 @@ from worker.reducingworker import ReducingWorker
 from worker.reportworker import ReportWorker
 from model.config import ConfigParser
 from fuzzing.fuzzers import FUZZERS
+from reducing.reducers import REDUCERS
 
 
 gevent.monkey.patch_all()
@@ -68,9 +69,7 @@ class PyFuzz2Node:
         return FUZZERS[self._node_config.fuzzer_type][1].from_list(self._node_config.fuzzer_config)
 
     def __choose_reducer(self):
-        if self._node_config.reducer_type == "js_reducer":
-            from reducing.javascript import JsReducer
-            return JsReducer(self._node_config.reducer_config[0], self._node_config.reducer_config[1])
+        return REDUCERS[self._node_config.reducer_type][1].from_list(self._node_config.reducer_config)
 
     def __stop_all_workers(self):
         self._operation_worker.stop_worker()
@@ -97,10 +96,12 @@ class PyFuzz2Node:
             try:
                 if self._node_config.node_net_mode == "net":
                     if self._listener_worker.new_config:
+                        self._logger.info("Received new config")
                         self.__stop_all_workers()
                         # self.__save_fuzz_state() if there is a new config it shouldn't restore the state??
                         restart(self._node_config.sleep_time + 5)
                     elif self._listener_worker.reset:
+                        self._logger.info("Node is going to reboot on received command")
                         self.__stop_all_workers()
                         gevent.sleep(5)
                         if self._node_config.node_op_mode == "fuzzing":
@@ -108,6 +109,7 @@ class PyFuzz2Node:
                         gevent.sleep(self._node_config.sleep_time + 5)
                         reboot()
                 if time.time() - start > (8*60*60):  # Reboot after eight hours
+                    self._logger.info("Node is going to reboot")
                     self.__stop_all_workers()
                     gevent.sleep(5)
                     if self._node_config.node_op_mode == "fuzzing":

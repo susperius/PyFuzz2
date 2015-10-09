@@ -5,16 +5,20 @@ import pickle
 import logging
 import os
 from worker import Worker
+from databaseworker import DB_TYPES, SEPARATOR
 from node.model.message_types import MESSAGE_TYPES
 from node.utils.html_css_splitter import split_files, is_two_files
+from model.crash import Crash
 
 
 class ReportWorker(Worker):
-    def __init__(self, report_queue, node_dict):
+    def __init__(self, report_queue, db_queue, node_dict, crash_dict=None):
         self._logger = logging.getLogger(__name__)
         self._greenlet = None
         self._report_queue = report_queue
+        self._db_queue = db_queue
         self._nodes = node_dict
+        self._crashes = {} if crash_dict is None else crash_dict
 
     def __worker_green(self):
         while True:
@@ -25,9 +29,7 @@ class ReportWorker(Worker):
                 file_type = data_unpacked[1]
                 program = data_unpacked[2]
                 report = data_unpacked[3]
-                node_name = self._nodes[address].name
-                self.__report_crash_local(node_name, file_type, program, report)
-                self._nodes[address].crashed()
+                self.__report_crash_local(address, file_type, program, report)
             elif MESSAGE_TYPES['GET_CONFIG'] == msg_type:
                 config = data_unpacked[1]
                 self._nodes[address].config = config
@@ -42,6 +44,10 @@ class ReportWorker(Worker):
         if self._greenlet is not None:
             gevent.kill(self._greenlet)
 
+    @property
+    def crashes(self):
+        return self._crashes
+
     @staticmethod
     def __parse_string_report(crash, value, end_marker="\r"):
         start = crash.find(value) + len(value)
@@ -50,12 +56,20 @@ class ReportWorker(Worker):
             end = crash.find("\n", start)
         return crash[start:end]
 
-    def __report_crash_local(self, node_name, file_type, program, crash):
+    def __report_crash_local(self, node_address, file_type, program, crash):
         program = program.split("\\")[-1].split(".")[0]
         classification = self.__parse_string_report(crash[0], "Exploitability Classification: ")
         description = self.__parse_string_report(crash[0], "Short Description: ")
         hash_val = self.__parse_string_report(crash[0], "(Hash=", ")")
         hash_val = hash_val.split(".")
+        self._nodes[node_address].crashed(hash_val[0])
+        crash_key = program + SEPARATOR + hash_val[0]
+        if crash_key not in self._crashes.keys():
+            self._crashes[crash_key] = Crash(node_address, program, hash_val[0], hash_val[1],
+                                                                 description, classification)
+        else:
+            self._crashes[crash_key].add_node_address(node_address)
+        self._db_queue.put((DB_TYPES['CRASH'], crash_key))
         directory = "results/" + program + "/" + description + "/" + hash_val[0] + "/" + hash_val[1]
         if os.path.exists(directory):
             self._logger.info("duplicated crash")

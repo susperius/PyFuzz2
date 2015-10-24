@@ -22,23 +22,18 @@ class WebSite:
 
     def home(self, nodes):
         home_html = self._html_template
-        overview_table = html.TABLE_HEADER
-        table_caption = ""
+        overview_table = "<table>"
+        table_caption = "<tr>\r\n"
         table_caption_list = ["NODE NAME", "NODE ADDRESS", "CRASHES", "STATUS", "LAST CONTACT"]
         for element in table_caption_list:
-            table_caption += html.TABLE_HEAD_CAPTION.replace("CONTENTS", element)
-        table_caption = html.TABLE_ELEMENT.replace("CONTENTS", table_caption)
+            table_caption += "<th>" + element + "</th>\r\n"
+        table_caption += "</tr>\r\n"
         node_table = ""
         for key in sorted(nodes.keys()):
-            node_name = html.NODE_LINK.replace("CONTENTS", nodes[key].name)
-            node_name = node_name.replace("NAME", nodes[key].address)
-            node = html.TABLE_DEFAULT_CONTENT.replace("CONTENTS", node_name) + \
-                   html.TABLE_DEFAULT_CONTENT.replace("CONTENTS", nodes[key].address) + \
-                   html.TABLE_DEFAULT_CONTENT.replace("CONTENTS", str(nodes[key].crashes)) + \
-                   html.TABLE_DEFAULT_CONTENT.replace("CONTENTS", "Active" if nodes[key].status else "Inactive") + \
-                   html.TABLE_DEFAULT_CONTENT.replace("CONTENTS", nodes[key].last_contact)
-            node_table += html.TABLE_ELEMENT.replace("CONTENTS", node)
-        overview_table += table_caption + node_table + html.TABLE_FOOTER
+            node_table += html.node_overview_node_entry(nodes[key].name, nodes[key].address, str(nodes[key].crashes),
+                                                        "Active" if nodes[key].status else "Inactive",
+                                                        nodes[key].last_contact)
+        overview_table += table_caption + node_table + "</table>"
         home_html = home_html.replace("SECTION_TITLE", "OVERVIEW")
         home_html = home_html.replace("REPLACE_ME", "<b>PyFuzz 2 Nodes</b><br>" + overview_table)
         return self._statuses[200], self._header_html, home_html
@@ -54,30 +49,26 @@ class WebSite:
         node_detail_html = node_detail_html.replace("SECTION_TITLE", node.name)
         node_conf_table = "<form action=\"/index.py?func=home&node=" + node.address + \
                           "&submit=1\" method=\"post\">\r\n" + "<table>\r\n"
-        node_conf_table += "<tr><th/><th/></tr>\r\n"
+        node_conf_table += "<tr><th/>GENERAL CONFIG<th/></tr>\r\n"
         # General config settings
         for i in range(4):
-            node_conf_table += "<tr>\r\n<td><b>" + node_config[i][0] + "</b></td>\r\n" + \
-                               "<td>" + node_config[i][1] + "</td>\r\n</tr>\r\n"
+            node_conf_table += html.node_detail_table_entry(node_config[i][0], node_config[i][1])
         del node_config[0:4]
         for elem in node_config:
-            single_node = "<td><b>" + elem[0] + "</b></td>\r\n" + \
-                          "<td><input type=\"text\" name=\"" + elem[0].lower() + "\" value=\"" + \
-                          elem[1] + "\" size=\"60\"></td>\r\n"
-            node_conf_table += "<tr>\r\n" + single_node + "</tr>\r\n"
+            node_conf_table += html.node_detail_table_entry_editable(elem[0], elem[1])
         node_conf_table += "</table>\r\n<table id=\"programs_table\">\r\n"
         # Program settings
         if programs is not None:
-            for prog in programs:
-                node_conf_table += "<tr><th/><th/></tr>\r\n"
+            for i, prog in enumerate(programs):
+                node_conf_table += "<tr><th>PROGRAM " + str(i) + "</th><th/></tr>\r\n"
                 single_prog = ""
                 for key, val in prog.items():
-                    single_prog += html.editable_table_entry(key, val)
+                    single_prog += html.node_detail_table_entry_editable(key, val)
                 node_conf_table += single_prog
         node_conf_table += "</table>\r\n"
         # Fuzzer settings
         if op_mode_conf != "":
-            node_conf_table += "<table id=\"fuzz_table\" >\r\n<tr><th/><th/></tr>\r\n"
+            node_conf_table += "<table id=\"fuzz_table\" >\r\n<tr><th>FUZZER SETTINGS</th><th/></tr>\r\n"
             fuzz_types_options = ""
             for key in FUZZERS.keys():
                 fuzz_types_options += "<option>"+key+"</option>\r\n"
@@ -85,10 +76,8 @@ class WebSite:
                                "onLoad=\"set_select_value('" + op_mode_conf["fuzzer_type"] + "')\" " + \
                                " name=\"fuzzer_type\" onChange=\"changeFuzzer()\">\r\n" + \
                                fuzz_types_options+"</select>\r\n</td>\r\n</tr>\r\n"
-            node_conf_table += "<div id=\"fuzz_config\">\r\n"
             for key in FUZZERS[op_mode_conf["fuzzer_type"]][0]:
-                node_conf_table += html.editable_table_entry(key, op_mode_conf['fuzz_conf'][key])
-            node_conf_table += "\r\n</div>\r\n"
+                node_conf_table += html.node_detail_table_entry_editable(key, op_mode_conf['fuzz_conf'][key])
             node_conf_table += "</table>\r\n"
         else:
             node_conf_table += "<br><br><b>No additional information received by now</b>\r\n"

@@ -1,29 +1,23 @@
 __author__ = 'susperius'
 
-TABLE_HEADER = "<table>\r\n"
-TABLE_FOOTER = "</table>\r\n"
-TABLE_ELEMENT = "<tr>\r\nCONTENTS</tr>\r\n"
-TABLE_HEAD_CAPTION = "<th>CONTENTS</th>\r\n"
-TABLE_DEFAULT_CONTENT = "<td>CONTENTS</td>\r\n"
 
-NODE_LINK = "<a href=\"/index.py?func=node_detail&node=NAME\">CONTENTS</a>"
-
-BOLD = "<b>CONTENTS</b>"
-BR = "<br>\r\n"
-
-TEXTAREA_DISABLED = "<textarea ATTRIBS>CONTENTS</textarea>"
-
-FORM_HEADER = "<form ATTRIBS >\r\n"
-FORM_FOOTER = "</form>\r\n"
-INPUT_TEXT = "<input type=\"text\" name=\"NAME\" value=\"CONTENTS\" ATTRIBS>"
-INPUT_SUBMIT = "<input type=\"submit\" value=\"Submit\">\r\n"
-
-SELECT = "<select name=\"NAME\">\r\nOPTIONS</select>\r\n"
-SELECT_OPTIONS = "<option>CONTENTS</options>\r\n"
+def node_overview_node_entry(node_name, node_address, crashes, status, last_contact):
+    return "<tr>\r\n<td><a href=\"/index.py?func=node_detail&node=" + node_address + "\">" + node_name + "</a></td>\r\n" + \
+            "<td>" + node_address + "</td>\r\n" +\
+            "<td>" + crashes + "</td>\r\n" + \
+            "<td>" + status + "</td>\r\n" + \
+            "<td>" + last_contact + "</td>\r\n" + \
+            "</tr>\r\n"
 
 
-def editable_table_entry(caption, value):
+def node_detail_table_entry(caption, value):
+    return "<tr><td><b>" + caption + "</b></td>\r\n" + \
+           "<td>" + value + "</td></tr>\r\n"
+
+
+def node_detail_table_entry_editable(caption, value):
     return "<tr><td><b>" + caption + "</b></td>\r\n" + \
            "<td><input type=\"text\" name=\"" + caption.lower() + "\" value=\"" + \
            value + "\" size=\"60\"></td></tr>\r\n"
+
 

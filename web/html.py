@@ -21,3 +21,6 @@ def node_detail_table_entry_editable(caption, value):
            value + "\" size=\"60\"></td></tr>\r\n"
 
 
+def action_button(caption, action, method):
+    return "<form action=\"" + action + "\" method=\""+ method + "\">\r\n" + \
+           "<input type=\"submit\" value=\"" + caption + "\">\r\n</form>\r\n"

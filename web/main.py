@@ -83,10 +83,10 @@ class WebSite:
             node_conf_table += "<br><br><b>No additional information received by now</b>\r\n"
         node_conf_table += "<br>\r\n"
         node_conf_table += "<input type=\"submit\" value=\"Submit\" disabled>\r\n</form>\r\n"
-        node_conf_table += "<form action=\"/index.py?func=home&reboot=" + node.address + "\" method=\"post\">\r\n" + \
-                           "<input type=\"submit\" value=\"Reboot node\">\r\n</form>\r\n"
-        node_conf_table += "<form action=\"/index.py?func=home&del=" + node.address + "\" method=\"post\">\r\n" + \
-                           "<input type=\"submit\" value=\"Delete node\">\r\n</form>\r\n"
+        node_conf_table += html.action_button("Reboot node", "\"/index.py?func=home&reboot=" + node.address + "\"",
+                                              "post")
+        node_conf_table += html.action_button("Delete node", "\"/index.py?func=home&del=" + node.address + "\"",
+                                              "post")
         node_detail_html = node_detail_html.replace("REPLACE_ME", node_conf_table)
         return self._statuses[200], self._header_html, node_detail_html
 

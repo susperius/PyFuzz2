@@ -15,9 +15,11 @@ def node_detail_table_entry(caption, value):
            "<td>" + value + "</td></tr>\r\n"
 
 
-def node_detail_table_entry_editable(caption, value):
+def node_detail_table_entry_editable(caption, value, name=None):
+    if name is None:
+        name = caption
     return "<tr><td><b>" + caption + "</b></td>\r\n" + \
-           "<td><input type=\"text\" name=\"" + caption.lower() + "\" value=\"" + \
+           "<td><input type=\"text\" name=\"" + name.lower() + "\" value=\"" + \
            value + "\" size=\"60\"></td></tr>\r\n"
 
 

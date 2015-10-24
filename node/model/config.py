@@ -145,23 +145,27 @@ class ConfigParser:
     @staticmethod
     def create_config(data):  # TODO: figure out how to build a new programs list from the submitted data
         in_data = data.replace("+", " ").replace("%5C", "\\").replace("%3A", ":").split("&")
-        print(in_data)
         conf = {}
-        programs = []
+        programs = {}
         for elem in in_data:
             value = elem.split("=")
-            if value[0] not in PROGRAM_ATTRIBUTES:
+            if "prog" not in value[0]:
                 conf[value[0].replace(" ", "_")] = value[1]
             else:
                 pass
-        print(in_data)
+                prog_no, key = value[0].split(" ")
+                if prog_no not in programs.keys():
+                    programs[prog_no] = {}
+                programs[prog_no][key] = value[1]
+        conf['programs'] = []
+        for key, prog in programs.items():
+            pass
+            conf['programs'].append(prog)
         node_config = NodeConfig(conf.pop('node_name'), conf.pop('beacon_server'), conf.pop('beacon_port'),
                                  conf.pop('report_server'), conf.pop('report_port'), conf.pop('listener_port'),
                                  "node/node_config.xml")
         node_config.set_beacon_interval(conf.pop('beacon_interval'))
-        node_config.set_program_path(conf.pop('program_path'))
-        node_config.set_program_dbg_child(conf.pop('debug_child'))
-        node_config.set_program_sleep_time(conf.pop('sleep_time'))
+        node_config.set_programs(conf.pop('programs'))
         node_config.set_fuzzer(conf.pop('fuzzer_type'), conf)
         return node_config.dump()
 
@@ -176,7 +180,8 @@ class NodeConfig:
         self._beacon = self._root.find("beacon")
         self._report = self._root.find("reporting")
         self._listener = self._root.find("listener")
-        self._programs = self._root.find("programs")
+        self._root.remove(self._root.find("programs"))
+        self._programs = ET.SubElement(self._root, "programs")
         if self._op_mode == "fuzzing":
             self._fuzzer = self._root.find("fuzzer")
         elif self._op_mode == "reducing":
@@ -209,17 +214,14 @@ class NodeConfig:
     def set_listener_port(self, port):
         self._listener.attrib['port'] = str(port)
 
-    def add_program(self, program):
-        self._programs.append(program)
+#    def add_program(self, program):
+#        self._programs.append(program)
 
-    # def set_program_path(self, path):
-    #     self._program.attrib['path'] = path
-    #
-    # def set_program_dbg_child(self, dbg_child):
-    #     self._program.attrib['dbg_child'] = dbg_child
-    #
-    # def set_program_sleep_time(self, sleep_time):
-    #     self._program.attrib['sleep_time'] = sleep_time
+    def set_programs(self, programs):
+        for program in programs:
+            prog = ET.SubElement(self._programs, "program")
+            for key, val in program.items():
+                prog.attrib[key] = str(val)
 
     def set_fuzzer(self, type, arg_dict):
         self._fuzzer.attrib['type'] = type

@@ -50,6 +50,7 @@ class WebSite:
         node_conf_table = "<form action=\"/index.py?func=home&node=" + node.address + \
                           "&submit=1\" method=\"post\">\r\n" + "<table>\r\n"
         node_conf_table += "<tr><th/>GENERAL CONFIG<th/></tr>\r\n"
+        # ------------------------------------------------------------------------------------------------------------
         # General config settings
         for i in range(4):
             node_conf_table += html.node_detail_table_entry(node_config[i][0], node_config[i][1])
@@ -57,15 +58,17 @@ class WebSite:
         for elem in node_config:
             node_conf_table += html.node_detail_table_entry_editable(elem[0], elem[1])
         node_conf_table += "</table>\r\n<table id=\"programs_table\">\r\n"
+        # ------------------------------------------------------------------------------------------------------------
         # Program settings
         if programs is not None:
             for i, prog in enumerate(programs):
                 node_conf_table += "<tr><th>PROGRAM " + str(i) + "</th><th/></tr>\r\n"
                 single_prog = ""
                 for key, val in prog.items():
-                    single_prog += html.node_detail_table_entry_editable(key, val)
+                    single_prog += html.node_detail_table_entry_editable(key, val, "prog-" + str(i) + " " + key)
                 node_conf_table += single_prog
         node_conf_table += "</table>\r\n"
+        # ------------------------------------------------------------------------------------------------------------
         # Fuzzer settings
         if op_mode_conf != "":
             node_conf_table += "<table id=\"fuzz_table\" >\r\n<tr><th>FUZZER SETTINGS</th><th/></tr>\r\n"
@@ -82,7 +85,7 @@ class WebSite:
         else:
             node_conf_table += "<br><br><b>No additional information received by now</b>\r\n"
         node_conf_table += "<br>\r\n"
-        node_conf_table += "<input type=\"submit\" value=\"Submit\" disabled>\r\n</form>\r\n"
+        node_conf_table += "<input type=\"submit\" value=\"Submit\" >\r\n</form>\r\n"
         node_conf_table += html.action_button("Reboot node", "\"/index.py?func=home&reboot=" + node.address + "\"",
                                               "post")
         node_conf_table += html.action_button("Delete node", "\"/index.py?func=home&del=" + node.address + "\"",

@@ -20,3 +20,10 @@ INPUT_SUBMIT = "<input type=\"submit\" value=\"Submit\">\r\n"
 
 SELECT = "<select name=\"NAME\">\r\nOPTIONS</select>\r\n"
 SELECT_OPTIONS = "<option>CONTENTS</options>\r\n"
+
+
+def editable_table_entry(caption, value):
+    return "<tr><td><b>" + caption + "</b></td>\r\n" + \
+           "<td><input type=\"text\" name=\"" + caption.lower() + "\" value=\"" + \
+           value + "\" size=\"60\"></td></tr>\r\n"
+

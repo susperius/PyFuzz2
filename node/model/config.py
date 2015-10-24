@@ -20,12 +20,15 @@ except ImportError:
     pass
 
 
+PROGRAM_ATTRIBUTES = ["path", "dbg_child", "name", "use_http", "sleep_time"]
+
+
 class ConfigParser:
-    def __init__(self, config_filename):
+    def __init__(self, config_filename, from_string=False):
         self._logger = logging.getLogger(__name__)
         self._programs = []
         try:
-            if "PyFuzz2Node" not in config_filename:
+            if not from_string:
                 self._tree = ET.parse(config_filename)
                 self._root = self._tree.getroot()
             else:
@@ -103,18 +106,6 @@ class ConfigParser:
     def programs(self):
         return self._programs
 
-    # @property
-    # def program_path(self):
-    #     return self._program_path
-    #
-    # @property
-    # def dbg_child(self):
-    #     return self._program_dbg_child
-    #
-    # @property
-    # def sleep_time(self):
-    #     return self._program_sleep_time
-
     @property
     def file_type(self):
         return self._file_type
@@ -152,16 +143,21 @@ class ConfigParser:
         return general_config, self._programs, op_mode_conf
 
     @staticmethod
-    def create_config(data):
+    def create_config(data):  # TODO: figure out how to build a new programs list from the submitted data
         in_data = data.replace("+", " ").replace("%5C", "\\").replace("%3A", ":").split("&")
+        print(in_data)
         conf = {}
+        programs = []
         for elem in in_data:
             value = elem.split("=")
-            conf[value[0].replace(" ", "_")] = value[1]
+            if value[0] not in PROGRAM_ATTRIBUTES:
+                conf[value[0].replace(" ", "_")] = value[1]
+            else:
+                pass
+        print(in_data)
         node_config = NodeConfig(conf.pop('node_name'), conf.pop('beacon_server'), conf.pop('beacon_port'),
                                  conf.pop('report_server'), conf.pop('report_port'), conf.pop('listener_port'),
                                  "node/node_config.xml")
-
         node_config.set_beacon_interval(conf.pop('beacon_interval'))
         node_config.set_program_path(conf.pop('program_path'))
         node_config.set_program_dbg_child(conf.pop('debug_child'))

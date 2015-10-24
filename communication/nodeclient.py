@@ -15,6 +15,9 @@ class NodeClient():
         self._node_port = node_port
 
     def send(self, data):
-        sock = gevent.socket.create_connection((self._node_listener, self._node_port))
-        sock.send(data)
-        sock.close()
+        try:
+            sock = gevent.socket.create_connection((self._node_listener, self._node_port))
+            sock.send(data)
+            sock.close()
+        except IOError:
+            pass

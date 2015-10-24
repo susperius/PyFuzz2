@@ -5,7 +5,7 @@ import gevent
 import logging
 from worker import Worker
 from model.crash import Crash
-from model.node import PyFuzz2Node
+from model.pyfuzz2_node import PyFuzz2Node
 
 DB_TYPES = {'CRASH': 0x01, 'NODE': 0x02}
 SEPARATOR = "_;_"

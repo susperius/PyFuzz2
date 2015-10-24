@@ -1,6 +1,7 @@
 __author__ = 'susperius'
 
 import time
+from node.model.config import ConfigParser
 
 
 class PyFuzz2Node:
@@ -11,7 +12,7 @@ class PyFuzz2Node:
         self._is_active = True
         self._last_beacon = time.time()
         self._crashes = {}
-        self._config = ""
+        self._config = None
 
     def check_status(self, sec=60):
         if time.time() - self._last_beacon > sec:
@@ -88,7 +89,7 @@ class PyFuzz2Node:
         if major_hash in self._crashes.keys():
             self._crashes[major_hash] += 1
         else:
-            self._crashes[major_hash] = 0
+            self._crashes[major_hash] = 1
 
     def dump(self):
         return "Name: " + self._name + " Status: " + str(self._is_active) + " Last contact: " + time.strftime(

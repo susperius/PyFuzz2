@@ -25,13 +25,12 @@ class ReportWorker(Worker):
             address, data_packed = self._report_queue.get()
             data_unpacked = pickle.loads(data_packed)
             msg_type = data_unpacked[0]
+            msg = data_unpacked[1]
             if MESSAGE_TYPES['CRASH'] == msg_type:
-                file_type = data_unpacked[1]
-                program = data_unpacked[2]
-                report = data_unpacked[3]
-                self.__report_crash_local(address, file_type, program, report)
+                # Structure crash message (0xFF, (prog['name'], crash_report, testcases[]))
+                self.__report_crash_local(address, msg)
             elif MESSAGE_TYPES['GET_CONFIG'] == msg_type:
-                config = data_unpacked[1]
+                config = msg
                 self._nodes[address].config = config
             gevent.sleep(1)
 
@@ -56,35 +55,30 @@ class ReportWorker(Worker):
             end = crash.find("\n", start)
         return crash[start:end]
 
-    def __report_crash_local(self, node_address, file_type, program, crash):
-        program = program.split("\\")[-1].split(".")[0]
-        classification = self.__parse_string_report(crash[0], "Exploitability Classification: ")
-        description = self.__parse_string_report(crash[0], "Short Description: ")
-        hash_val = self.__parse_string_report(crash[0], "(Hash=", ")")
+    def __report_crash_local(self, node_address, msg):
+        prog_name, crash_report, testcases = msg
+        classification = self.__parse_string_report(crash_report, "Exploitability Classification: ")
+        description = self.__parse_string_report(crash_report, "Short Description: ")
+        hash_val = self.__parse_string_report(crash_report, "(Hash=", ")")
         hash_val = hash_val.split(".")
         self._nodes[node_address].crashed(hash_val[0])
-        crash_key = program + SEPARATOR + hash_val[0]
+        crash_key = prog_name + SEPARATOR + hash_val[0]
         if crash_key not in self._crashes.keys():
-            self._crashes[crash_key] = Crash(node_address, program, hash_val[0], hash_val[1],
-                                                                 description, classification)
+            self._crashes[crash_key] = Crash(node_address, prog_name, hash_val[0], hash_val[1],
+                                             description, classification)
         else:
             self._crashes[crash_key].add_node_address(node_address)
         self._db_queue.put((DB_TYPES['CRASH'], crash_key))
-        directory = "results/" + program + "/" + description + "/" + hash_val[0] + "/" + hash_val[1]
+        directory = "results/" + prog_name + "/" + description + "/" + hash_val[0] + "/" + hash_val[1]
         if os.path.exists(directory):
             self._logger.info("duplicated crash")
         else:
-            self._logger.info("New unique crash in " + program + "-> \r\n\tclass = " + classification +
+            self._logger.info("New unique crash in " + prog_name + "-> \r\n\tclass = " + classification +
                               " \r\n\tShort Description = " + description +
                               " \r\n\tsaved in " + directory)
             os.makedirs(directory)
-            if is_two_files(crash[1]):
-                files = split_files(crash[1], "crash_file." + file_type)
-                with open(directory + "/" + files.keys()[0], 'wb+') as file1_fd, open(directory + "/" + files.keys()[1], 'wb+') as file2_fd:
-                    file1_fd.write(files[files.keys()[0]])
-                    file2_fd.write(files[files.keys()[1]])
-            else:
-                with open(directory + "/crash_file." + file_type, "wb+") as fd_crash:
-                    fd_crash.write(crash[1])
+            for testcase in testcases:
+                with open(directory + "/" + testcase[0], 'w+') as fd_case:
+                    fd_case.write(testcase[1])
             with open(directory + "/crash_report.txt", 'w+') as fd_rep:
-                fd_rep.write(crash[0])
+                fd_rep.write(crash_report)

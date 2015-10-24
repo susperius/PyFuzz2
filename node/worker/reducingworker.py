@@ -9,15 +9,13 @@ from reportworker import ReportWorker
 
 
 class ReducingWorker(Worker):
-    def __init__(self, reducer, program_path, sleep_time, dbg_child, report_queue):
-        self._program_path = program_path
-        self._sleep_time = sleep_time
+    def __init__(self, reducer, programs, report_queue):
+        self._program = programs[0]
         self._running = False
         self._greenlet = None
         self._logger = logging.getLogger(__name__)
         self._reducer = reducer
         self._process = None
-        self._dbg_child = dbg_child
         self._report_queue = report_queue
         self._actual_file = {}
 
@@ -39,10 +37,10 @@ class ReducingWorker(Worker):
                     with open('tmp/reduced.html', 'wb+') as fd:
                         fd.write(case)
                     self._process = subprocess.Popen(
-                                "python debugging\\windbg.py -p \"" + self._program_path
-                                + "\" -t \"http://127.0.0.1:8080/reduced.html\" -c " + str(self._dbg_child),
+                                "python debugging\\windbg.py -p \"" + self._program['path']
+                                + "\" -t \"http://127.0.0.1:8080/reduced.html\" -c " + self._program['dbg_child'],
                                 stdout=subprocess.PIPE)
-                    gevent.sleep(self._sleep_time)
+                    gevent.sleep(int(self._program['sleep_time']))
                     self._process.kill()
                     if os.path.isfile("tmp_crash_report"):
                         with open("tmp_crash_report") as fd:
@@ -57,10 +55,11 @@ class ReducingWorker(Worker):
                                 case_fd.write(case)
                                 output_fd.write(output)
                             if red_min_hash != min_hash:
-                                self._report_queue.put((0xFF, (output, case)))
+                                # Structure crash message (0xFF, (prog['name'], crash_report, testcases[]))
+                                self._report_queue.put((0xFF, (self._program['name'], output, case)))
                         else:
                             self._reducer.crashed(False)
-                            self._report_queue.put((0xFF, (output, case)))
+                            self._report_queue.put((0xFF, (self._program['name'], output, case)))
 
                     else:
                         self._reducer.crashed(False)

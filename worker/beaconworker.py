@@ -48,8 +48,9 @@ class BeaconWorker:
     def __check_all_beacons(self):
         while True:
             for key, node in self._node_dict.items():
-                if not node.check_status() and not node.check_status(self._timeout):
+                if not node.check_status(self._timeout):
                     self._logger.debug("Node: " + node.name + " is inactive")
+                    self._db_queue.put((DB_TYPES['NODE'], key))
             gevent.sleep(40)
 
     @property

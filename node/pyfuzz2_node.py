@@ -41,10 +41,10 @@ class PyFuzz2Node:
             self._tcp_listener = Listener(tcp_listener_port, self._listener_queue)
             self._listener_worker = ListenerWorker(self._listener_queue, self._reporter_queue)
             self._report_worker = ReportWorker(True, self._reporter_queue, self._node_config.file_type,
-                                               self._node_config.program_path, report_server, report_port)
+                                               self._node_config.programs, report_server, report_port)
         else:  # else single mode
             self._report_worker = ReportWorker(False, self._reporter_queue, self._node_config.file_type,
-                                               self._node_config.program_path)
+                                               self._node_config.programs)
         if self._node_config.node_op_mode == 'fuzzing':
             self._fuzzer = self.__choose_fuzzer()
             if os.path.isfile("fuzz_state.pickle"):
@@ -55,13 +55,10 @@ class PyFuzz2Node:
                 except KeyError as er:
                     self._logger.error("Error while restoring the PRNG state -> " + er.message)
                     self._fuzzer.set_seed()
-            self._operation_worker = FuzzingWorker(self._node_config.program_path, self._fuzzer, self._reporter_queue,
-                                                   self._node_config.sleep_time, self._node_config.dbg_child)
+            self._operation_worker = FuzzingWorker(self._node_config.programs, self._fuzzer, self._reporter_queue,)
         elif self._node_config.node_op_mode == 'reducing':
             self._reducer = self.__choose_reducer()
-            self._operation_worker = ReducingWorker(self._reducer, self._node_config.program_path,
-                                                    self._node_config.sleep_time, self._node_config.dbg_child,
-                                                    self._reporter_queue)
+            self._operation_worker = ReducingWorker(self._reducer, self._node_config.programs, self._reporter_queue)
         else:
             raise ValueError('Unsupported operation mode!')
 

@@ -11,20 +11,16 @@ from worker import Worker
 
 
 class FuzzingWorker(Worker):
-    def __init__(self, program_path, fuzzer, report_queue, sleep_time, dbg_child=False):
+    def __init__(self, programs, fuzzer, report_queue):
         self._logger = logging.getLogger(__name__)
         self._greenlet = None
         self._process = None
         self._running = False
-        self._program_path = program_path
+        self._programs = programs
         self._testcase = ""
-        self._crash_occurred = False
         self._crash_report = ""
         self._fuzzer = fuzzer
         self._report_queue = report_queue
-        self._sleep_time = sleep_time
-        self._dbg_child = dbg_child
-        self._running = False
 
     def __worker_green(self):
         while self._running:
@@ -33,52 +29,54 @@ class FuzzingWorker(Worker):
             self._logger.info("Start testing ...")
             dir_listing = os.listdir("testcases/")
             for filename in dir_listing:
-                if not self._running:
-                    break
-                if self._fuzzer.file_type not in filename:
-                    continue
-                output = ""
-                testcase_dir = os.getcwd() + "\\testcases\\"
-                if self._dbg_child:
-                    if self._fuzzer.NAME == "js_dom_fuzzer":
-                        self._process = subprocess.Popen(
-                            "python debugging\\windbg.py -p \"" + self._program_path
-                            + "\" -t \"http://127.0.0.1:8080/" + filename + "\" -c True",
-                            stdout=subprocess.PIPE)
-                        #  TODO: make sure a web server is running
+                for prog in self._programs:
+                    if not self._running:
+                        break
+                    if self._fuzzer.file_type not in filename:
+                        continue
+                    crash_report = ""
+                    testcase_dir = os.getcwd() + "\\testcases\\"
+                    if bool(prog['dbg_child']):
+                        if bool(prog['use_http']):
+                            self._process = subprocess.Popen(
+                                "python debugging\\windbg.py -p \"" + prog['path']
+                                + "\" -t \"http://127.0.0.1:8080/" + filename + "\" -c True",
+                                stdout=subprocess.PIPE)
+                            #  TODO: make sure a web server is running
+                        else:
+                            self._process = subprocess.Popen(
+                                "python debugging\\windbg.py -p \"" + prog['path']
+                                + "\" -t \"" + testcase_dir + filename + "\" -c True",
+                                stdout=subprocess.PIPE)
                     else:
-                        self._process = subprocess.Popen(
-                            "python debugging\\windbg.py -p \"" + self._program_path
-                            + "\" -t \"" + testcase_dir + filename + "\" -c True",
-                            stdout=subprocess.PIPE)
-                else:
-                    if self._fuzzer.NAME == "js_dom_fuzzer":
-                        self._process = subprocess.Popen(
-                            "python debugging\\windbg.py -p \"" + self._program_path
-                            + "\" -t \"http://127.0.0.1:8080/" + filename + "\"",
-                            stdout=subprocess.PIPE)
-                    else:
-                        self._process = subprocess.Popen(
-                            "python debugging\\windbg.py -p \"" + self._program_path
-                            + "\" -t \"" + testcase_dir + filename + "\"",
-                            stdout=subprocess.PIPE)
-                self._logger.debug("Debugger started...")
-                gevent.sleep(self._sleep_time)
-                self._process.kill()
-                if os.path.isfile("tmp_crash_report"):
-                    with open("tmp_crash_report") as fd:
-                        output = fd.read()
-                    os.remove("tmp_crash_report")
-                    with open(testcase_dir + filename, "rb") as fd:
-                        testcase = fd.read()
-                    test_file = filename.split(".")
-                    for single_file in dir_listing:
-                        if single_file.startswith(test_file[0]) and test_file[1] not in single_file:
-                            with open(testcase_dir + single_file, "rb") as add_fd:
-                                testcase += "-" * 50 + "\r\n\r\nNEW FILE:" + single_file + "\r\n\r\n" + "-" * 50 + "\r\n"
-                                testcase += add_fd.read()
-                    self._report_queue.put((0xFF, (output, testcase)))
-                gevent.sleep(1)
+                        if bool(prog['use_http']):
+                            self._process = subprocess.Popen(
+                                "python debugging\\windbg.py -p \"" + prog['path']
+                                + "\" -t \"http://127.0.0.1:8080/" + filename + "\"",
+                                stdout=subprocess.PIPE)
+                        else:
+                            self._process = subprocess.Popen(
+                                "python debugging\\windbg.py -p \"" + prog['path']
+                                + "\" -t \"" + testcase_dir + filename + "\"",
+                                stdout=subprocess.PIPE)
+                    self._logger.debug("Debugger started...")
+                    gevent.sleep(int(prog['sleep_time']))
+                    self._process.kill()
+                    if os.path.isfile("tmp_crash_report"):
+                        with open("tmp_crash_report") as fd:
+                            crash_report = fd.read()
+                        os.remove("tmp_crash_report")
+                        testcases = []
+                        with open(testcase_dir + filename, "rb") as fd:
+                            testcases.append((filename, fd.read()))
+                        test_file = filename.split(".")
+                        for single_file in dir_listing:
+                            if single_file.startswith(test_file[0]) and test_file[1] not in single_file:
+                                with open(testcase_dir + single_file, "rb") as add_fd:
+                                    testcases.append((single_file, add_fd.read()))
+                        # Structure crash message (0xFF, (prog['name'], crash_report, testcases[]))
+                        self._report_queue.put((0xFF, (prog['name'], crash_report, testcases)))
+                    gevent.sleep(1)
 
     def __create_testcases(self):
         self._fuzzer.create_testcases(100, "testcases")

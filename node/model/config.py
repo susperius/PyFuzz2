@@ -23,6 +23,7 @@ except ImportError:
 class ConfigParser:
     def __init__(self, config_filename):
         self._logger = logging.getLogger(__name__)
+        self._programs = []
         try:
             if "PyFuzz2Node" not in config_filename:
                 self._tree = ET.parse(config_filename)
@@ -44,9 +45,12 @@ class ConfigParser:
                 self._listener_port = int(listener.attrib['port'])
             elif self._node_net_mode != "single":
                 raise ValueError("Only net and single are available modes for node!")
-            self._program_path = self._root.find("program").attrib['path']
-            self._program_dbg_child = bool(self._root.find("program").attrib['dbg_child'])
-            self._program_sleep_time = int(self._root.find("program").attrib['sleep_time'])
+            programs = self._root.find("programs")
+            for prog in programs:
+                self._programs.append(prog.attrib)
+            # self._program_path = self._root.find("program").attrib['path']
+            # self._program_dbg_child = bool(self._root.find("program").attrib['dbg_child'])
+            # self._program_sleep_time = int(self._root.find("program").attrib['sleep_time'])
             if self._node_op_mode == 'fuzzing':
                 fuzzer = self._root.find("fuzzer")
                 self._fuzzer_type = fuzzer.attrib['type']
@@ -96,16 +100,20 @@ class ConfigParser:
         return self._listener_port if self._node_net_mode == "net" else None
 
     @property
-    def program_path(self):
-        return self._program_path
+    def programs(self):
+        return self._programs
 
-    @property
-    def dbg_child(self):
-        return self._program_dbg_child
-
-    @property
-    def sleep_time(self):
-        return self._program_sleep_time
+    # @property
+    # def program_path(self):
+    #     return self._program_path
+    #
+    # @property
+    # def dbg_child(self):
+    #     return self._program_dbg_child
+    #
+    # @property
+    # def sleep_time(self):
+    #     return self._program_sleep_time
 
     @property
     def file_type(self):
@@ -132,10 +140,7 @@ class ConfigParser:
                           ("Beacon Port", str(self._beacon_port)),
                           ("Beacon Interval", str(self._beacon_interval)),
                           ("Report Server", self._report_server),
-                          ("Report Port", str(self._report_port)),
-                          ("Program Path", self.program_path),
-                          ("Debug Child", str(self.dbg_child)),
-                          ("Sleep Time", str(self.sleep_time))]
+                          ("Report Port", str(self._report_port))]
         if self.node_op_mode == 'fuzzing':
             op_mode_conf = {"fuzzer_type": self._fuzzer_type, "fuzz_conf": {}}
             i = 0
@@ -144,7 +149,7 @@ class ConfigParser:
                 i += 1
         else:
             op_mode_conf = None
-        return general_config, op_mode_conf
+        return general_config, self._programs, op_mode_conf
 
     @staticmethod
     def create_config(data):
@@ -175,7 +180,7 @@ class NodeConfig:
         self._beacon = self._root.find("beacon")
         self._report = self._root.find("reporting")
         self._listener = self._root.find("listener")
-        self._program = self._root.find("program")
+        self._programs = self._root.find("programs")
         if self._op_mode == "fuzzing":
             self._fuzzer = self._root.find("fuzzer")
         elif self._op_mode == "reducing":
@@ -208,14 +213,17 @@ class NodeConfig:
     def set_listener_port(self, port):
         self._listener.attrib['port'] = str(port)
 
-    def set_program_path(self, path):
-        self._program.attrib['path'] = path
+    def add_program(self, program):
+        self._programs.append(program)
 
-    def set_program_dbg_child(self, dbg_child):
-        self._program.attrib['dbg_child'] = dbg_child
-
-    def set_program_sleep_time(self, sleep_time):
-        self._program.attrib['sleep_time'] = sleep_time
+    # def set_program_path(self, path):
+    #     self._program.attrib['path'] = path
+    #
+    # def set_program_dbg_child(self, dbg_child):
+    #     self._program.attrib['dbg_child'] = dbg_child
+    #
+    # def set_program_sleep_time(self, sleep_time):
+    #     self._program.attrib['sleep_time'] = sleep_time
 
     def set_fuzzer(self, type, arg_dict):
         self._fuzzer.attrib['type'] = type

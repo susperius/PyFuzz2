@@ -2,7 +2,9 @@
     <beacon server="192.168.1.130" port="31337" interval="10"/>
     <reporting server="192.168.1.130" port="31338"/>
     <listener port="32337"/>
-    <program path="C:\Program Files\Internet Explorer\iexplore.exe" dbg_child="True" sleep_time="10"/>
+    <programs>
+        <program name="Internet Explorer" path="C:\Program Files\Internet Explorer\iexplore.exe" dbg_child="True" sleep_time="10" use_http="True" />
+    </programs>
     <reducer type="js_reducer" path="testcases/" file_type="html"/>
     <fuzzer type="js_dom_fuzzer" starting_elements="30" total_operations="3000" seed="0" browser="ie" file_type="html"/>
 </PyFuzz2Node>
@@ -13,7 +15,9 @@ REDUCING WON'T WORK IN NETWORK MODE !!!
     <beacon server="192.168.1.130" port="31337" interval="10"/> Beacon server config
     <reporting server="192.168.1.130" port="31338"/> Report receiving server
     <listener port="32337"/> Local listening port
-    <program path="C:\Program Files\Internet Explorer\iexplore.exe" dbg_child="True" sleep_time="20"/> Program, which is fuzzed or the testcases are reduced for
+    <programs> Allows you to feed multiple programs with the same input in fuzzing mode, while in reducing mode only the first program entry is used
+        <program path="C:\Program Files\Internet Explorer\iexplore.exe" dbg_child="True" sleep_time="10" use_http="True" /> Program, which is fuzzed or the testcases are reduced for
+    </programs>
     <fuzzer type="js_dom_fuzzer" starting_elements="30" total_operations="3000" seed="260620151818" browser="ie" file_type="html"/> Fuzzer config
     <reducer type="js_dom_reducer" test_case_path="crash-file.html" crash_report_path="crash_report.txt" file_type="html"/>
 </PyFuzz2Node>

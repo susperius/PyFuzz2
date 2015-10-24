@@ -20,8 +20,10 @@ own fuzzer.
 For the client/server you need the following modules and software installed:
 
 * WinDbg
-* PyKd
+* `Microsoft Visual C++ Compiler for Python 2.7 <http://www.microsoft.com/en-us/download/details.aspx?id=44266>`_
+* PyKd (use the installer on  the `PyKd <https://pykd.codeplex.com/>`_ project page)
 * Gevent
+* psutil
 
 Both software parts are configured via xml files. The config-files show some possible values and example of how to
 config the client/server.

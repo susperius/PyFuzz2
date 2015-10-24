@@ -49,11 +49,13 @@ class ConfigParser:
             elif self._node_net_mode != "single":
                 raise ValueError("Only net and single are available modes for node!")
             programs = self._root.find("programs")
+            sleep_times = []
             for prog in programs:
+                sleep_times.append(prog.attrib['sleep_time'])
                 self._programs.append(prog.attrib)
             # self._program_path = self._root.find("program").attrib['path']
             # self._program_dbg_child = bool(self._root.find("program").attrib['dbg_child'])
-            # self._program_sleep_time = int(self._root.find("program").attrib['sleep_time'])
+            self._sleep_time = max(sleep_times)
             if self._node_op_mode == 'fuzzing':
                 fuzzer = self._root.find("fuzzer")
                 self._fuzzer_type = fuzzer.attrib['type']
@@ -105,6 +107,10 @@ class ConfigParser:
     @property
     def programs(self):
         return self._programs
+
+    @property
+    def sleep_time(self):
+        return int(self._sleep_time)
 
     @property
     def file_type(self):

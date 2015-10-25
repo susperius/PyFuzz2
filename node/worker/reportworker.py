@@ -30,7 +30,7 @@ class ReportWorker(Worker):
                 # Structure crash message (0xFF, (prog['name'], crash_report, testcases[]))
                 self.__report_crash_local(msg)
                 if self._net_mode:
-                    data = pickle.dumps(msg, -1)
+                    data = pickle.dumps((msg_type, msg), -1)
                     self._client.send(data)
             elif MESSAGE_TYPES['GET_CONFIG'] == msg_type:
                 with open("node_config.xml", 'r') as fd:

@@ -15,12 +15,18 @@ class FuzzingWorker(Worker):
         self._logger = logging.getLogger(__name__)
         self._greenlet = None
         self._process = None
+        self._web_process = None
         self._running = False
         self._programs = programs
+        self._need_web_server = False
+        for prog in programs:
+            if bool(prog['use_http']):
+                self._need_web_server = True
         self._testcase = ""
         self._crash_report = ""
         self._fuzzer = fuzzer
         self._report_queue = report_queue
+        self._DEVNULL = os.open(os.devnull, os.O_RDWR)
 
     def __worker_green(self):
         while self._running:
@@ -28,13 +34,15 @@ class FuzzingWorker(Worker):
             self.__create_testcases()
             self._logger.info("Start testing ...")
             dir_listing = os.listdir("testcases/")
+            if self._need_web_server:
+                self._web_process = subprocess.Popen("python -m SimpleHTTPServer 8080", stdout=self._DEVNULL,
+                                                     stderr=self._DEVNULL, cwd="testcases/")
             for filename in dir_listing:
                 for prog in self._programs:
                     if not self._running:
                         break
                     if self._fuzzer.file_type not in filename:
                         continue
-                    crash_report = ""
                     testcase_dir = os.getcwd() + "\\testcases\\"
                     if bool(prog['dbg_child']):
                         if bool(prog['use_http']):
@@ -42,7 +50,6 @@ class FuzzingWorker(Worker):
                                 "python debugging\\windbg.py -p \"" + prog['path']
                                 + "\" -t \"http://127.0.0.1:8080/" + filename + "\" -c True",
                                 stdout=subprocess.PIPE)
-                            #  TODO: make sure a web server is running
                         else:
                             self._process = subprocess.Popen(
                                 "python debugging\\windbg.py -p \"" + prog['path']
@@ -77,6 +84,8 @@ class FuzzingWorker(Worker):
                         # Structure crash message (0xFF, (prog['name'], crash_report, testcases[]))
                         self._report_queue.put((0xFF, (prog['name'], crash_report, testcases)))
                     gevent.sleep(1)
+            if self._need_web_server:
+                self._web_process.kill()
 
     def __create_testcases(self):
         self._fuzzer.create_testcases(100, "testcases")
@@ -93,6 +102,7 @@ class FuzzingWorker(Worker):
             try:
                 self._process.kill()
                 self._process.terminate()
+                os.close(self._DEVNULL)
             except Exception as ex:
                 self._logger.debug("Exception occured while killing Debugger: " + ex.message)
 

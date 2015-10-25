@@ -8,7 +8,7 @@ class Crash:
             self._node_addresses = set()
             self._node_addresses.add(node_address)
         else:
-            self._node_addresses = node_addresses
+            self._node_addresses = set(node_addresses)
         self._program = program
         self._maj_hash = maj_hash
         self._min_hash = min_hash
@@ -18,6 +18,7 @@ class Crash:
 
     def add_node_address(self, node_address):
         self._node_addresses.add(node_address)
+        self._count += 1
 
     @property
     def node_addresses(self):

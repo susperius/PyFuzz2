@@ -29,20 +29,22 @@ class FuzzingWorker(Worker):
         self._DEVNULL = os.open(os.devnull, os.O_RDWR)
 
     def __worker_green(self):
+        count = 0
         while self._running:
-            self._logger.info("Creating Testcases ...")
+            self._logger.info("Creating Testcases...\r\n\tnumber: " + str(count) + " to " + str(count + 100))
             self.__create_testcases()
-            self._logger.info("Start testing ...")
+            self._logger.info("Start testing...")
             dir_listing = os.listdir("testcases/")
             if self._need_web_server:
                 self._web_process = subprocess.Popen("python -m SimpleHTTPServer 8080", stdout=self._DEVNULL,
                                                      stderr=self._DEVNULL, cwd="testcases/")
             for filename in dir_listing:
+                if self._fuzzer.file_type not in filename:
+                        continue
+                count += 1
                 for prog in self._programs:
                     if not self._running:
                         break
-                    if self._fuzzer.file_type not in filename:
-                        continue
                     testcase_dir = os.getcwd() + "\\testcases\\"
                     if bool(prog['dbg_child']):
                         if bool(prog['use_http']):
@@ -66,7 +68,8 @@ class FuzzingWorker(Worker):
                                 "python debugging\\windbg.py -p \"" + prog['path']
                                 + "\" -t \"" + testcase_dir + filename + "\"",
                                 stdout=subprocess.PIPE)
-                    self._logger.debug("Debugger started...")
+                    self._logger.debug("Debugger started...\r\n\tprogram: " + prog['name'] + " testcase: " + filename +
+                                       " #testcases: " + str(count))
                     gevent.sleep(int(prog['sleep_time']))
                     self._process.kill()
                     if os.path.isfile("tmp_crash_report"):

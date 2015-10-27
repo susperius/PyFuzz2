@@ -1,5 +1,4 @@
 __author__ = 'susperius'
-
 from ..fuzzer import Fuzzer
 
 

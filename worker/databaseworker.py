@@ -79,6 +79,7 @@ class DatabaseWorker(Worker):
                 self._node_dict[node_addresses[0]].crashed(maj_hash)
                 del(node_addresses[0])
                 for addr in node_addresses:
+                    addr = addr.replace(" ", "")
                     self._node_dict[addr].crashed(maj_hash)
                     self._crash_dict[row[0]].add_node_address(addr)
 

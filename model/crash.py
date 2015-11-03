@@ -4,11 +4,9 @@ __author__ = 'susperius'
 class Crash:
     def __init__(self, node_address, program, maj_hash, min_hash, short_description, classification,
                  node_addresses=None, count=1):
-        if node_addresses is None:
-            self._node_addresses = set()
+        node_address = set()
+        if node_addresses is not None:
             self._node_addresses.add(node_address)
-        else:
-            self._node_addresses = set(node_addresses)
         self._program = program
         self._maj_hash = maj_hash
         self._min_hash = min_hash

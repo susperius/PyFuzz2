@@ -8,7 +8,7 @@ from node.fuzzing.fuzzers import FUZZERS
 class WebSite:
     def __init__(self):
         self._logger = logging.getLogger(__name__)
-        self._funcs = ['home', 'node_detail']
+        self._funcs = ['home', 'node_detail', 'stats']
         self._statuses = {200: '200 OK', 404: '404 FILE NOT FOUND'}
         self._header_html = [('Content-Type', 'text/html')]
         self._header_css = [('Content-Type', 'text/css')]
@@ -92,6 +92,11 @@ class WebSite:
                                               "post")
         node_detail_html = node_detail_html.replace("REPLACE_ME", node_conf_table)
         return self._statuses[200], self._header_html, node_detail_html
+
+    def stats(self, nodes, crashes):
+        stats_html = self._html_template
+        stats_html = stats_html.replace("SECTION_TITLE", "Crash Stats")
+        return self._statuses[200], self._header_html, stats_html
 
     def file_not_found(self):
         return self._statuses[404], self._header_html, ['<b>404 FILE NOT FOUND!</b>\n']

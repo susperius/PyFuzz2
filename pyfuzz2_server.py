@@ -92,6 +92,8 @@ class PyFuzz2Server:
                     status, headers, html = site.node_detail(self._beacon_worker.nodes[key])
                 else:
                     status, headers, html = site.file_not_found()
+            elif func == "stats":
+                status, headers, html = site.stats(self._node_dict, self._crash_dict)
         elif environ['PATH_INFO'] == "/style.css":
             status, headers, html = site.get_style()
         elif environ['PATH_INFO'] == "/scripts.js":

@@ -73,7 +73,7 @@ class DatabaseWorker(Worker):
         if len(result) > 0:
             for row in result:
                 program, maj_hash = row[0].split(SEPARATOR)
-                node_addresses = pickle.load(row[5])
+                node_addresses = pickle.loads(row[5])
                 self._crash_dict[row[0]] = Crash(node_addresses, program, maj_hash, row[1], row[2], row[3], row[4])
                 for addr in node_addresses:
                     self._node_dict[addr].crashed(maj_hash)
@@ -85,12 +85,12 @@ class DatabaseWorker(Worker):
                 key = self._crash_dict[msg].program + SEPARATOR + self._crash_dict[msg].major_hash
                 self._logger.debug("DB-Crash Access Key -> " + key)
                 if self.crash_exists(key):
-                    data = [pickle.dump(self._crash_dict[key].node_addresses), self._crash_dict[key].count, key]
+                    data = [pickle.dumps(self._crash_dict[key].node_addresses, 0), self._crash_dict[key].count, key]
                     self._cursor.execute("UPDATE crashes SET node_addr=?, count=? WHERE program_maj_hash=?", data)
                 else:
                     data = [key, self._crash_dict[key].minor_hash, self._crash_dict[key].short_description,
                             self._crash_dict[key].classification, self._crash_dict[key].count,
-                            pickle.dump(self._crash_dict[key].node_addresses)]
+                            pickle.dumps(self._crash_dict[key].node_addresses, 0)]
                     self._cursor.execute("INSERT INTO crashes "
                                          "(program_maj_hash, min_hash, description, classification, count, node_addr)"
                                          " VALUES (?, ?, ?, ?, ?, ?)", data)

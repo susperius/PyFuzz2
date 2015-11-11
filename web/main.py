@@ -1,6 +1,7 @@
 __author__ = 'susperius'
 import html
 import logging
+from model.crash import Crash
 from node.model.config import ConfigParser
 from node.fuzzing.fuzzers import FUZZERS
 
@@ -21,19 +22,15 @@ class WebSite:
         return self._funcs
 
     def home(self, nodes):
-        home_html = self._html_template
-        overview_table = "<table>"
-        table_caption = "<tr>\r\n"
         table_caption_list = ["NODE NAME", "NODE ADDRESS", "CRASHES", "STATUS", "LAST CONTACT"]
-        for element in table_caption_list:
-            table_caption += "<th>" + element + "</th>\r\n"
-        table_caption += "</tr>\r\n"
+        home_html = self._html_template
+        overview_table = html.table_header(table_caption_list)
         node_table = ""
         for key in sorted(nodes.keys()):
             node_table += html.node_overview_node_entry(nodes[key].name, nodes[key].address, str(nodes[key].crashes),
                                                         "Active" if nodes[key].status else "Inactive",
                                                         nodes[key].last_contact)
-        overview_table += table_caption + node_table + "</table>"
+        overview_table += node_table + html.table_footer()
         home_html = home_html.replace("SECTION_TITLE", "OVERVIEW")
         home_html = home_html.replace("REPLACE_ME", "<b>PyFuzz 2 Nodes</b><br>" + overview_table)
         return self._statuses[200], self._header_html, home_html
@@ -93,9 +90,14 @@ class WebSite:
         node_detail_html = node_detail_html.replace("REPLACE_ME", node_conf_table)
         return self._statuses[200], self._header_html, node_detail_html
 
-    def stats(self, nodes, crashes):
+    def stats(self, nodes_dict, crashes_dict):
         stats_html = self._html_template
         stats_html = stats_html.replace("SECTION_TITLE", "Crash Stats")
+        stats_table = html.table_header(Crash.FIELDS, "stats_table")
+        for key in crashes_dict.keys():
+            stats_table += html.table_entry(crashes_dict[key].stats)
+        stats_table += html.table_footer()
+        stats_html = stats_html.replace("REPLACE_ME", stats_table)
         return self._statuses[200], self._header_html, stats_html
 
     def file_not_found(self):

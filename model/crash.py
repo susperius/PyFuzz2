@@ -2,14 +2,18 @@ __author__ = 'susperius'
 
 
 class Crash:
+    FIELDS = ["Program", "Major Hash", "Minor Hash", "Short Description", "Classification", "Nodes", "Count"]
+
     def __init__(self, node_address, program, maj_hash, min_hash, short_description, classification,
                  count=1):
         self._node_addresses = set()
-        if node_address is not None:
-            if type(node_address) is not set:
-                self.node_addresses.add(node_address)
-            else:
-                self._node_addresses.union(node_address)
+        if type(node_address) is not set:
+            self._node_addresses = set()
+            self.node_addresses.add(node_address)
+        else:
+            self._node_addresses = self._node_addresses.union(node_address)
+            self._node_addresses.add("192.168.1.139")
+            self._node_addresses.add("192.168.1.140")
         self._program = program
         self._maj_hash = maj_hash
         self._min_hash = min_hash
@@ -49,3 +53,8 @@ class Crash:
     def program(self):
         return self._program
 
+    @property
+    def stats(self):
+        #["Program", "Major Hash", "Minor Hash", "Short Description", "Classification", "Nodes", "Count"]
+        return [str(self.program), str(self.major_hash), str(self.minor_hash), str(self.short_description),
+                str(self.classification), self.node_addresses, str(self.count)]

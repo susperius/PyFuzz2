@@ -1,7 +1,7 @@
 __author__ = 'susperius'
 from reducer import Reducer
 import re
-from fuzzing.jsfuzzer.browserObjects import Window
+from fuzzing.browser.jsfuzzer.browserObjects import Window
 import logging
 
 

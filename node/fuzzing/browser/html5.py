@@ -10,8 +10,8 @@ from ..fuzzer import Fuzzer
 
 class Html5Fuzzer(Fuzzer):
     TYPES_DICT = {'APP_DATA': None, 'BOOL': FuzzValues.BOOL, 'BUTTON_TYPE': FuzzValues.BUTTON_TYPE,
-                  'CHAR': FuzzValues.CHARS, 'CHARACTER_SET': FuzzValues.CHARACTER_SET, 'COORDS': None,
-                  'CROSSORIGIN': 'TODO', 'CSS': None,
+                  'CHAR': FuzzValues.CHARS, 'CHARACTER_SET': FuzzValues.CHARACTER_SET,
+                  'COORDS': None, 'CROSSORIGIN': 'TODO', 'CSS': None,
                   'CSS_CLASS': None, 'DATALIST_ID': None, 'DATETIME': None, 'DIRECTION': FuzzValues.TEXT_DIRECTION,
                   'INPUT_TYPE': FuzzValues.INPUT_TYPES,
                   'ELEM_ID' : None, 'FORM_ID': None, 'FORM_METHOD': FuzzValues.FORM_METHOD,

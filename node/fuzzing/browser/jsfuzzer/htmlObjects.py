@@ -55,6 +55,8 @@ class HtmlObjects:
 
     HTML5_COL_ATTR = {'span': 'INT'}
 
+    HTML5_CANVAS_ATTR = {'height': 'INT', 'width': 'INT'}
+
     HTML5_DEL_ATTR = {'cite': 'URL', 'datetime': 'DATETIME'}
 
     HTML5_DETAILS_ATTR = {'open': None}
@@ -154,7 +156,7 @@ class HtmlObjects:
                      'body': {'outer_tag': None, 'attr': HTML5_GLOBAL_ATTR, 'req_attr': None},
                      'br': {'outer_tag': None, 'attr': HTML5_GLOBAL_ATTR, 'req_attr': None},
                      'button': {'outer_tag': None, 'attr': dict(HTML5_BUTTON_ATTR.items() + HTML5_GLOBAL_ATTR.items()), 'req_attr': None},
-                     #'canvas': ,
+                     'canvas': {'outer_tag': None, 'attr': dict(HTML5_CANVAS_ATTR.items() + HTML5_GLOBAL_ATTR.items()), 'req_attr': None},
                      'caption': {'outer_tag': ['table'], 'attr': HTML5_GLOBAL_ATTR, 'req_attr': None},
                      #'center': ,
                      'cite': {'outer_tag': None, 'attr': HTML5_GLOBAL_ATTR, 'req_attr': None},

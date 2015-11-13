@@ -32,6 +32,8 @@ class FuzzValues:
              '7', '8', '9', '!', '"', '§', '$', '%', '&', '/', '(', ')', '=', '?', '`', '´', '*', '+', '#', '-',
              '_', '.', ':', ';', ',', '>', '<', '€', '@', 'ä', 'Ä', 'ü', 'Ü', 'ö', 'Ö', '°', '^', '\\', '\'']
 
+    COLORS = ['#FF8C00', '#FFA500', '#FF4500']
+
     CHARACTER_SET = ['UTF-8', 'UTF-16']
 
     FORM_ENCTYPE = ['application/x-www-form-urlencoded', 'multipart/form-data', 'text/plain']

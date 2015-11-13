@@ -101,7 +101,7 @@ class JsDomFuzzer(Fuzzer):
         js_code += self.__add_event_handlers()
         doc = html.replace("SCRIPT_BODY", js_code)
         self.__reinit()
-        return (doc, css)
+        return doc, css
 
     def set_state(self, state):
         random.setstate(state)

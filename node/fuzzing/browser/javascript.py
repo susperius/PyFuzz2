@@ -11,6 +11,7 @@ from jsfuzzer.browserObjects import *
 from html5 import Html5Fuzzer
 from css import CssFuzzer
 from jsfuzzer.values import FuzzValues
+from jsfuzzer.cssProperties import CSS_STYLES
 from ..fuzzer import Fuzzer
 
 TEMPLATE_FILE = "fuzzing/jsfuzzer/template.dat"
@@ -247,7 +248,7 @@ class JsDomFuzzer(Fuzzer):
             if attr == 'style':
                 val = ""
                 for i in range(1, 50):
-                    css = random.choice(FuzzValues.CSS_STYLES)
+                    css = random.choice(CSS_STYLES)
                     val += css[0] + ": " + random.choice(css[1:]) + "; "
             else:
                 val = random.choice(FuzzValues.INTERESTING_VALUES)
@@ -276,7 +277,7 @@ class JsDomFuzzer(Fuzzer):
         elif method == 'scrollTop':
             code += self._js_elements[key].prop_scrollTop() + " = \"" + random.choice(FuzzValues.INTS) + "\";"
         elif method == 'style':
-            value = random.choice(FuzzValues.CSS_STYLES)
+            value = random.choice(CSS_STYLES)
             if "-" in value[0]:
                 pos = value[0].find("-")
                 value[0] = value[0].replace("-", "")

@@ -4,6 +4,7 @@ import random
 
 from jsfuzzer.htmlObjects import HtmlObjects
 from jsfuzzer.values import FuzzValues
+from jsfuzzer.cssProperties import CSS_STYLES
 from ..fuzzer import Fuzzer
 
 
@@ -243,7 +244,7 @@ class Html5Fuzzer(Fuzzer):
         count = random.randint(2, 10)
         ret_val = ""
         for i in range(count):
-            style_pick = random.choice(FuzzValues.CSS_STYLES)
+            style_pick = random.choice(CSS_STYLES)
             value = random.choice(style_pick[1:])
             ret_val += style_pick[0] + ":" + value + ";"
         return ret_val

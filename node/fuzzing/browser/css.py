@@ -4,7 +4,7 @@ import random
 
 from ..fuzzer import Fuzzer
 from jsfuzzer.values import FuzzValues
-
+from jsfuzzer.cssProperties import CSS_STYLES
 
 class CssFuzzer(Fuzzer):
     NAME = "CssFuzzer"
@@ -40,7 +40,7 @@ class CssFuzzer(Fuzzer):
         return style
 
     def __get_style(self):
-        prop = random.choice(FuzzValues.CSS_STYLES)
+        prop = random.choice(CSS_STYLES)
         val = random.choice(prop)
         return prop[0] + " : " + val + ";"
 

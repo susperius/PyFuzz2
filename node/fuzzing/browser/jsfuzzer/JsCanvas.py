@@ -7,6 +7,8 @@ class Canvas2d:
     PATTERN_TYPES = ['repeat', 'repeat-x', 'repeat-y', 'no-repeat']
     LINE_STYLES = ['butt', 'round', 'square']
     LINE_JOIN_TYPES = ['bevel', 'round', 'miter']
+    TEXT_ALIGNMENTS = ['start', 'end', 'center', 'left', 'right']
+    TEXT_BASELINES = ['alphabetic', 'top', 'hanging', 'middle', 'ideographic', 'bottom']
 
     def __init__(self, var_name):
         self._name = var_name
@@ -33,25 +35,25 @@ class Canvas2d:
 
     def get_context(self, ctx_name):
         self._ctx = ctx_name
-        return self.__allocation(self._ctx, self._name + ".getContext(\"2d\")")
+        return self.__assignment(self._ctx, self._name + ".getContext(\"2d\")")
 
     def fill_style(self, color):
-        return self.__allocation(self._ctx + ".fillStyle", color, True)
+        return self.__assignment(self._ctx + ".fillStyle", color, True)
 
     def stroke_style(self, color):
-        return self.__allocation(self._ctx + ".strokeStyle", color, True)
+        return self.__assignment(self._ctx + ".strokeStyle", color, True)
 
     def shadow_color(self, color):
-        return self.__allocation(self._ctx + ".shadowColor", color, True)
+        return self.__assignment(self._ctx + ".shadowColor", color, True)
 
     def shadow_blur(self, number):
-        return self.__allocation(self._ctx + ".shadowBlur", number)
+        return self.__assignment(self._ctx + ".shadowBlur", number)
 
     def shadow_offset_x(self, offset_x):
-        return self.__allocation(self._ctx + ".shadowOffsetX", offset_x)
+        return self.__assignment(self._ctx + ".shadowOffsetX", offset_x)
 
     def shadow_offset_y(self, offset_y):
-        return self.__allocation(self._ctx + ".shadowOffsetY", offset_y)
+        return self.__assignment(self._ctx + ".shadowOffsetY", offset_y)
 
     def create_linear_gradient(self, grd_name, x0, y0, x1, y1): #  Can be used as fillStyle !!
         self._gradients.append(grd_name)
@@ -63,16 +65,16 @@ class Canvas2d:
         return "var " + pattern_name + " = " + self._ctx + ".createPattern(" + patternable_obj + ", \"" + patternable_obj + "\");\r\n"
 
     def line_cap(self, line_style):
-        return self.__allocation(self._ctx + ".lineCap", line_style, True)
+        return self.__assignment(self._ctx + ".lineCap", line_style, True)
 
     def line_join(self, join_type):
-        return self.__allocation(self._ctx + ".lineJoin", join_type, True)
+        return self.__assignment(self._ctx + ".lineJoin", join_type, True)
 
     def line_width(self, width):
-        return self.__allocation(self._ctx + ".lineWidth", width)
+        return self.__assignment(self._ctx + ".lineWidth", width)
 
     def miterLimit(self, miter_length):
-        return self.__allocation(self._ctx + ".miterLimit", miter_length)
+        return self.__assignment(self._ctx + ".miterLimit", miter_length)
 
     def rect(self, x, y, width, height):
         return self._ctx + ".rect(" + str(x) + ", " + str(y) + ", " + str(width) + ", " + str(height) + ");\r\n"
@@ -145,8 +147,30 @@ class Canvas2d:
     def set_trans_form(self, a, b, c, d, e, f):
         return self._ctx + ".setTransform(" + str(a) + ", " + str(b) + ", " + str(c) + ", " + str(d) + ", " + str(e) + ", " + str(f) + ");\r\n"
 
+    def font(self, size_and_font_name):
+        return self.__assignment(self._name + ".font", size_and_font_name, True)
+
+    def text_align(self, text_alignment):
+        return self.__assignment(self._name + ".textAlign", text_alignment, True)
+
+    def text_baseline(self, text_baseline):
+        return self.__assignment(self._name + ".textBaseline", text_baseline, True)
+
+    def fill_text(self, text, x, y):
+        return self._ctx + ".fillText(\"" + text + "\", " + str(x) + ", " + str(y) + ");\r\n"
+
+    def stroke_text(self, text, x, y):
+        return self._ctx + ".strokeText(\"" + text + "\", " + str(x) + ", " + str(y) + ");\r\n"
+
+    # ATTENTION --->>>> NO SEMICOLON NOR NEWLINE!
+    def measure_text(self, text, text_is_variable_name=False):
+        return self._ctx + ".measureText(\"" + text + "\").width" if  not text_is_variable_name else self._ctx + ".measureText(" + text + ").width"
+
+    def draw_image(self, drawable_obj, x, y):
+        return self._ctx + ".drawImage(" + drawable_obj + ", " + str(x) + ", " + str(y) + ");\r\n"
+
     @staticmethod
-    def __allocation(left_of_eq, right_of_eq, quotes=False):
+    def __assignment(left_of_eq, right_of_eq, quotes=False):
         return str(left_of_eq) + " = \"" + str(right_of_eq) + "\";\r\n" if quotes else str(left_of_eq) + " = " + str(right_of_eq) + ";\r\n"
 
 

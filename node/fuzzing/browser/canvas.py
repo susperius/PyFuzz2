@@ -36,6 +36,7 @@ class CanvasFuzzer(Fuzzer):
         function += "var " + self._canvas_id + " = document.getElementById(\"" + self._canvas_id + "\");\r\n"
         function += js_canvas.get_context("ctx")
         for i in range(self._count):
+            function += "\t"
             luck = random.choice(range(0, 10))
             if luck < 3:
                 key = random.choice(js_canvas.attributes.keys())
@@ -93,7 +94,7 @@ class CanvasFuzzer(Fuzzer):
                     function += JsGlobal.try_catch_block(js_canvas.draw_image(js_canvas.name, x, y))
                 elif method in js_canvas.path_methods:
                     if not js_canvas.has_active_path:
-                        function += js_canvas.begin_path()
+                        function += js_canvas.begin_path() + "\t"
                     if method == "stroke":
                         function += JsGlobal.try_catch_block(js_canvas.stroke())
                     elif method == "fill":

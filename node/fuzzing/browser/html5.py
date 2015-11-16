@@ -33,7 +33,7 @@ class Html5Fuzzer(Fuzzer):
     #  TODO: DATALIST_ID, REGEXP, URL ... dl creation ...
 
     NO_SINGLE_USE_TAGS = ['head', 'body', 'th', 'tr', 'td', 'tfoot', 'tbody', 'thead', 'title', 'dt', 'dd']
-    NO_CHILD_LIST = ['select', 'time', 'iframe']
+    NO_CHILD_LIST = ['select', 'time', 'iframe', 'style', 'canvas']
 
     def __init__(self, seed, elements, max_depth, max_attr, file_type):
         if int(seed) == 0:
@@ -43,6 +43,7 @@ class Html5Fuzzer(Fuzzer):
         self._css_classes = []
         self._elem_ids = []
         self._form_ids = []
+        self._canvas_ids = []
         self._header_ids = []
         self._map_names = []
         self._file_type = file_type
@@ -65,6 +66,10 @@ class Html5Fuzzer(Fuzzer):
     def tags(self):
         return self._used_tags
 
+    @property
+    def canvas_ids(self):
+        return self._canvas_ids
+
     def file_type(self):
         return self._file_type
 
@@ -83,8 +88,8 @@ class Html5Fuzzer(Fuzzer):
     def __reinit(self):
         self._elem_ids = []
         self._css_classes = []
-        self._elem_ids = []
         self._form_ids = []
+        self._canvas_ids = []
         self._header_ids = []
         self._map_names = []
         self._used_tags = set()
@@ -116,6 +121,9 @@ class Html5Fuzzer(Fuzzer):
             closing_list.reverse()
             for close_tag in closing_list:
                 self._body += close_tag + "\r\n"
+        if len(self._canvas_ids) == 0:
+            tag, open_tag, close_tag = self.__build_tag('canvas')
+            self._body += open_tag + close_tag + "\r\n"
         html = "<!DOCTYPE html>\r\n<html>\r\n" + self._head + close_head + "\r\n" + self._body + close_body + "\r\n" + \
                "</html>\r\n"
         return html
@@ -133,6 +141,8 @@ class Html5Fuzzer(Fuzzer):
                 return "table", self.__build_table(), ""
             elif tag == "dl":
                 return "dl", self.__build_dl(), ""
+        if tag == "canvas":
+            self._canvas_ids.append(elem_id)
         close_tag += "</" + tag + ">"
         if HtmlObjects.HTML5_OBJECTS[tag]['outer_tag'] is not None and not ignore_outer_tag:
             if "head" not in HtmlObjects.HTML5_OBJECTS[tag]['outer_tag']:

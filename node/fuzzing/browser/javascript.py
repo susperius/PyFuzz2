@@ -10,6 +10,7 @@ from jsfuzzer.htmlObjects import *
 from jsfuzzer.browserObjects import *
 from html5 import Html5Fuzzer
 from css import CssFuzzer
+from canvas import CanvasFuzzer
 from jsfuzzer.values import FuzzValues
 from jsfuzzer.cssProperties import CSS_STYLES
 from ..fuzzer import Fuzzer
@@ -29,6 +30,7 @@ class JsDomFuzzer(Fuzzer):
         #  self._html_fuzzer = HtmlFuzzer(self._starting_elements, 3, seed)
         self._html_fuzzer = Html5Fuzzer(int(seed), self._starting_elements, 10, 5, file_type)
         self._css_fuzzer = CssFuzzer(seed)
+        self._canvas_fuzzer = CanvasFuzzer(200)
         if seed == 0:
             random.seed()
         else:
@@ -92,11 +94,15 @@ class JsDomFuzzer(Fuzzer):
         self._css_fuzzer.set_tags(self._html_fuzzer.tags)
         css = self._css_fuzzer.fuzz()
         ids = self._html_fuzzer.elem_ids
-        js_code = self.__create_startup(ids)
+        js_code = ""
+        for canvas_id in self._html_fuzzer.canvas_ids:
+            self._canvas_fuzzer.set_canvas_id(canvas_id)
+            js_code += self._canvas_fuzzer.fuzz()
+        js_code += self.__create_startup(ids)
+
         while self._total_operations > self._operations_count:
             js_code += self.__add_function()
-        js_code = js_code.replace(Window.setTimeout("func" + str(self._function_count) + "()", self._window_timeout),
-                                  "event_firing()")
+        js_code += self.__last_function()
         js_code += self.__add_event_dipatcher()
         js_code += self.__add_event_handlers()
         doc = html.replace("SCRIPT_BODY", js_code)
@@ -106,6 +112,12 @@ class JsDomFuzzer(Fuzzer):
     def set_state(self, state):
         random.setstate(state)
 
+    def __last_function(self):
+        code = "function func" + str(self._function_count) + "(){ \r\n"
+        code += "\tevent_firing();\r\n"
+        code += "}\r\n"
+        return code
+
     def __create_startup(self, elem_ids):
         code = "function startup() {\n"
         i = 0
@@ -113,6 +125,8 @@ class JsDomFuzzer(Fuzzer):
             code += "\t" + "elem" + str(i) + " = " + JsDocument.getElementById(elem_id) + "\n"
             self._js_elements["elem"+str(i)] = JsElement("elem"+str(i))
             i += 1
+        for canvas_id in self._html_fuzzer._canvas_ids:
+            code += "\tfunc_" + canvas_id + "();\r\n"
         code += "\t" + Window.setTimeout("func0"+"()", self._window_timeout) + "\n}\n"
         return code
 

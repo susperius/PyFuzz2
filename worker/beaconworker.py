@@ -9,7 +9,7 @@ from node.model.message_types import MESSAGE_TYPES
 
 
 class BeaconWorker:
-    def __init__(self, beacon_queue, node_worker_queue, db_queue, timeout, node_dict=None):
+    def __init__(self, beacon_queue, node_worker_queue, db_queue, timeout, config_req_interval, node_dict=None):
         self._beacon_queue = beacon_queue
         self._node_worker_queue = node_worker_queue
         self._db_queue = db_queue
@@ -18,6 +18,7 @@ class BeaconWorker:
         self._node_dict = {} if node_dict is None else node_dict
         self._timeout = timeout
         self._greenlets = []
+        self._config_req_interval = config_req_interval
 
     def __beacon_worker_green(self):
         while True:
@@ -61,7 +62,7 @@ class BeaconWorker:
             for key, node in self._node_dict.items():
                 if node.status:
                     self._node_worker_queue.put([(key, node.listener_port), MESSAGE_TYPES["GET_CONFIG"], ""])  # [(ip, port), GET_CONFIG, ""]
-            gevent.sleep(300)
+            gevent.sleep(self._config_req_interval)
 
     @property
     def nodes(self):

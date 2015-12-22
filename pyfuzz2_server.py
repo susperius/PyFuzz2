@@ -29,9 +29,9 @@ class PyFuzz2Server:
         self._crash_dict = {}
         self._logger = logger
         self._config = ConfigParser(config_filename)
-        self._beacon_port, self._beacon_timeout = self._config.beacon_config
-        self._report_port = self._config.report_server_config
-        self._web_port = self._config.web_server_config
+        beacon_port, beacon_timeout, config_req_interval = self._config.beacon_config
+        report_port = self._config.report_server_config
+        web_port = self._config.web_server_config
         self._beacon_queue = Queue()
         self._node_queue = Queue()
         self._report_queue = Queue()
@@ -39,13 +39,13 @@ class PyFuzz2Server:
         self._db_queue = Queue()
         self._db_worker = DatabaseWorker(self._db_queue, self._node_dict, self._crash_dict)
         self._db_worker.load()
-        self._beacon_server = BeaconServer(self._beacon_port, self._beacon_queue)
+        self._beacon_server = BeaconServer(beacon_port, self._beacon_queue)
         self._beacon_worker = BeaconWorker(self._beacon_queue, self._node_queue, self._db_queue,
-                                           self._beacon_timeout, self._node_dict)
-        self._report_server = ReportServer(self._report_port, self._report_queue)
+                                           beacon_timeout, config_req_interval, self._node_dict)
+        self._report_server = ReportServer(report_port, self._report_queue)
         self._report_worker = ReportWorker(self._report_queue, self._db_queue, self._node_dict, self._crash_dict)
         self._node_client_worker = NodeClientWorker(self._node_queue)
-        self._web_server = WebServer(self._web_port, self._web_queue, self.web_main)
+        self._web_server = WebServer(web_port, self._web_queue, self.web_main)
 
     def main(self):
         self._logger.info("PyFuzz2 Server started...")

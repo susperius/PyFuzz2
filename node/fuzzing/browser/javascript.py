@@ -20,9 +20,9 @@ TEMPLATE_FILE = "fuzzing/jsfuzzer/template.dat"
 
 class JsDomFuzzer(Fuzzer):
     NAME = "js_dom_fuzzer"
-    CONFIG_PARAMS = ["starting_elements", "total_operations", "browser", "seed", "file_type"]
+    CONFIG_PARAMS = ["starting_elements", "total_operations", "browser", "seed", "canvas_size", "file_type"]
 
-    def __init__(self, starting_elements, total_operations, browser, seed=31337, file_type='html'):
+    def __init__(self, starting_elements, total_operations, browser, seed, canvas_size, file_type='html'):
         self._starting_elements = int(starting_elements)
         self._total_operations = int(total_operations)
         self._browser = browser
@@ -30,7 +30,7 @@ class JsDomFuzzer(Fuzzer):
         #  self._html_fuzzer = HtmlFuzzer(self._starting_elements, 3, seed)
         self._html_fuzzer = Html5Fuzzer(int(seed), self._starting_elements, 10, 5, file_type)
         self._css_fuzzer = CssFuzzer(seed)
-        self._canvas_fuzzer = CanvasFuzzer(200)
+        self._canvas_fuzzer = CanvasFuzzer(canvas_size)
         if seed == 0:
             random.seed()
         else:
@@ -47,7 +47,7 @@ class JsDomFuzzer(Fuzzer):
 
     @classmethod
     def from_list(cls, params):
-        return cls(params[0], params[1], params[2], params[3], params[4])
+        return cls(params[0], params[1], params[2], params[3], params[4], params[5])
 
     @property
     def prng_state(self):

@@ -1,3 +1,4 @@
+* 12/22/15: if you delete a node in the web interface, it'll be also deleted from the database
 * 11/11/15: implemented the stats page in the web interface; this site lists the occurred crashes with some additional info
 * 11/09/15: changed the databaseworker in order to save and restore the node_address sets for the crashes with pickle (not compatible with old database files)
 * 10/25/15: now the Python SimpleHTTPServer module will be started in the testcase directory if the program option use_http is set

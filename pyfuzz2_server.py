@@ -12,7 +12,7 @@ from communication.beaconserver import BeaconServer
 from communication.reportserver import ReportServer
 from communication.webserver import WebServer
 from model.config import ConfigParser
-from worker.databaseworker import DatabaseWorker
+from worker.databaseworker import DatabaseWorker, DB_TYPES
 from worker.beaconworker import BeaconWorker
 from worker.reportworker import ReportWorker
 from worker.nodeclientworker import NodeClientWorker
@@ -85,6 +85,7 @@ class PyFuzz2Server:
                 if "del" in parameters:
                     key = parameters['del'][0]
                     del(self._beacon_worker.nodes[key])
+                    self._db_queue.put(DB_TYPES['DELETE_NODE'], key)
                 status, headers, html = site.home(self._beacon_worker.nodes)
             elif func == "node_detail":
                 if "node" in parameters and parameters['node'][0] in self._beacon_worker.nodes.keys():

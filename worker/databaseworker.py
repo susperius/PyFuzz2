@@ -8,7 +8,7 @@ from worker import Worker
 from model.crash import Crash
 from model.pyfuzz2_node import PyFuzz2Node
 
-DB_TYPES = {'CRASH': 0x01, 'NODE': 0x02}
+DB_TYPES = {'CRASH': 0x01, 'NODE': 0x02, 'DELETE_NODE': 0x03}
 SEPARATOR = "_;_"
 
 
@@ -46,6 +46,9 @@ class DatabaseWorker(Worker):
         self._cursor.execute("SELECT address, name, listener_port, status, crashes, config FROM nodes WHERE address=? LIMIT 1",
                              address)
         return self._cursor.fetchone()
+
+    def delete_single_node(self, address):
+        self._cursor.execute("DELETE FROM nodes WHERE address=?", address)
 
     def crash_exists(self, key):
         binding = [key]
@@ -109,6 +112,10 @@ class DatabaseWorker(Worker):
                             str(self._node_dict[key].crash_hashes), self._node_dict[key].config]
                     self._cursor.execute("INSERT INTO nodes (address, name, listener_port, status, crashes, config) "
                                          "VALUES (?, ?, ?, ?, ?, ?)", data)
+            elif db_type == DB_TYPES['DELETE_NODE']:
+                key = msg
+                self._logger.debug("DB Access -> deleting key: " + key)
+                self.delete_single_node(key)
             self._db_conn.commit()
 
 

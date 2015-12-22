@@ -1,4 +1,4 @@
-<PyFuzz2Node name="NODE01" net_mode="net" op_mode="fuzzing">
+<PyFuzz2Node name="NODE01" net_mode="net" op_mode="fuzzing" reboot_time="43200">
     <beacon server="192.168.1.130" port="31337" interval="10"/>
     <reporting server="192.168.1.130" port="31338"/>
     <listener port="32337"/>
@@ -11,7 +11,7 @@
 
 <!--
 REDUCING WON'T WORK IN NETWORK MODE !!!
-<PyFuzz2Node name="NODE01" net_mode="single" (single or net) op_mode="fuzzing" (fuzzing or reducing)>
+<PyFuzz2Node name="NODE01" net_mode="single" (single or net) op_mode="fuzzing" (fuzzing or reducing) reboot_time="43200"> 12 hours
     <beacon server="192.168.1.130" port="31337" interval="10"/> Beacon server config
     <reporting server="192.168.1.130" port="31338"/> Report receiving server
     <listener port="32337"/> Local listening port

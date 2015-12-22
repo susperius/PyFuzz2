@@ -36,6 +36,7 @@ class ConfigParser:
             self._node_name = self._root.attrib['name']
             self._node_net_mode = self._root.attrib['net_mode']
             self._node_op_mode = self._root.attrib['op_mode']
+            self._reboot_time = int(self._root.attrib['reboot_time'])
             if self._node_net_mode == "net":
                 beacon = self._root.find("beacon")
                 reporting = self._root.find("reporting")
@@ -91,6 +92,10 @@ class ConfigParser:
     @property
     def node_op_mode(self):
         return self._node_op_mode
+
+    @property
+    def reboot_time(self):
+        return self._reboot_time
 
     @property
     def beacon_config(self):

@@ -1,7 +1,7 @@
 __author__ = 'susperius'
 
 import time
-from node.model.config import ConfigParser
+
 
 
 class PyFuzz2Node:

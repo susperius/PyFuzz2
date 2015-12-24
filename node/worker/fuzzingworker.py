@@ -9,6 +9,7 @@ import logging
 from debugging.windbg import Debugger
 from worker import Worker
 
+WAIT_FOR_PROCESSES_TO_SPAWN = 2
 
 class FuzzingWorker(Worker):
     def __init__(self, programs, fuzzer, report_queue):
@@ -50,39 +51,35 @@ class FuzzingWorker(Worker):
                         if bool(prog['use_http']):
                             self._processes.append(subprocess.Popen(
                                 "python debugging\\windbg.py -p \"" + prog['path']
-                                + "\" -t \"http://127.0.0.1:8080/" + filename + "\" -c True -X"))
-                                #stdout=subprocess.PIPE)
+                                + "\" -t \"http://127.0.0.1:8080/" + filename + "\" -c True -X", stdout=self._DEVNULL,
+                                stderr=self._DEVNULL))
                         else:
-                            self._processes = subprocess.Popen(
+                            self._processes.append(subprocess.Popen(
                                 "python debugging\\windbg.py -p \"" + prog['path']
-                                + "\" -t \"" + testcase_dir + filename + "\" -c True",
-                                stdout=subprocess.PIPE)
+                                + "\" -t \"" + testcase_dir + filename + "\" -c True -X", stdout=self._DEVNULL,
+                                stderr=self._DEVNULL))
                     else:
                         if bool(prog['use_http']):
                             self._processes.append(subprocess.Popen(
                                 "python debugging\\windbg.py -p \"" + prog['path']
-                                + "\" -t \"http://127.0.0.1:8080/" + filename + "\"",
-                                stdout=subprocess.PIPE))
+                                + "\" -t \"http://127.0.0.1:8080/" + filename + "\" -X", stdout=self._DEVNULL,
+                                stderr=self._DEVNULL))
                         else:
                             self._processes.append(subprocess.Popen(
                                 "python debugging\\windbg.py -p \"" + prog['path']
-                                + "\" -t \"" + testcase_dir + filename + "\"",
-                                stdout=subprocess.PIPE))
+                                + "\" -t \"" + testcase_dir + filename + "\" -X", stdout=self._DEVNULL,
+                                stderr=self._DEVNULL))
                     self._logger.debug("Debugger started...\r\n\tprogram: " + prog['name'] + " testcase: " + filename +
                                        " #testcases: " + str(count))
-                    gevent.sleep(1)
-                    image_name = prog['path'].split("\\")[-1]
-                    image_main_pid = self.__get_child_pid()  # TODO: Perhaps it's enough to iterate just over the children ????
-                    for proc in psutil.process_iter():
-                        try:
-                            pinfo = proc.as_dict(attrs=['name', 'pid'])
-                            if pinfo['name'] == image_name:
-                                if pinfo['pid'] != image_main_pid:
-                                    self._processes.append(subprocess.Popen("python debugging\\windbg.py -a " +
-                                                                            str(pinfo['pid'])))
-                                    self._logger.debug("Attached to a child process PID: " + str(pinfo['pid']))
-                        except psutil.NoSuchProcess:
-                            pass
+                    gevent.sleep(WAIT_FOR_PROCESSES_TO_SPAWN)
+                    main_proc = psutil.Process(self._processes[0].pid)
+                    children = main_proc.children(recursive=True)
+                    children = children[1:]  # The first process is the main debugging process
+                    for child in children:
+                        self._processes.append(subprocess.Popen("python debugging\\windbg.py -a " +
+                                                                str(child.pid), stderr=self._DEVNULL,
+                                                                stdout=self._DEVNULL))
+                        self._logger.debug("Attached to a child process PID: " + str(child.pid))
                     gevent.sleep(int(prog['sleep_time']) + 5)
                     self.__kill_processes()
                     self._processes = []
@@ -128,7 +125,3 @@ class FuzzingWorker(Worker):
                 proc.kill()
             except psutil.NoSuchProcess:
                 pass
-
-    def __get_child_pid(self):
-        p = psutil.Process(self._processes[0].pid)
-        return p.children()[0].pid

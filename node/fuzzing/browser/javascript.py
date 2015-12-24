@@ -139,7 +139,7 @@ class JsDomFuzzer(Fuzzer):
             code += "\t" + JsGlobal.try_catch_block(self.__add_element_method())
         if not event:
             self._function_count += 1
-            code += "\t" + Window.setTimeout("func" + str(self._function_count) + "()", self._window_timeout) + " \n"
+            code += "\t" + Window.setTimeout("func" + str(self._function_count) + "()", self._window_timeout + 100) + " \n"
         code += "}\n"
         return code
 

@@ -14,7 +14,7 @@ class FuzzingWorker(Worker):
     def __init__(self, programs, fuzzer, report_queue):
         self._logger = logging.getLogger(__name__)
         self._greenlet = None
-        self._process = None
+        self._processes = []
         self._web_process = None
         self._running = False
         self._programs = programs
@@ -48,30 +48,43 @@ class FuzzingWorker(Worker):
                     testcase_dir = os.getcwd() + "\\testcases\\"
                     if bool(prog['dbg_child']):
                         if bool(prog['use_http']):
-                            self._process = subprocess.Popen(
+                            self._processes.append(subprocess.Popen(
                                 "python debugging\\windbg.py -p \"" + prog['path']
-                                + "\" -t \"http://127.0.0.1:8080/" + filename + "\" -c True",
-                                stdout=subprocess.PIPE)
+                                + "\" -t \"http://127.0.0.1:8080/" + filename + "\" -c True -X"))
+                                #stdout=subprocess.PIPE)
                         else:
-                            self._process = subprocess.Popen(
+                            self._processes = subprocess.Popen(
                                 "python debugging\\windbg.py -p \"" + prog['path']
                                 + "\" -t \"" + testcase_dir + filename + "\" -c True",
                                 stdout=subprocess.PIPE)
                     else:
                         if bool(prog['use_http']):
-                            self._process = subprocess.Popen(
+                            self._processes.append(subprocess.Popen(
                                 "python debugging\\windbg.py -p \"" + prog['path']
                                 + "\" -t \"http://127.0.0.1:8080/" + filename + "\"",
-                                stdout=subprocess.PIPE)
+                                stdout=subprocess.PIPE))
                         else:
-                            self._process = subprocess.Popen(
+                            self._processes.append(subprocess.Popen(
                                 "python debugging\\windbg.py -p \"" + prog['path']
                                 + "\" -t \"" + testcase_dir + filename + "\"",
-                                stdout=subprocess.PIPE)
+                                stdout=subprocess.PIPE))
                     self._logger.debug("Debugger started...\r\n\tprogram: " + prog['name'] + " testcase: " + filename +
                                        " #testcases: " + str(count))
-                    gevent.sleep(int(prog['sleep_time']))
-                    self._process.kill()
+                    gevent.sleep(1)
+                    image_name = prog['path'].split("\\")[-1]
+                    image_main_pid = self.__get_child_pid()
+                    for proc in psutil.process_iter():
+                        try:
+                            pinfo = proc.as_dict(attrs=['name', 'pid'])
+                            if pinfo['name'] == image_name:
+                                if pinfo['pid'] != image_main_pid:
+                                    self._processes.append(subprocess.Popen("python debugging\\windbg.py -a " +
+                                                                            str(pinfo['pid'])))
+                                    self._logger.debug("Attached to a child process PID: " + str(pinfo['pid']))
+                        except psutil.NoSuchProcess:
+                            pass
+                    gevent.sleep(int(prog['sleep_time']) + 5)
+                    self.__kill_processes()
                     if os.path.isfile("tmp_crash_report"):
                         with open("tmp_crash_report") as fd:
                             crash_report = fd.read()
@@ -103,9 +116,15 @@ class FuzzingWorker(Worker):
             self._running = False
             gevent.kill(self._greenlet)
             try:
-                self._process.kill()
-                self._process.terminate()
+                self.__kill_processes()
                 os.close(self._DEVNULL)
             except Exception as ex:
                 self._logger.debug("Exception occured while killing Debugger: " + ex.message)
 
+    def __kill_processes(self):
+        for proc in self._processes:
+            proc.kill()
+
+    def __get_child_pid(self):
+        p = psutil.Process(self._processes[0].pid)
+        return p.children()[0].pid

@@ -1,7 +1,12 @@
-__author__ = 'susperius'
-
 import pykd
 import logging
+import subprocess
+import psutil
+import os
+from optparse import OptionParser
+from time import sleep
+
+__author__ = 'susperius'
 
 
 class ExceptionHandler(pykd.eventHandler):
@@ -36,18 +41,20 @@ class ExceptionHandler(pykd.eventHandler):
 
 
 class Debugger:
-    def __init__(self, program_path, debug_child=False):
+    def __init__(self):
         pykd.initialize()
-        self._program_path = program_path
-        self._debug_child = debug_child
         self._process_id = None
         self._event_handler = ExceptionHandler()
         self._crash_occurred = False
         self._logger = logging.getLogger(__name__)
 
-    def start_process(self, arguments):
-        self._process_id = pykd.startProcess(self._program_path + " " + arguments, debugChildren=self._debug_child)
+    def start_process(self, path, arguments, debug_child=False):
+        self._process_id = pykd.startProcess(path + " " + arguments, debugChildren=debug_child)
         self._logger.debug("Process created")
+
+    def attach_to_pid(self, pid):
+        self._process_id = pid
+        pykd.attachProcess(pid)
 
     def run(self):
         while not self._event_handler.exceptionOccurred():
@@ -60,7 +67,8 @@ class Debugger:
 
     def involve_msec(self):
         pykd.dbgCommand(u".load C:\pyfuzz2\\node\debugging\msec\MSEC.dll")
-        return pykd.dbgCommand(u"!exploitable -v")
+        msec = pykd.dbgCommand(u"!exploitable -v")
+        return  msec if msec is not None else "MSEC not found\r\n"
 
     def issue_dbg_command(self, cmd):
         return pykd.dbgCommand(unicode(cmd))
@@ -72,32 +80,56 @@ class Debugger:
     def crashed(self):
         return self._crash_occurred
 
-if __name__ == "__main__":
-    from optparse import OptionParser
+
+def option_parsing():
     parser = OptionParser()
     parser.add_option("-p", "--path", dest="path", help="The path of the executable", metavar="PATH")
     parser.add_option("-t", "--testcase", dest="testcase", help="The path of the testcase", metavar="TESTCASE")
     parser.add_option("-c", "--child", dest="dbg_child", action="store_true", default=False)
     parser.add_option("-i", "--instruction", dest="instruction", help="Debugger instruction to run before start",
                       default=None)
-    (options, args) = parser.parse_args()
-    dbg = Debugger(options.path, options.dbg_child)
-    dbg.start_process(options.testcase)
-    if options.instruction is not None:
-        options.instruction = options.instruction.replace("'", '"')
-        dbg.issue_dbg_command(options.instruction)
-    dbg.run()
-    crash_report = ""
-    if dbg.crashed:
-        crash_report += "Crash Report\r\n"
-        crash_report += dbg.issue_dbg_command(u"ub eip")
-        crash_report += dbg.issue_dbg_command(u"r")
-        crash_report += "\r\n"
-        crash_report += dbg.issue_dbg_command(u"kb")
-        crash_report += "\r\n"
-        crash_report += dbg.involve_msec()
-        with open("tmp_crash_report", 'w+') as fd:
-            fd.write(crash_report)
-        print crash_report
-    else:
-        print "No Crash"
+    parser.add_option("-X", "--execute", dest="execute", action="store_true", default=False,
+                      help="Start the debugger inside this process")
+    parser.add_option("-a", "--attach", dest="attach", default=None, help="Attach debugger to PID")
+    return parser.parse_args()
+
+
+if __name__ == "__main__":
+    options, args = option_parsing()
+    processes = []
+    if options.execute:
+        dbg = Debugger()
+        dbg.start_process(options.path, options.testcase)
+        if options.instruction is not None:
+            options.instruction = options.instruction.replace("'", '"')
+            dbg.issue_dbg_command(options.instruction)
+        dbg.run()
+        crash_report = ""
+        if dbg.crashed:
+            crash_report += "Crash Report\r\n"
+            crash_report += dbg.issue_dbg_command(u"ub eip")
+            crash_report += dbg.issue_dbg_command(u"r")
+            crash_report += "\r\n"
+            crash_report += dbg.issue_dbg_command(u"kb")
+            crash_report += "\r\n"
+            crash_report += dbg.involve_msec()
+            with open("tmp_crash_report", 'a+') as fd:
+                fd.write(crash_report)
+            print crash_report
+    elif options.attach is not None:
+        dbg = Debugger()
+        dbg.attach_to_pid(int(options.attach))
+        dbg.run()
+        crash_report = ""
+        if dbg.crashed:
+            crash_report += "Crash Report Subprocess\r\n"
+            crash_report += dbg.issue_dbg_command(u"ub eip")
+            crash_report += dbg.issue_dbg_command(u"r")
+            crash_report += "\r\n"
+            crash_report += dbg.issue_dbg_command(u"kb")
+            crash_report += "\r\n"
+            crash_report += dbg.involve_msec()
+            with open("tmp_crash_report", 'a+') as fd:
+                fd.write(crash_report)
+            print crash_report
+        pass

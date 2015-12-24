@@ -27,7 +27,7 @@ class ExceptionHandler(pykd.eventHandler):
         return self.exception_info
 
     def onException(self, exceptInfo):
-        if not exceptInfo.FirstChance:
+        if not exceptInfo.firstChance:
             #self.exception_info = (exceptInfo.ExceptionCode, self.interesting_exceptions[exceptInfo.ExceptionCode],
             #                       exceptInfo)
             self.exception_occurred = True
@@ -37,6 +37,7 @@ class ExceptionHandler(pykd.eventHandler):
 
 class Debugger:
     def __init__(self, program_path, debug_child=False):
+        pykd.initialize()
         self._program_path = program_path
         self._debug_child = debug_child
         self._process_id = None

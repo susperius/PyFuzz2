@@ -30,7 +30,7 @@ class JsDomFuzzer(Fuzzer):
         #  self._html_fuzzer = HtmlFuzzer(self._starting_elements, 3, seed)
         self._html_fuzzer = Html5Fuzzer(int(seed), self._starting_elements, 10, 5, file_type)
         self._css_fuzzer = CssFuzzer(seed)
-        self._canvas_fuzzer = CanvasFuzzer(canvas_size)
+        self._canvas_fuzzer = CanvasFuzzer(int(canvas_size))
         if seed == 0:
             random.seed()
         else:

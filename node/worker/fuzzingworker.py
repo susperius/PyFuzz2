@@ -72,7 +72,7 @@ class FuzzingWorker(Worker):
                                        " #testcases: " + str(count))
                     gevent.sleep(1)
                     image_name = prog['path'].split("\\")[-1]
-                    image_main_pid = self.__get_child_pid()
+                    image_main_pid = self.__get_child_pid()  # TODO: Perhaps it's enough to iterate just over the children ????
                     for proc in psutil.process_iter():
                         try:
                             pinfo = proc.as_dict(attrs=['name', 'pid'])
@@ -85,6 +85,7 @@ class FuzzingWorker(Worker):
                             pass
                     gevent.sleep(int(prog['sleep_time']) + 5)
                     self.__kill_processes()
+                    self._processes = []
                     if os.path.isfile("tmp_crash_report"):
                         with open("tmp_crash_report") as fd:
                             crash_report = fd.read()
@@ -123,7 +124,10 @@ class FuzzingWorker(Worker):
 
     def __kill_processes(self):
         for proc in self._processes:
-            proc.kill()
+            try:
+                proc.kill()
+            except psutil.NoSuchProcess:
+                pass
 
     def __get_child_pid(self):
         p = psutil.Process(self._processes[0].pid)

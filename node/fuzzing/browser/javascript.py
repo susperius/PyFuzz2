@@ -125,8 +125,8 @@ class JsDomFuzzer(Fuzzer):
             code += "\t" + "elem" + str(i) + " = " + JsDocument.getElementById(elem_id) + "\n"
             self._js_elements["elem"+str(i)] = JsElement("elem"+str(i))
             i += 1
-        for canvas_id in self._html_fuzzer._canvas_ids:
-            code += "\tfunc_" + canvas_id + "();\r\n"
+        for canvas_id in self._html_fuzzer.canvas_ids:
+            code += "\t" + Window.setTimeout("func_" + canvas_id + "()", self._window_timeout)
         code += "\t" + Window.setTimeout("func0"+"()", self._window_timeout) + "\n}\n"
         return code
 

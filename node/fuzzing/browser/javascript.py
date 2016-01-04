@@ -7,7 +7,7 @@ from jsfuzzer.JsElement import *
 from jsfuzzer.JsGlobal import JsGlobal
 from jsfuzzer.domObjects import *
 from jsfuzzer.htmlObjects import *
-from jsfuzzer.browserObjects import *
+from jsfuzzer.JsWindow import *
 from html5 import Html5Fuzzer
 from css import CssFuzzer
 from canvas import CanvasFuzzer
@@ -126,8 +126,8 @@ class JsDomFuzzer(Fuzzer):
             self._js_elements["elem"+str(i)] = JsElement("elem"+str(i))
             i += 1
         for canvas_id in self._html_fuzzer.canvas_ids:
-            code += "\t" + Window.setTimeout("func_" + canvas_id + "()", self._window_timeout)
-        code += "\t" + Window.setTimeout("func0"+"()", self._window_timeout) + "\n}\n"
+            code += "\t" + JsWindow.setTimeout("func_" + canvas_id + "()", self._window_timeout)
+        code += "\t" + JsWindow.setTimeout("func0" + "()", self._window_timeout) + "\n}\n"
         return code
 
     def __add_function(self, func_name=None, event=False):
@@ -139,7 +139,7 @@ class JsDomFuzzer(Fuzzer):
             code += "\t" + JsGlobal.try_catch_block(self.__add_element_method())
         if not event:
             self._function_count += 1
-            code += "\t" + Window.setTimeout("func" + str(self._function_count) + "()", self._window_timeout + 100) + " \n"
+            code += "\t" + JsWindow.setTimeout("func" + str(self._function_count) + "()", self._window_timeout + 100) + " \n"
         code += "}\n"
         return code
 

@@ -1,6 +1,6 @@
 __author__ = 'susperius'
 
-class Window:
+class JsWindow:
 
     @staticmethod
     def setTimeout(function, timeout):

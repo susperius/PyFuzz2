@@ -10,10 +10,6 @@ class Reducer:
         raise NotImplementedError('ABSTRACT CLASS')
 
     @property
-    def path(self):
-         raise NotImplementedError('ABSTRACT CLASS')
-
-    @property
     def file_type(self):
         raise NotImplementedError('ABSTRACT CLASS')
 
@@ -24,5 +20,5 @@ class Reducer:
     def reduce(self):
         raise NotImplementedError('ABSTRACT METHOD')
 
-    def set_case(self, test_case, crash_report):
+    def set_case(self, path, test_case, crash_report):
         raise NotImplementedError('ABSTRACT CLASS')

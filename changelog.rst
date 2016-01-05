@@ -1,3 +1,5 @@
+* 01/05/15: redesigned the reducingworker in order to use the new debugging approach and to traverse through the result directories instead of the testcase directory;
+    added a 2 seconds delay in template.dat in order to avoid/minimize race conditions, while the debugger is looking for the processes and attaching to them
 * 12/22/15: if you delete a node in the web interface, it'll be also deleted from the database; you can now configure in which interval the server is requesting the node configs;
     the size of the canvas part is now configurable; node reboot time is now adjustable
 * 11/16/15: implemented a canvas fuzzer for 2D canvas elements

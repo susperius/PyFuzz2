@@ -7,12 +7,11 @@ import logging
 
 class JsReducer(Reducer):
     NAME = 'js_reducer'
-    CONFIG_PARAMS = ['path', 'file_type']
+    CONFIG_PARAMS = ['file_type']
 
-    def __init__(self, path, file_type):
+    def __init__(self, file_type):
         self._logger = logging.getLogger(__name__)
         self._file_type = file_type
-        self._path = path
         self._reduced_case = ""
         self._test_case = ""
         self._crash_report = ""
@@ -31,10 +30,10 @@ class JsReducer(Reducer):
 
     @classmethod
     def from_list(cls, params):
-        return cls(params[0], params[1])
+        return cls(params[0])
 
-    def set_case(self, test_case, crash_report):
-        with open(self._path + test_case, 'rb') as case_fd, open(self._path + crash_report, 'rb') as report_fd:
+    def set_case(self, path, test_case, crash_report):
+        with open(path + test_case, 'rb') as case_fd, open(path + crash_report, 'rb') as report_fd:
             self._test_case = case_fd.read()
             self._crash_report = report_fd.read()
             self._reduced_case = ""
@@ -47,10 +46,6 @@ class JsReducer(Reducer):
     @property
     def file_type(self):
         return self._file_type
-
-    @property
-    def path(self):
-        return self._path
 
     @property
     def crash_report(self):

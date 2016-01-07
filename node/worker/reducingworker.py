@@ -51,7 +51,7 @@ class ReducingWorker(Worker):
                     self._logger.info("Crash file verified")
                     break
             if not crashed:
-                self._logger.info("Crash file seems to be a false positive: " + crash['directory'] + "\\" + crash['file'])
+                self._logger.info("Crash file seems to be a false positive: " + crash['directory'] + "\\" + crash['crash_file'])
                 continue
             self._reducer.set_case(crash['directory'] + "/", crash['crash_file'], crash['report'])
             original_report = self._reducer.crash_report
@@ -87,7 +87,7 @@ class ReducingWorker(Worker):
                     self._reducer.crashed(False)
                 reduced_case = self._reducer.reduce()
             if reduced_crash is not None:
-                reduced_crash_report = re.sub(reduced_crash_min_hash, "REDUCED", reduced_crash_report)
+                reduced_crash_report = re.sub(reduced_crash_min_hash, "0x00000000", reduced_crash_report)
                 testcase.append(reduced_case)
                 self._report_queue.put((0xFF, (program['name'], reduced_crash_report, testcase)))
         self._logger.info("Reducing completed ...")

@@ -71,16 +71,7 @@ class FuzzingWorker(Worker):
                                 stderr=self._DEVNULL))
                     self._logger.debug("Debugger started...\r\n\tprogram: " + prog['name'] + " testcase: " + filename +
                                        " #testcases: " + str(count))
-                    gevent.sleep(WAIT_FOR_PROCESSES_TO_SPAWN)
-                    main_proc = psutil.Process(self._processes[0].pid)
-                    children = main_proc.children(recursive=True)
-                    children = children[1:]  # The first process is the main debugging process
-                    for child in children:
-                        self._processes.append(subprocess.Popen("python debugging\\windbg.py -a " +
-                                                                str(child.pid), stderr=self._DEVNULL,
-                                                                stdout=self._DEVNULL))
-                        self._logger.debug("Attached to a child process PID: " + str(child.pid))
-                    gevent.sleep(int(prog['sleep_time']) + 5)
+                    gevent.sleep(int(prog['sleep_time']))
                     self.__kill_processes()
                     self._processes = []
                     if os.path.isfile("tmp_crash_report"):

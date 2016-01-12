@@ -104,15 +104,6 @@ class ReducingWorker(Worker):
                     "python debugging\\windbg.py -p \"" + program['path']
                     + "\" -t \"" + os.getcwd() + crash['directory'] + filename +
                     "\" -X", stdout=self._DEVNULL, stderr=self._DEVNULL))
-        gevent.sleep(WAIT_FOR_PROCESSES_TO_SPAWN)
-        main_proc = psutil.Process(self._processes[0].pid)
-        children = main_proc.children(recursive=True)
-        children = children[1:]  # The first process is the main debugging process
-        for child in children:
-            self._processes.append(subprocess.Popen("python debugging\\windbg.py -a " +
-                                                    str(child.pid), stderr=self._DEVNULL,
-                                                    stdout=self._DEVNULL))
-            self._logger.debug("Attached to a child process PID: " + str(child.pid))
         gevent.sleep(int(program['sleep_time']))
         self.__kill_processes()
         self._processes = []

@@ -103,7 +103,7 @@ class Html5Fuzzer(Fuzzer):
         self._head += "<link rel=\"stylesheet\" href=\"TESTCASE.css\">\r\n"
         self._head += "<script type='text/javascript'>\r\nSCRIPT_BODY\r\n</script>\r\n"
         tag, self._body, close_body = self.__build_tag("body")
-        self._body = self._body[:-2] + " onload=\"eval(setTimeout(function () { startup(); }, 2000))\">\r\n"
+        self._body = self._body[:-2] + " onload=\"eval(setTimeout(function () { startup(); }, 200))\">\r\n"
         self._body += "HELLO WORLD!\r\n<br>"
         while self._elements >= count:
             closing_list = []

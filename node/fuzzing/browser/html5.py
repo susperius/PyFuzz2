@@ -2,7 +2,7 @@ __author__ = 'susperius'
 
 import random
 
-from model.HtmlObjects import HtmlObjects
+from model.HtmlObjects import *
 from model.values import FuzzValues
 from model.CssProperties import CSS_STYLES
 from ..fuzzer import Fuzzer
@@ -110,8 +110,8 @@ class Html5Fuzzer(Fuzzer):
             for i in range(random.randint(1, self._max_depth)):
                 tag, open_tag, close_tag = self.__build_tag()
                 count += 1
-                if HtmlObjects.HTML5_OBJECTS[tag]['outer_tag'] is not None\
-                   and HtmlObjects.HTML5_OBJECTS[tag]['outer_tag'] == "head":  # Tags only allowed in head
+                if HTML5_OBJECTS[tag]['outer_tag'] is not None\
+                   and HTML5_OBJECTS[tag]['outer_tag'] == "head":  # Tags only allowed in head
                     self._head += open_tag + random.choice(FuzzValues.STRINGS) + close_tag + "\r\n"
                 else:  # default body tags
                     self._body += open_tag + random.choice(FuzzValues.STRINGS) + "\r\n"
@@ -134,7 +134,7 @@ class Html5Fuzzer(Fuzzer):
         elem_id = "id" + str(len(self._elem_ids))
         self._elem_ids.append(elem_id)
         if tag is None:
-            tags = [x for x in HtmlObjects.HTML5_OBJECTS.keys() if x not in self.NO_SINGLE_USE_TAGS]
+            tags = [x for x in HTML5_OBJECTS.keys() if x not in self.NO_SINGLE_USE_TAGS]
             tag = random.choice(tags)
             self._used_tags.add(tag)
             if tag == "table":
@@ -144,22 +144,22 @@ class Html5Fuzzer(Fuzzer):
         if tag == "canvas":
             self._canvas_ids.append(elem_id)
         close_tag += "</" + tag + ">"
-        if HtmlObjects.HTML5_OBJECTS[tag]['outer_tag'] is not None and not ignore_outer_tag:
-            if "head" not in HtmlObjects.HTML5_OBJECTS[tag]['outer_tag']:
-                ignore, open_tag, close_tag_out = self.__build_tag(random.choice(HtmlObjects.HTML5_OBJECTS[tag]['outer_tag']))
+        if HTML5_OBJECTS[tag]['outer_tag'] is not None and not ignore_outer_tag:
+            if "head" not in HTML5_OBJECTS[tag]['outer_tag']:
+                ignore, open_tag, close_tag_out = self.__build_tag(random.choice(HTML5_OBJECTS[tag]['outer_tag']))
                 close_tag += close_tag_out
         open_tag += "<" + tag + " id=\"" + elem_id + "\""
         if tag == "form":
             self._form_ids.append(elem_id)
         elif tag == "th":
             self._header_ids.append(elem_id)
-        attribs_avail = HtmlObjects.HTML5_OBJECTS[tag]['attr']
+        attribs_avail = HTML5_OBJECTS[tag]['attr']
         max_tag_attr = len(attribs_avail.keys())
         attr_count = random.randint(1, self._max_attr) if self._max_attr < max_tag_attr else \
             random.randint(1, max_tag_attr)
         attribs = set()
-        if HtmlObjects.HTML5_OBJECTS[tag]['req_attr'] is not None:
-            for attr in HtmlObjects.HTML5_OBJECTS[tag]['req_attr']:
+        if HTML5_OBJECTS[tag]['req_attr'] is not None:
+            for attr in HTML5_OBJECTS[tag]['req_attr']:
                 attribs.add(attr)
         while len(attribs) < attr_count:
             attribs.add(random.choice(attribs_avail.keys()))

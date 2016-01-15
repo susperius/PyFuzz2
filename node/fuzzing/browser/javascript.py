@@ -258,7 +258,7 @@ class JsDomFuzzer(Fuzzer):
                 code += self._js_elements[key].removeEventListener(event,
                                                                    self._js_elements[key].registered_events[event])
         elif method == 'setAttribute':
-            attr = random.choice(HtmlObjects.HTML_ATTR_GENERIC)
+            attr = random.choice(HTML_ATTR_GENERIC)
             if attr == 'style':
                 val = ""
                 for i in range(1, 50):

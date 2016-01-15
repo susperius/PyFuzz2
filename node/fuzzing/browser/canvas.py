@@ -1,8 +1,8 @@
 import random
-import jsfuzzer.JsCanvas as JsCanvas
+import model.JsCanvas as JsCanvas
 from ..fuzzer import Fuzzer
-from jsfuzzer.JsGlobal import JsGlobal
-from jsfuzzer.values import FuzzValues
+from model.JsGlobal import JsGlobal
+from model.values import FuzzValues
 
 __author__ = 'susperius'
 

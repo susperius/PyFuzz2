@@ -2,20 +2,20 @@ __author__ = 'susperius'
 
 import random
 
-from jsfuzzer.JsDocument import *
-from jsfuzzer.JsElement import *
-from jsfuzzer.JsGlobal import JsGlobal
-from jsfuzzer.domObjects import *
-from jsfuzzer.htmlObjects import *
-from jsfuzzer.JsWindow import *
+from model.JsDocument import *
+from model.JsElement import *
+from model.JsGlobal import JsGlobal
+from model.DomObjects import *
+from model.HtmlObjects import *
+from model.JsWindow import *
 from html5 import Html5Fuzzer
 from css import CssFuzzer
 from canvas import CanvasFuzzer
-from jsfuzzer.values import FuzzValues
-from jsfuzzer.cssProperties import CSS_STYLES
+from model.values import FuzzValues
+from model.CssProperties import CSS_STYLES
 from ..fuzzer import Fuzzer
 
-TEMPLATE_FILE = "fuzzing/jsfuzzer/template.dat"
+TEMPLATE_FILE = "fuzzing/model/template.dat"
 
 
 class JsDomFuzzer(Fuzzer):

@@ -2,7 +2,7 @@ __author__ = 'susperius'
 
 import os
 import random
-from ..browser.jsfuzzer.values import FuzzValues
+from ..browser.model.values import FuzzValues
 
 
 class DataTypes:

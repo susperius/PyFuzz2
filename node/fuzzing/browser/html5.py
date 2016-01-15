@@ -2,9 +2,9 @@ __author__ = 'susperius'
 
 import random
 
-from jsfuzzer.htmlObjects import HtmlObjects
-from jsfuzzer.values import FuzzValues
-from jsfuzzer.cssProperties import CSS_STYLES
+from model.HtmlObjects import HtmlObjects
+from model.values import FuzzValues
+from model.CssProperties import CSS_STYLES
 from ..fuzzer import Fuzzer
 
 

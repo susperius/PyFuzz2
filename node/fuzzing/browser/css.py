@@ -3,8 +3,8 @@ __author__ = 'susperius'
 import random
 
 from ..fuzzer import Fuzzer
-from jsfuzzer.values import FuzzValues
-from jsfuzzer.cssProperties import CSS_STYLES
+from model.values import FuzzValues
+from model.CssProperties import CSS_STYLES
 
 class CssFuzzer(Fuzzer):
     NAME = "CssFuzzer"

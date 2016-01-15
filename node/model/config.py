@@ -72,12 +72,12 @@ class ConfigParser:
                 self._reducer_config = []
                 if self._reducer_type not in REDUCERS.keys():
                     raise ValueError('Unsupported reducing type')
-                for elem in REDUCERS[self._reducer_type]:
+                for elem in REDUCERS[self._reducer_type][0]:
                     self._reducer_config.append(reducer.attrib[elem])
                 self._file_type = reducer.attrib['file_type']
             else:
                 raise ValueError('Unsupported Operation Mode!')
-        except Exception as ex:
+        except ValueError as ex:
             self._logger.error("General error occurred while parsing config: " + str(ex.message) + str(ex.args))
             quit()
 

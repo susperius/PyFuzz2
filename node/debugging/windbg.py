@@ -100,6 +100,7 @@ if __name__ == "__main__":
     if options.execute:
         dbg = Debugger()
         dbg.start_process(options.path, options.testcase)
+        dbg.issue_dbg_command(u".childdbg 1")
         if options.instruction is not None:
             options.instruction = options.instruction.replace("'", '"')
             dbg.issue_dbg_command(options.instruction)

@@ -12,7 +12,7 @@ SCRIPT_BODY
 
 </head>
 
-<body id="doc_body" onload="eval(startup())">
+<body id="doc_body" onload="eval(setTimeout(function () { startup(); }, 2000))">
 Hello World!
 HTML_BODY
 </body>

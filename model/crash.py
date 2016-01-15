@@ -12,8 +12,6 @@ class Crash:
             self.node_addresses.add(node_address)
         else:
             self._node_addresses = self._node_addresses.union(node_address)
-            self._node_addresses.add("192.168.1.139")
-            self._node_addresses.add("192.168.1.140")
         self._program = program
         self._maj_hash = maj_hash
         self._min_hash = min_hash

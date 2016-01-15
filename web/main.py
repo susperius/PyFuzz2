@@ -94,7 +94,7 @@ class WebSite:
         stats_html = self._html_template
         stats_html = stats_html.replace("SECTION_TITLE", "Crash Stats")
         stats_table = html.table_header(Crash.FIELDS, "stats_table")
-        for key in crashes_dict.keys():
+        for key in sorted(crashes_dict.keys()):
             stats_table += html.table_entry(crashes_dict[key].stats)
         stats_table += html.table_footer()
         stats_html = stats_html.replace("REPLACE_ME", stats_table)

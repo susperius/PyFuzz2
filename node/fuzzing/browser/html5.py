@@ -6,6 +6,7 @@ from model.HtmlObjects import *
 from model.values import FuzzValues
 from model.CssProperties import CSS_STYLES
 from ..fuzzer import Fuzzer
+from model.FuzzedHtmlPage import HtmlPage
 
 
 class Html5Fuzzer(Fuzzer):
@@ -53,6 +54,7 @@ class Html5Fuzzer(Fuzzer):
         self._head = ""
         self._body = ""
         self._used_tags = set()
+        self._html_page = None
 
     @classmethod
     def from_list(cls, params):
@@ -93,6 +95,7 @@ class Html5Fuzzer(Fuzzer):
         self._header_ids = []
         self._map_names = []
         self._used_tags = set()
+        self._html_page = HtmlPage()
 
     def fuzz(self):
         self.__reinit()
@@ -126,7 +129,8 @@ class Html5Fuzzer(Fuzzer):
             self._body += open_tag + close_tag + "\r\n"
         html = "<!DOCTYPE html>\r\n<html>\r\n" + self._head + close_head + "\r\n" + self._body + close_body + "\r\n" + \
                "</html>\r\n"
-        return html
+        self._html_page.set_raw_html(html)
+        return self._html_page
 
     def __build_tag(self, tag=None, ignore_outer_tag=False):
         open_tag = ""
@@ -138,9 +142,12 @@ class Html5Fuzzer(Fuzzer):
             tag = random.choice(tags)
             self._used_tags.add(tag)
             if tag == "table":
+                self._html_page.add_element(elem_id, tag)
                 return "table", self.__build_table(), ""
             elif tag == "dl":
+                # self._html_page.add_element(elem_id, tag)
                 return "dl", self.__build_dl(), ""
+        self._html_page.add_element(elem_id, tag)
         if tag == "canvas":
             self._canvas_ids.append(elem_id)
         close_tag += "</" + tag + ">"

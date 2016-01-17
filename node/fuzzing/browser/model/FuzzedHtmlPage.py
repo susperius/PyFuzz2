@@ -18,6 +18,9 @@ class HtmlPage:
     def get_elements_by_id(self):
         return self._elements
 
+    def change_element(self, element_id, element_type):
+        self._elements[element_id] = element_type
+
     def get_elements_by_type(self):
         elements_by_type = dict.fromkeys(HTML5_OBJECTS.keys())
         for element_id in self._elements.iterkeys():
@@ -26,4 +29,7 @@ class HtmlPage:
             else:
                 elements_by_type[self._elements[element_id]].append(element_id)
         return elements_by_type
+
+    def get_element_ids(self):
+        return self._elements.keys()
 

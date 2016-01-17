@@ -90,16 +90,16 @@ class JsDomFuzzer(Fuzzer):
                 css_fd.write(css)
 
     def fuzz(self):
-        html = self._html_fuzzer.fuzz()
-        self._css_fuzzer.set_tags(self._html_fuzzer.tags)
+        html_page = self._html_fuzzer.fuzz()
+        html = html_page.get_raw_html()
+        self._css_fuzzer.set_tags(html_page.get_element_ids())
         css = self._css_fuzzer.fuzz()
-        ids = self._html_fuzzer.elem_ids
+        ids = (html_page.get_element_ids())
         js_code = ""
-        for canvas_id in self._html_fuzzer.canvas_ids:
+        for canvas_id in (html_page.get_elements_by_type())['canvas']:
             self._canvas_fuzzer.set_canvas_id(canvas_id)
             js_code += self._canvas_fuzzer.fuzz()
         js_code += self.__create_startup(ids)
-
         while self._total_operations > self._operations_count:
             js_code += self.__add_function()
         js_code += self.__last_function()
@@ -176,7 +176,7 @@ class JsDomFuzzer(Fuzzer):
 
     def __add__new_element(self):
         elem_name = "elem_cr" + str(len(self._js_elements))
-        code = elem_name + " = " + JsDocument.createElement(random.choice(HtmlObjects.HTML_OBJECTS)) + "\n"
+        code = elem_name + " = " + JsDocument.createElement(random.choice(HTML_OBJECTS)) + "\n"
         self._js_elements[elem_name] = JsElement(elem_name)
         return elem_name, code
 
@@ -210,7 +210,7 @@ class JsDomFuzzer(Fuzzer):
             self._js_elements[elem_name] = JsElement(elem_name)
             self._js_elements[elem_name].set_children(self._js_elements[key].get_children())
         elif method == 'hasAttribute':
-            code += self._js_elements[key].hasAttribute(random.choice(HtmlObjects.HTML_ATTR_GENERIC))
+            code += self._js_elements[key].hasAttribute(random.choice(HTML_ATTR_GENERIC))
         elif method == 'hasChildNode':
             code += self._js_elements[key].hasChildNodes()
         elif method == 'insertBefore':
@@ -225,7 +225,7 @@ class JsDomFuzzer(Fuzzer):
             code += self._js_elements[key].normalize()
         elif method == 'removeAttribute':
             if not self._js_elements[key].attributes:
-                code += self._js_elements[key].setAttribute(random.choice(HtmlObjects.HTML_ATTR_GENERIC),
+                code += self._js_elements[key].setAttribute(random.choice(HTML_ATTR_GENERIC),
                                                             random.choice(FuzzValues.INTERESTING_VALUES))
             else:
                 code += self._js_elements[key].removeAttribute(random.choice(self._js_elements[key].attributes.keys()))

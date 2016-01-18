@@ -1,5 +1,3 @@
-__author__ = 'susperius'
-
 import gevent
 import pickle
 import logging
@@ -7,8 +5,10 @@ import os
 from worker import Worker
 from databaseworker import DB_TYPES, SEPARATOR
 from node.model.message_types import MESSAGE_TYPES
-from node.utils.html_css_splitter import split_files, is_two_files
 from model.crash import Crash
+from hashlib import md5
+
+__author__ = 'susperius'
 
 
 class ReportWorker(Worker):
@@ -32,6 +32,10 @@ class ReportWorker(Worker):
             elif MESSAGE_TYPES['GET_CONFIG'] == msg_type:
                 config = msg
                 self._nodes[address].config = config
+            elif MESSAGE_TYPES['UNKNOWN'] == msg_type:
+                # Structure unknown crash message (0xFE, (prog['name'], testcases))
+                self.__report_unknown(msg)
+            gevent.sleep(0)
             gevent.sleep(1)
 
     def start_worker(self):
@@ -48,10 +52,10 @@ class ReportWorker(Worker):
         return self._crashes
 
     @staticmethod
-    def __parse_string_report(crash, value, end_marker="\r"):
+    def __parse_string_report(crash, value, end_marker="\r\n"):
         start = crash.find(value) + len(value)
         end = crash.find(end_marker, start)
-        if end_marker == "\r" and end == -1:
+        if end_marker == "\r\n" and end == -1:
             end = crash.find("\n", start)
         return crash[start:end]
 
@@ -78,7 +82,17 @@ class ReportWorker(Worker):
                               " \r\n\tsaved in " + directory)
             os.makedirs(directory)
             for testcase in testcases:
-                with open(directory + "/" + testcase[0], 'w+') as fd_case:
+                with open(directory + "/" + testcase[0], 'wb+') as fd_case:
                     fd_case.write(testcase[1])
-            with open(directory + "/crash_report.txt", 'w+') as fd_rep:
+            with open(directory + "/crash_report.txt", 'wb+') as fd_rep:
                 fd_rep.write(crash_report)
+
+    @staticmethod
+    def __report_unknown(msg):
+        prog_name, testcases = msg
+        md5_hash = md5()
+        md5_hash.update(testcases[0][1])
+        directory = "results/" + prog_name + "/" + md5_hash.hexdigest() + "/"
+        for testcase in testcases:
+            with open(directory + testcase[0], 'wb+') as fd:
+                fd.write(testcase[1])

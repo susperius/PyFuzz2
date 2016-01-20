@@ -60,18 +60,6 @@ class Html5Fuzzer(Fuzzer):
     def from_list(cls, params):
         pass  # TODO: implement
 
-    @property
-    def elem_ids(self):
-        return self._elem_ids
-
-    @property
-    def tags(self):
-        return self._used_tags
-
-    @property
-    def canvas_ids(self):
-        return self._canvas_ids
-
     def file_type(self):
         return self._file_type
 

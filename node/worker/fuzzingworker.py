@@ -1,11 +1,9 @@
 import gevent
 import os
-import time
 import psutil
 import subprocess
 import logging
 import debugging.PyFuzzDbg as PyFuzzDbg
-from debugging.windbg import Debugger
 from worker import Worker
 
 __author__ = 'susperius'

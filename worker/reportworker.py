@@ -34,7 +34,7 @@ class ReportWorker(Worker):
                 self._nodes[address].config = config
             elif MESSAGE_TYPES['UNKNOWN'] == msg_type:
                 # Structure unknown crash message (0xFE, (prog['name'], testcases))
-                self.__report_unknown(msg)
+                self.__report_unknown(address, msg)
             gevent.sleep(0)
             gevent.sleep(1)
 
@@ -87,12 +87,20 @@ class ReportWorker(Worker):
             with open(directory + "/crash_report.txt", 'wb+') as fd_rep:
                 fd_rep.write(crash_report)
 
-    @staticmethod
-    def __report_unknown(msg):
+    def __report_unknown(self, node_address, msg):
         prog_name, testcases = msg
         md5_hash = md5()
         md5_hash.update(testcases[0][1])
-        directory = "results/" + prog_name + "/" + md5_hash.hexdigest() + "/"
+        hex_hash = md5_hash.hexdigest()
+        directory = "results/" + prog_name + "/" + hex_hash + "/"
+        self._logger.info("New unique crash in " + prog_name + "-> \r\n\tclass = UNKNOWN" +
+                          " \r\n\tShort Description = UNKNOWN CRASH"
+                          " \r\n\tsaved in " + directory)
+        crash_key = prog_name + SEPARATOR + hex_hash
+        #  I know there could happen a collision, but I think the chances are so small that I take the risk willingly
+        self._crashes[crash_key] = Crash(node_address, prog_name, hex_hash, "UNKNOWN", "UNKNOWN", "UNKNOWN")
+        self._db_queue.put(self._crashes[crash_key])
+        os.makedirs(directory)
         for testcase in testcases:
             with open(directory + testcase[0], 'wb+') as fd:
                 fd.write(testcase[1])

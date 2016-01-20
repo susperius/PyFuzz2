@@ -60,6 +60,7 @@ class FuzzingWorker(Worker):
                     else:
                         pyfuzzdbg.set_app_name(unicode(prog['path'] + "\"" + testcase_dir + filename + "\"\x00\x00"))
                         return_code = pyfuzzdbg.start_test()
+                    gevent.sleep(1)
                     #  --------------------------------------------------------------------------------------------
                     #  Just involve the whole Windows Debug Engine if a crash appeared else just save the resources
                     if return_code != 0:

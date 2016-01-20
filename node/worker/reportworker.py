@@ -82,12 +82,15 @@ class ReportWorker(Worker):
             with open(directory + "/crash_report.txt", 'wb+') as fd_rep:
                 fd_rep.write(crash_report)
 
-    @staticmethod
-    def __report_unknown(msg):
+    def __report_unknown(self, msg):
         prog_name, testcases = msg
         md5_hash = md5()
         md5_hash.update(testcases[0][1])
         directory = "results/" + prog_name + "/" + md5_hash.hexdigest() + "/"
+        self._logger.info("New unique crash in " + prog_name + "-> \r\n\tclass = UNKNOWN" +
+                          " \r\n\tShort Description = UNKNOWN CRASH"
+                          " \r\n\tsaved in " + directory)
+        os.makedirs(directory)
         for testcase in testcases:
             with open(directory + testcase[0], 'wb+') as fd:
                 fd.write(testcase[1])

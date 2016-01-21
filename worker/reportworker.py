@@ -92,7 +92,7 @@ class ReportWorker(Worker):
         md5_hash = md5()
         md5_hash.update(testcases[0][1])
         hex_hash = md5_hash.hexdigest()
-        directory = "results/" + prog_name + "/" + hex_hash + "/"
+        directory = "results/" + prog_name + "/UNKNOWN/" + hex_hash + "/"
         self._logger.info("New unique crash in " + prog_name + "-> \r\n\tclass = UNKNOWN" +
                           " \r\n\tShort Description = UNKNOWN CRASH"
                           " \r\n\tsaved in " + directory)

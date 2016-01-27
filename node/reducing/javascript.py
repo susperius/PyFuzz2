@@ -1,8 +1,8 @@
-__author__ = 'susperius'
 from reducer import Reducer
 import re
-from fuzzing.browser.jsfuzzer.browserObjects import Window
 import logging
+
+__author__ = 'susperius'
 
 
 class JsReducer(Reducer):
@@ -14,12 +14,13 @@ class JsReducer(Reducer):
         self._file_type = file_type
         self._reduced_case = ""
         self._test_case = ""
-        self._crash_report = ""
         self._functions = []
         self._event_handler = []
+        self._canvas_function = []
         self._start = 0
-        self._crashed = False
         self._phase = 0
+        self._try_start_pos = 0
+        self._try_end_pos = 0
         '''
         Phases in reducing:
         0 - Determine which functions are necessary
@@ -32,102 +33,76 @@ class JsReducer(Reducer):
     def from_list(cls, params):
         return cls(params[0])
 
-    def set_case(self, path, test_case, crash_report):
-        with open(path + test_case, 'rb') as case_fd, open(path + crash_report, 'rb') as report_fd:
+    def set_case(self, path, test_case):
+        with open(path + test_case, 'rb') as case_fd:
             self._test_case = case_fd.read()
-            self._crash_report = report_fd.read()
-            self._reduced_case = ""
-            self._functions = self.__find_functions()
-            self._event_handler = self.__find_event_handler()
-            self._start = 0
-            self._crashed = False
-            self._phase = 0
+        self._test_case = self._test_case.replace("\r\n", "\n")
+        self._reduced_case = ""
+        self._functions = self.__get_functions()
+        self._event_handler = self.__get_event_handler_functions()
+        self._canvas_function = self.__get_canvas_functions()
+        self._start = 0
+        self._phase = 0
+        self._try_start_pos = 0
+        self._try_end_pos = 0
 
     @property
     def file_type(self):
         return self._file_type
 
-    @property
-    def crash_report(self):
-        return self._crash_report
-
     def crashed(self, crashed):
-        self._crashed = crashed
-        if self._crashed:
+        if crashed:
             self._test_case = self._reduced_case
-            if self._phase == 0:
-                self._functions = self.__find_functions()
-                if self._start + 3 >= len(self._functions):
-                    self._phase = 1
-            elif self._phase == 1:
-                self._event_handler = self.__find_event_handler()
-                if self._start >= len(self._event_handler):
-                    self._phase = 2
-                    self._start = len(self._test_case)
-        else:
-            if self._phase == 0:
-                if self._start + 3 < len(self._functions):
-                    self._start += 1
-                else:
-                    self._phase = 1
-                    self._start = 0
-            elif self._phase == 1:
-                self._start += 1
-                if self._start >= len(self._event_handler):
-                    self._phase = 2
-                    self._start = len(self._test_case)
-            elif self._phase == 2:
-                try_pos, end_pos = self.__find_try_catch(self._start)
-                self._start = try_pos
+        if self._phase == 0 and len(self._functions) == 1:
+            self._phase += 1
+        elif self._phase == 1 and not self._event_handler:
+            self._phase += 1
+        elif self._phase == 2:
+            if not crashed:
+                self._start = self._try_end_pos
 
     def reduce(self):
         if self._phase == 0:
-            self.__remove_functions(self._start, self._start + 2)
+            self.__remove_function(self._functions.pop(0), self._functions[0])
         elif self._phase == 1:
-            self.__remove_event_handler(self._start)
+            self.__remove_function(self._event_handler.pop(0))
         elif self._phase == 2:
-            self.__remove_try_catch_block(self._start)
-        else:
-            return None
+            self.__remove_try_catch_block()
         return self._reduced_case
 
-    def __find_functions(self):
-        func_list = ['function startup']
-        func_list += re.findall('function func[0-9]+', self._test_case)
-        func_list.append('function event_firing')
+    def __get_functions(self):
+        # func_list = ['function startup']
+        func_list = []
+        func_list += re.findall('function func[0-9]+', self._test_case)  # normal functions
+        # func_list.append('function event_firing')
         return func_list
 
-    def __find_event_handler(self):
+    def __get_event_handler_functions(self):
         func_list = re.findall('function [a-zA-Z]+_handler', self._test_case)
         return func_list
 
-    def __remove_event_handler(self, handler_number):
-        self._logger.debug('remove: ' + self._event_handler[handler_number])
-        start_pos = self._test_case.find(self._event_handler[handler_number])
-        end_pos = self._test_case.find(self._event_handler[handler_number + 1]) if handler_number + 1 < len(
-            self._event_handler) else self._test_case.find('</script') - 1
-        self._reduced_case = self._test_case[:start_pos] + self._test_case[end_pos:]
+    def __get_canvas_functions(self):
+        func_list = re.findall('function func_id[0-9]+', self._test_case)
+        return func_list
 
-    def __remove_functions(self, start, end):
-        self._logger.debug('remove: ' + self._functions[start + 1])
-        start_pos = self._test_case.find(self._functions[start])
-        end_func = self._functions[end].replace('function ', '')
-        end_func_pos = self._test_case.find(self._functions[end])
-        window_start_pos = self._test_case.find('window.setTimeout(', start_pos)
-        self._reduced_case = self._test_case[:window_start_pos] + Window.setTimeout(end_func + '()', 40) + "\n}\n" + \
-                             self._test_case[end_func_pos:]
+    def __remove_function(self, function_name, next_function=None):
+        self._logger.debug("Removing function: " + function_name)
+        function_start_pos = self._test_case.find(function_name)
+        function_end_pos = self._test_case.find("}\nfunction", function_start_pos) + 2
+        self._reduced_case = self._test_case[:function_start_pos] + self._test_case[function_end_pos:]
+        if next_function is not None:
+            function_name = function_name.replace("function", "")
+            next_function = next_function.replace("function", "")
+            self._reduced_case = self._reduced_case.replace(
+                    function_name + "() }, ",
+                    next_function + "() }, "
+            )
 
-    def __find_try_catch(self, start):
-        try_pos = self._test_case.rfind('try{ ', 0, start)
-        end_pos = self._test_case.find(' }\n', try_pos)
-        end_pos += 3
-        return try_pos, end_pos
-
-    def __remove_try_catch_block(self, start):
-        try_pos, end_pos = self.__find_try_catch(start)
-        self._logger.debug('removing try-catch-block at position ' + str(try_pos))
-        if try_pos == -1:
-            self._phase = 3
+    def __remove_try_catch_block(self):
+        self._try_start_pos = self._test_case.find("try{ ", self._start)
+        if self._try_start_pos == -1:
             self._reduced_case = None
         else:
-            self._reduced_case = self._test_case[:try_pos] + self._test_case[end_pos:]
+            self._try_end_pos = self._test_case.find(" }\n", self._try_start_pos) + 3
+            self._reduced_case = self._test_case[:self._try_start_pos] + self._test_case[self._try_end_pos:]
+

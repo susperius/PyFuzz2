@@ -13,12 +13,8 @@ class Reducer:
     def file_type(self):
         raise NotImplementedError('ABSTRACT CLASS')
 
-    @property
-    def crash_report(self):
-        raise NotImplementedError('ABSTRACT CLASS')
-
     def reduce(self):
         raise NotImplementedError('ABSTRACT METHOD')
 
-    def set_case(self, path, test_case, crash_report):
+    def set_case(self, path, test_case):
         raise NotImplementedError('ABSTRACT CLASS')

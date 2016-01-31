@@ -1,5 +1,6 @@
 __author__ = 'susperius'
 
+
 class JsWindow:
 
     @staticmethod

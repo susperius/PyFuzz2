@@ -1,15 +1,21 @@
 # coding=utf8
+from JsObject import JsObject
 
-class JsElement:
+
+class JsElement(JsObject):
+    TYPE = "JsElement"
+
     def __init__(self, var_name):
+        JsObject.__init__(self, var_name)
         self.__name = var_name
         self.__registered_events = {}
         self.__children = []
         self.__attributes = {}
 
     @property
-    def name(self):
-        return self.__name
+    def methods_and_properties(self):
+        js_element_methods_and_properties = {}  # TODO: Writing all the stuff down
+        return js_element_methods_and_properties
 
     @property
     def registered_events(self):
@@ -25,6 +31,7 @@ class JsElement:
     def attributes(self):
         return self.__attributes
 
+# region METHODS
     def addEventListener(self, event, function):
         self.__registered_events[event] = function
         return self.__name + ".addEventListener('" + event + "', " + function + ");"
@@ -134,8 +141,9 @@ class JsElement:
 
     def item(self, index):
         return self.__name + ".item(" + index + ");"
+# endregion
 
-    # -----  PROPS ------
+# region PROPERTIES
     def prop_accessKey(self):
         return self.__name + ".accessKey"
 
@@ -246,4 +254,4 @@ class JsElement:
 
     def prop_length(self):
         return self.__name + ".length"
-
+# endregion

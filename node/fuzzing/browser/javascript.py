@@ -6,7 +6,6 @@ from model.JsGlobal import JsGlobal
 from model.DomObjects import *
 from model.HtmlObjects import *
 from model.JsWindow import *
-from model.FuzzedJs import JsFunctions
 from html5 import Html5Fuzzer
 from css import CssFuzzer
 from canvas import CanvasFuzzer
@@ -23,6 +22,7 @@ class JsDomFuzzer(Fuzzer):
     NAME = "js_dom_fuzzer"
     CONFIG_PARAMS = ["starting_elements", "total_operations", "browser", "seed", "canvas_size", "file_type"]
     CALLING_COMMENT = "//FUNCTION_CALLING"
+    TIMEOUT = 20
 
     def __init__(self, starting_elements, total_operations, browser, seed, canvas_size, file_type='html'):
         self._starting_elements = int(starting_elements)
@@ -42,12 +42,13 @@ class JsDomFuzzer(Fuzzer):
         self._operations_count = 0
         self._js_elements = {}
         """:type dict(JsElement)"""
-        self._window_timeout = 20
         self._occurring_events = {}
         for event in DomObjects.DOM_EVENTS:
             self._occurring_events[event] = 0
         self._html_page = None
-        self._js_functions = None
+        self._calls_in_startup = []
+        # arrays dictionary layout: {'array_id': [JsObject, .... JsObject], ...}
+        self._arrays = {}
 
     @classmethod
     def from_list(cls, params):
@@ -61,25 +62,17 @@ class JsDomFuzzer(Fuzzer):
     def file_type(self):
         return self._file_type
 
-    @staticmethod
-    def __get_html_ids(html):
-        start = html.find("IDS:") + 5
-        end = html.find("-->")
-        ids = html[start:end].split("; ")
-        del(ids[-1])
-        return ids
-
     def set_seed(self, seed=0):
         random.seed(seed)
 
-    def __reinit(self):
+    def __re_init(self):
         self._function_count = 0
         self._operations_count = 0
         self._function_count = 0
         self._operations_count = 0
         self._js_elements = {}
-        """:type dict(JsElement)"""
-        self._window_timeout = 20
+        self._calls_in_startup = []
+        self._arrays = []
         self._occurring_events = {}
         for event in DomObjects.DOM_EVENTS:
             self._occurring_events[event] = 0
@@ -95,20 +88,19 @@ class JsDomFuzzer(Fuzzer):
 
     def fuzz(self):
         self._html_page = self._html_fuzzer.fuzz()
-        self._js_functions = JsFunctions(self.CALLING_COMMENT)
         html = self._html_page.get_raw_html()
         self._css_fuzzer.set_tags(self._html_page.get_element_ids())
         css = self._css_fuzzer.fuzz()
         js_code = ""
-        self.__create_startup()
-        self.__create_canvas_functions()
+        js_code += self.__create_canvas_functions()
+        js_code += self.__create_startup()
         while self._total_operations > self._operations_count:
-            self.__add_function()
-        self.__add_event_dispatcher()
-        self.__create_event_handlers()
-        self.__create_calling_blocks()
+            js_code += self.__add_function()
+        js_code += self.__add_event_dispatcher()
+        js_code += self.__create_event_handlers()
+        js_code = js_code.replace(self.CALLING_COMMENT, self.__concate_startup_list())
         doc = html.replace("SCRIPT_BODY", js_code)
-        self.__reinit()
+        self.__re_init()
         return doc, css
 
     def set_state(self, state):
@@ -121,34 +113,39 @@ class JsDomFuzzer(Fuzzer):
             code += "\t" + "elem" + str(i) + " = " + JsDocument.getElementById(elem_id) + "\n"
             self._js_elements["elem"+str(i)] = JsElement("elem"+str(i))
             i += 1
-        code += "\t" + self.CALLING_COMMENT + "\n\tevent_firing();}\n"
-        self._js_functions.add_function("startup", code)
+        code += "\t" + self.CALLING_COMMENT + \
+                "\n\tevent_firing();}\n"
+        return code
 
     def __create_canvas_functions(self):
+        code = ""
         for canvas_id in (self._html_page.get_elements_by_type())['canvas']:
+            self._calls_in_startup.append("\tfunc_" + canvas_id + "();\n")
             self._canvas_fuzzer.set_canvas_id(canvas_id)
-            self._js_functions.add_function("func_" + canvas_id, self._canvas_fuzzer.fuzz())
+            code += self._canvas_fuzzer.fuzz()
+        return code
 
     def __add_function(self, func_name=None, event=False):
         if not func_name:
-            func_name = "func" + str(self._function_count) + "()"
+            func_name = "func_" + str(self._function_count) + "()"
         code = "function " + func_name + " {\n"
         func_count = random.randint(10, 50)
         for i in range(func_count):
             code += "\t" + JsGlobal.try_catch_block(self.__add_element_method())
         if not event:
             self._function_count += 1
-            code += "\t" + self.CALLING_COMMENT + "\n"
+            if random.randint(0, 10) <= 3:
+                code += "\t" + JsWindow.setTimeout("func_" + str(self._function_count) + "()", self.TIMEOUT) + "\n"
+            else:
+                self._calls_in_startup.append("\tfunc_" + str(self._function_count) + "();\n")
         code += "}\n"
-        self._js_functions.add_function(func_name, code, event)
+        return code
 
     def __create_event_handlers(self):
+        code = ""
         for event in self._occurring_events:
-            self.__add_function(event + "_handler" + "(event)", True)
-
-    def __create_calling_blocks(self):
-        # TODO: GO ON HERE !!!!!
-        pass
+            code += self.__add_function(event + "_handler" + "(event)", True)
+        return code
 
     def __add_event_dispatcher(self):
         code = "function event_firing() {\n"
@@ -173,7 +170,7 @@ class JsDomFuzzer(Fuzzer):
                 elif event == 'select':
                     code += JsGlobal.try_catch_block(self._js_elements[key].select() + "\n", "ex")
         code += "}\n"
-        self._js_functions.add_function("event_firing", code)
+        return code
 
     def __add__new_element(self):
         elem_name = "elem_cr" + str(len(self._js_elements))
@@ -307,4 +304,28 @@ class JsDomFuzzer(Fuzzer):
         self._operations_count += 1
         if random.randint(1, 10000) < 50:
             code += "CollectGarbage();"
+        return code
+
+    def __build_array(self, length=0):
+        array_id = "array_" + str(len(self._arrays.keys()))
+        self._arrays[array_id] = []
+        code = array_id + " = ["
+        array_length = length if length != 0 else random.randint(1, len(self._js_elements.keys()) / 2)
+        for i in range(array_length):
+            element_to_add = random.choice(self._js_elements.keys())
+            self._arrays[array_id].append(self._js_elements[element_to_add])
+            code += element_to_add + ","
+        code = code[:-1] + "];\n"
+        return code
+
+    def __create_for_loop(self):
+        pass
+
+    def __create_if_clause(self):
+        pass
+
+    def __concate_startup_list(self):
+        code = ""
+        for item in self._calls_in_startup[:-1]:
+            code += item
         return code

@@ -1,5 +1,7 @@
 from HtmlObjects import HTML5_OBJECTS
 
+# Perhaps I could keep track of script and css also in this class ...
+
 
 class HtmlPage:
     def __init__(self):
@@ -17,6 +19,9 @@ class HtmlPage:
 
     def get_elements_by_id(self):
         return self._elements
+
+    def get_element_by_id(self, element_id):
+        return self._elements[element_id]
 
     def change_element(self, element_id, element_type):
         self._elements[element_id] = element_type

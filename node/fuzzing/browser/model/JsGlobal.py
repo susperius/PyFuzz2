@@ -61,7 +61,7 @@ class JsGlobal:
     
     @staticmethod
     def try_catch_block(try_code, exception_code="ex", catch_code=""):
-        return "try{ " + try_code + " } catch(" + exception_code + ") {\n " + catch_code + " }\n"
+        return "try{ " + try_code + " } catch(" + exception_code + ") { " + catch_code + " }\n"
 
     @staticmethod
     def for_loop(start, end, code):

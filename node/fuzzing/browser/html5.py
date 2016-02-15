@@ -54,7 +54,7 @@ class Html5Fuzzer(Fuzzer):
         self._head = ""
         self._body = ""
         self._used_tags = set()
-        self._html_page = None
+        self._html_page = HtmlPage()
 
     @classmethod
     def from_list(cls, params):

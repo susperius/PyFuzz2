@@ -1,7 +1,7 @@
 __author__ = "susperius"
 
 
-class DomObjects:
+class DomObjectTypes:
     DOM_DOCUMENT_METHODS = ['addEventListener', 'adoptNode', 'close', 'createAttribute', 'createComment',
                             'createDocumentFragment', 'createElement', 'createTextNode', 'getElementById',
                             'getElementsByClassName', 'getElementsByName', 'getElementsByTagName', 'importNode',

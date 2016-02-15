@@ -5,7 +5,7 @@ __author__ = "susperius"
 class JsDocument:
     @staticmethod
     def addEventListener(event):
-        return "document.addEventListener('" + event + "');"
+        return "document.addEventListener('" + event + "')"
 
     '''
     Variable zu node muss übergeben werden
@@ -13,47 +13,47 @@ class JsDocument:
 
     @staticmethod
     def adoptNode(node):
-        return "document.adoptNode(" + node + ");"
+        return "document.adoptNode(" + node + ")"
 
     @staticmethod
     def close():
-        return "document.close();"
+        return "document.close()"
 
     @staticmethod
     def createAttribute(attribute):
-        return "document.createAttribute('" + attribute + "');"
+        return "document.createAttribute('" + attribute + "')"
 
     @staticmethod
     def createComment(comment):
-        return "document.createComement('" + comment + "');"
+        return "document.createComement('" + comment + "')"
 
     @staticmethod
     def createDocumentFragment(doc_frag):
-        return "document.createDocumentFragment('" + doc_frag + "');"
+        return "document.createDocumentFragment('" + doc_frag + "')"
 
     @staticmethod
     def createElement(element):
-        return "document.createElement('" + element + "');"
+        return "document.createElement('" + element + "')"
 
     @staticmethod
     def createTextNode(text):
-        return "document.createTextNode('" + text + "');"
+        return "document.createTextNode('" + text + "')"
 
     @staticmethod
     def getElementById(identifier):
-        return "document.getElementById('" + identifier + "');"
+        return "document.getElementById('" + identifier + "')"
 
     @staticmethod
     def getElementsByClassName(class_name):
-        return "document.getElementsByClassName('" + class_name + "');"
+        return "document.getElementsByClassName('" + class_name + "')"
 
     @staticmethod
     def getElementsByName(name):
-        return "document.getElementsByName('" + name + "');"
+        return "document.getElementsByName('" + name + "')"
 
     @staticmethod
     def getElementsByTagName(tag_name):
-        return "document.getElementsByTagName('" + tag_name + "');"
+        return "document.getElementsByTagName('" + tag_name + "')"
 
     '''
     Variable zu node muss übergeben werden
@@ -61,46 +61,46 @@ class JsDocument:
 
     @staticmethod
     def importNode(node, deep):
-        return "document.importNode(" + node + ", " + deep + ");"
+        return "document.importNode(" + node + ", " + deep + ")"
 
     @staticmethod
     def normalize():
-        return "document.normalize();"
+        return "document.normalize()"
 
     @staticmethod
     def normalizeDocument():
-        return "document.normalizeDocument();"
+        return "document.normalizeDocument()"
 
     @staticmethod
     def open():
-        return "document.open();"
+        return "document.open()"
 
     @staticmethod
     def querySelector(class_name):
-        return "document.querySelector('" + class_name + "');"
+        return "document.querySelector('" + class_name + "')"
 
     @staticmethod
     def querySelectorAll(class_name):
-        return "document.querySelectorAll('" + class_name + "');"
+        return "document.querySelectorAll('" + class_name + "')"
 
     @staticmethod
     def removeEventListener(event_name, function_name):
-        return "document.removeEventListener('" + event_name + "', " + function_name + ");"
+        return "document.removeEventListener('" + event_name + "', " + function_name + ")"
 
     @staticmethod
     def renameNode(node, node_name, namespace_uri=None):
         if node == None:
-            return "document.renameNode(" + node + ", null, '" + node_name + "');"
+            return "document.renameNode(" + node + ", null, '" + node_name + "')"
         else:
-            return "document.renameNode(" + node + ", '" + namespace_uri + "', '" + node_name + "');"
+            return "document.renameNode(" + node + ", '" + namespace_uri + "', '" + node_name + "')"
 
     @staticmethod
     def write(text):
-        return "document.write('" + text + "');"
+        return "document.write('" + text + "')"
 
     @staticmethod
-    def writeln(test):
-        return "document.writeln('" + text + "');"
+    def writeln(text):
+        return "document.writeln('" + text + "')"
 
     @staticmethod
     def prop_anchors():

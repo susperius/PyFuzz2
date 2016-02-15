@@ -8,6 +8,16 @@ from worker import Worker
 
 __author__ = 'susperius'
 
+INTERESTING_EXCEPTIONS = {0x80000001: "GUARD_PAGE_VIOLATION",
+                          0x80000005: "BUFFER_OVERFLOW",
+                          0xC0000005: "ACCESS_VIOLATION",
+                          0xC000001D: "ILLEGAL_INSTRUCTION",
+                          0xC0000144: "UNHANDLED_EXCEPTION",
+                          0xC0000409: "STACK_BUFFER_OVERRUN",
+                          0xC0000602: "UNKNOWN_EXCEPTION",
+                          0xC00000FD: "STACK_OVERFLOW",
+                          0XC000009D: "PRIVILEGED_INSTRUCTION"}
+
 
 class FuzzingWorker(Worker):
     def __init__(self, programs, fuzzer, report_queue):
@@ -61,7 +71,7 @@ class FuzzingWorker(Worker):
                     gevent.sleep(1)
                     #  --------------------------------------------------------------------------------------------
                     #  Just involve the whole Windows Debug Engine if a crash appeared else just save the resources
-                    if return_code != 0:
+                    if return_code in INTERESTING_EXCEPTIONS.keys():
                         if bool(prog['use_http']):
                             self._processes.append(subprocess.Popen(
                                 "python debugging\\windbg.py -p \"" + prog['path']

@@ -12,6 +12,7 @@ class JsDomElement(JsObject):
         self.__children = []
         self.__attributes = {}
         self.__html_type = html_type
+        #  TODO: Look up ret_vals and parameters
         js_element_methods_and_properties = {'addEventListener': {'ret_val': None, 'parameters': ['JS_EVENT_LISTENER'], 'method': self.addEventListener},
                                              'appendChild': {'ret_val': None, 'parameters': ['JS_DOM_ELEMENT'], 'method': self.appendChild},
                                              'blur': {'ret_val': None, 'parameters': None, 'method': self.blur},

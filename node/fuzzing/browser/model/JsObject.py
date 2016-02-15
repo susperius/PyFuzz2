@@ -1,6 +1,6 @@
 __author__ = 'susperius'
 
-JS_OBJECTS = ['JS_STRING', 'JS_NUMBER', 'JS_DATE', 'JS_ARRAY', 'JS_DOM_ELEMENT']
+JS_OBJECTS = ['JS_STRING', 'JS_NUMBER', 'JS_ARRAY', 'JS_DOM_ELEMENT']  # 'JS_DATE',
 
 
 class JsObject:
@@ -23,9 +23,21 @@ class JsObject:
         ret_val = {}
         for key in self._methods_and_properties.keys():
             if self._methods_and_properties[key]['ret_val'] not in ret_val.keys():
-                ret_val[self._methods_and_properties[key]['ret_val']] = [{'parameters': self._methods_and_properties[key]['parameters'], 'method': self._methods_and_properties['method']}]
+                ret_val[self._methods_and_properties[key]['ret_val']] = [{'parameters': self._methods_and_properties[key]['parameters'], 'method': self._methods_and_properties[key]['method']}]
             else:
-                ret_val[self._methods_and_properties[key]['ret_val']].append({'parameters': self._methods_and_properties[key]['parameters'], 'method': self._methods_and_properties['method']})
+                ret_val[self._methods_and_properties[key]['ret_val']].append({'parameters': self._methods_and_properties[key]['parameters'], 'method': self._methods_and_properties[key]['method']})
+        return ret_val
+
+    @property
+    def methods_and_properties_by_parameters(self):
+        ret_val = {}
+        for key in self._methods_and_properties.keys():
+            if self._methods_and_properties[key]['parameters'] is not None:
+                for param in self._methods_and_properties[key]['parameters']:
+                    if param not in ret_val.keys():
+                        ret_val[param] = [{'ret_val': self._methods_and_properties[key]['ret_val'], 'parameters': self._methods_and_properties[key]['parameters'], 'method': self._methods_and_properties[key]['method']}]
+                    else:
+                        ret_val[param].append({'ret_val': self._methods_and_properties[key]['ret_val'], 'parameters': self._methods_and_properties[key]['parameters'], 'method': self._methods_and_properties[key]['method']})
         return ret_val
 
     def toString(self):
@@ -36,7 +48,7 @@ class JsString(JsObject):
     TYPE = "JsString"
 
     def __init__(self, name):
-        JsObject.__init__(name)
+        JsObject.__init__(self, name)
         js_string_methods = {'charAt': {'ret_val': 'STRING', 'parameters': ['INT'], 'method': self.charAt},
                              'charCodeAt': {'ret_val': 'INT', 'parameters': ['INT'], 'method': self.charCodeAt},
                              'concat': {'ret_val': 'STRING', 'parameters': ['STRING'], 'method': self.concat},
@@ -135,7 +147,7 @@ class JsNumber(JsObject):
     TYPE = "JsNumber"
 
     def __init__(self, name):
-        JsObject.__init__(name)
+        JsObject.__init__(self, name)
         js_number_methods = {'toExponential': {'ret_val': 'EXP_FLOAT', 'parameters': ['NUMBER'], 'method': self.toExponential},
                              'toFixed': {'ret_val': 'STRING', 'parameters': ['INT'], 'method': self.toFixed},
                              'toPrecision': {'ret_val': 'FLOAT', 'parameters': ['INT'], 'method': self.toPrecision},

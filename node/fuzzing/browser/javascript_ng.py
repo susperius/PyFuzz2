@@ -145,10 +145,10 @@ class JsFuzzer(Fuzzer):
         print(param_list)
         for param in param_list:
             if param == "STRING":
-                str_src = random.choice([0, 1, 2])
+                str_src = random.choice([0, 2])
                 if str_src == 0:  # Take one from FuzzValues
                     ret_params.append(FuzzValues.STRINGS)
-                elif str_src == 1:  # Create a JsString
+                elif str_src == 1:  # Create a JsString  TODO: Figure out a way to send the string creation code back
                     ret_params.append(self.__create_js_string())
                 elif str_src == 2:
                     key = random.choice(self._js_objects.keys())

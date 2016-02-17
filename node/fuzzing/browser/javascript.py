@@ -89,7 +89,7 @@ class JsDomFuzzer(Fuzzer):
     def fuzz(self):
         self._html_page = self._html_fuzzer.fuzz()
         html = self._html_page.get_raw_html()
-        self._css_fuzzer.set_tags(self._html_page.get_elements_by_type().keys())
+        self._css_fuzzer.set_tags(self._html_page.get_elements_by_html_tag().keys())
         css = self._css_fuzzer.fuzz()
         js_code = ""
         js_code += self.__create_canvas_functions()
@@ -119,7 +119,7 @@ class JsDomFuzzer(Fuzzer):
 
     def __create_canvas_functions(self):
         code = ""
-        for canvas_id in (self._html_page.get_elements_by_type())['canvas']:
+        for canvas_id in (self._html_page.get_elements_by_html_tag())['canvas']:
             self._calls_in_startup.append("\tfunc_" + canvas_id + "();")
             self._canvas_fuzzer.set_canvas_id(canvas_id)
             code += self._canvas_fuzzer.fuzz()

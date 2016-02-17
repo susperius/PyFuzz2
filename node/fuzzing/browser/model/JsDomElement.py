@@ -21,7 +21,7 @@ class JsDomElement(JsObject):
                                              'compareDocumentPosition': {'ret_val': 'INT', 'parameters': ['JS_DOM_ELEMENT'], 'method': self.compareDocumentPosition},
                                              'focus': {'ret_val': None, 'parameters': None, 'method': self.focus},
                                              'getAttribute': {'ret_val': 'STRING', 'parameters': ['HTML_ATTR'], 'method': self.getAttribute},
-                                             'getAttributeNode': {'ret_val': ['JS_ATTR'], 'parameters': ['HTML_ATTR'], 'method': self.getAttributeNode},
+                                             'getAttributeNode': {'ret_val': 'JS_ATTR', 'parameters': ['HTML_ATTR'], 'method': self.getAttributeNode},
                                              'getElementsByClassName': {'ret_val': 'JS_NODE_LIST', 'parameters': ['CLASS_NAME'], 'method': self.getElementsByClassName},
                                              'getElementsByTagName': {'ret_val': 'JS_NODE_LIST', 'parameters': ['HTML_TAG'], 'method': self.getElementsByTagName},
                                              #'getFeature': {'ret_val': 0, 'parameters': None, 'method': self.getFeature},
@@ -60,7 +60,7 @@ class JsDomElement(JsObject):
                                              'id': {'ret_val': 'JS_IDENTIFIER', 'parameters': None, 'method': self.id},
                                              'innerHtml': {'ret_val': 'HTML_CODE', 'parameters': ['HTML_CODE*'], 'method': self.innerHtml},
                                              'isContentEditable': {'ret_val': 'BOOL', 'parameters': None, 'method': self.isContentEditable},
-                                             'lang': {'ret_val': 'LANG_CODE', 'parameters': ['LANG_CODE*'], 'method': self.lang},
+                                             'lang': {'ret_val': 'LANG', 'parameters': ['LANG_CODE*'], 'method': self.lang},
                                              'lastChild': {'ret_val': 'JS_DOM_ELEMENT', 'parameters': None, 'method': self.lastChild},
                                              'namespaceURI': {'ret_val': 'NAMESPACE_URI', 'parameters': None, 'method': self.namespaceURI},
                                              'nodeName': {'ret_val': 'STRING', 'parameters': None, 'method': self.nodeName},
@@ -312,8 +312,8 @@ class JsDomElement(JsObject):
     def scrollWidth(self):
         return self.__name + ".scrollWidth"
 
-    def style(self):
-        return self.__name + ".style"
+    def style(self, style=None):
+        return self.__name + ".style" if style is None else self.__name + ".style." + style[0] + " = " + style[1]
 
     def tabIndex(self):
         return self.__name + ".tabIndex"

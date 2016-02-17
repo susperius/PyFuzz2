@@ -181,12 +181,12 @@ class JsArray(JsObject):
         # list contents [ JsObject, ....]
         self._array_elements = array_elements
         self._js_array_methods_and_properties = {'concat': {'ret_val': 'JS_ARRAY', 'parameters': ['JS_ARRAY'], 'method': self.concat},
-                                                 'every': {'ret_val': 'BOOL', 'parameters': ['JS_FUNCTION'], 'method': self.every},
-                                                 'filter': {'ret_val': 'JS_ARRAY', 'parameters': ['JS_FUNCTION'], 'method': self.filter},
+                                                 'every': {'ret_val': 'BOOL', 'parameters': ['JS_ARRAY_FUNCTION'], 'method': self.every},
+                                                 'filter': {'ret_val': 'JS_ARRAY', 'parameters': ['JS_ARRAY_FUNCTION'], 'method': self.filter},
                                                  'indexOf': {'ret_val': 'INT', 'parameters': ['JS_OBJECT'], 'method': self.indexOf},
                                                  'join': {'ret_val': 'STRING', 'parameters': None, 'method': self.join},
                                                  'lastIndexOf': {'ret_val': 'INT', 'parameters': ['JS_OBJECT'], 'method': self.lastIndexOf},
-                                                 'map': {'ret_val': 'JS_ARRAY', 'parameters': ['JS_FUNCTION'], 'method': self.map},
+                                                 'map': {'ret_val': 'JS_ARRAY', 'parameters': ['JS_ARRAY_FUNCTION'], 'method': self.map},
                                                  'pop': {'ret_val': 'JS_OBJECT', 'parameters': None, 'method': self.pop},
                                                  'push': {'ret_val': 'JS_ARRAY', 'parameters': ['JS_OBJECT'], 'method': self.push},
                                                  'reverse': {'ret_val': 'JS_ARRAY', 'parameters': None, 'method': self.reverse},

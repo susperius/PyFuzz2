@@ -13,7 +13,7 @@ class Html5Fuzzer(Fuzzer):
     TYPES_DICT = {'APP_DATA': None, 'BOOL': FuzzValues.BOOL, 'BUTTON_TYPE': FuzzValues.BUTTON_TYPE,
                   'CHAR': FuzzValues.CHARS, 'CHARACTER_SET': FuzzValues.CHARACTER_SET,
                   'COORDS': None, 'CROSSORIGIN': 'TODO', 'CSS': None,
-                  'CSS_CLASS': None, 'DATALIST_ID': None, 'DATETIME': None, 'DIRECTION': FuzzValues.TEXT_DIRECTION,
+                  'CSS_CLASS': None, 'DATALIST_ID': None, 'DATETIME': None, 'TEXT_DIRECTION': FuzzValues.TEXT_DIRECTION,
                   'INPUT_TYPE': FuzzValues.INPUT_TYPES,
                   'ELEM_ID' : None, 'FORM_ID': None, 'FORM_METHOD': FuzzValues.FORM_METHOD,
                   'FORM_TARGET': FuzzValues.FORM_TARGET, 'FORM_ENCTYPE': FuzzValues.FORM_ENCTYPE,
@@ -120,6 +120,16 @@ class Html5Fuzzer(Fuzzer):
         self._html_page.set_raw_html(html)
         return self._html_page
 
+    def get_some_html_code(self, length):
+        code = ""
+        for i in range(length):
+            tag = random.choice(HTML5_OBJECTS.keys())
+            while HTML5_OBJECTS[tag]['outer_tag'] is not None:
+                tag = random.choice(HTML5_OBJECTS.keys())
+            tag, open_tag, close_tag = self.__build_tag(tag)
+            code += open_tag + random.choice(FuzzValues.INTERESTING_VALUES) + close_tag + "\n"
+        return code
+
     def __build_tag(self, tag=None, ignore_outer_tag=False):
         open_tag = ""
         close_tag = ""
@@ -223,7 +233,8 @@ class Html5Fuzzer(Fuzzer):
         elif attr_type == "CSS":
             return self.__get_style()
         elif attr_type == "CSS_CLASS":
-            pass
+            self.__add_css_class()
+            return random.choice(self._html_page.get_css_class_names())
         elif attr_type == "DATETIME":
             return self.__get_datetime()
         elif attr_type == "ELEM_ID":
@@ -255,7 +266,9 @@ class Html5Fuzzer(Fuzzer):
         return ret_val
 
     def __add_css_class(self):
-        self._css_classes.append("style_class" + str(len(self._css_classes)))
+        class_name = "style_class_" + str(len(self._css_classes))
+        self._html_page.add_css_class_name(class_name)
+        return class_name
 
     def __get_datetime(self):
         return str(random.randint(0, 9999)) + "-" + str(random.randint(0, 99)) + "-" + str(random.randint(0, 99)) + \

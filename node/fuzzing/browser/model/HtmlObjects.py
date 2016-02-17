@@ -29,7 +29,7 @@ HTML_ATTR_GENERIC = ['class', 'id', 'style', 'title']
 #
 HTML5_GLOBAL_ATTR = {'accesskey': 'CHAR', 'class': 'CSS_CLASS', 'contenteditable': 'BOOL',  # 'contextmenu': 'MENU',
                      # 'data-': 'APP_DATA',
-                     'dir': 'DIRECTION',
+                     'dir': 'TEXT_DIRECTION',
                      # 'dragable': 'BOOL', 'hidden': None,
                      # 'id': 'ID',
                      'lang': 'LANG', 'spellcheck': 'BOOL', 'style': 'CSS', 'tabindex': 'PURE_INT', 'title': 'STRING',

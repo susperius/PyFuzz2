@@ -6,12 +6,14 @@ from ..fuzzer import Fuzzer
 from model.values import FuzzValues
 from model.CssProperties import CSS_STYLES
 
+
 class CssFuzzer(Fuzzer):
     NAME = "CssFuzzer"
     CONFIG_PARAMS = ["seed"]
 
     def __init__(self, seed="0"):
         self._tags = []
+        self._class_names = []
         if int(seed) == 0:
             random.seed()
         else:
@@ -19,6 +21,13 @@ class CssFuzzer(Fuzzer):
 
     def set_tags(self, tags):
         self._tags = tags
+
+    def set_class_names(self, class_names):
+        self._class_names = class_names
+
+    def set_options(self, tags, class_names):
+        self._tags = tags
+        self._class_names = class_names
 
     def prng_state(self):
         return random.getstate()
@@ -30,18 +39,27 @@ class CssFuzzer(Fuzzer):
     def from_list(cls, params):
         pass
 
+    def create_testcases(self, count, directory):
+        pass
+
     def fuzz(self):
         style = ""
         for tag in self._tags:
-            style += tag + "{\r\n"
-            for i in range(random.randint(1, 20)):
-                style += "\t" + self.__get_style() + "\r\n"
-            style += "}\r\n"
+            style += self.__create_style(tag)
+        for class_name in self._class_names:
+            style += self.__create_style("." + class_name)
         return style
 
-    def __get_style(self):
+    def __create_style(self, css_selector):
+        style = css_selector + "{\n"
+        for i in range(random.randint(5,100)):
+            style += "\t" + self.__create_style_statement() + "\n"
+        style += "}\n"
+        return style
+
+    def __create_style_statement(self):
         prop = random.choice(CSS_STYLES)
-        val = random.choice(prop)
+        val = random.choice(prop[1:])
         return prop[0] + " : " + val + ";"
 
     def set_seed(self, seed):

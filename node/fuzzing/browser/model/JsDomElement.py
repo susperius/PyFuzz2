@@ -7,12 +7,10 @@ class JsDomElement(JsObject):
 
     def __init__(self, var_name, html_type):
         JsObject.__init__(self, var_name)
-        self.__name = var_name
         self.__registered_events = {}
         self.__children = []
         self.__attributes = {}
         self.__html_type = html_type
-        #  TODO: Look up ret_vals and parameters
         js_element_methods_and_properties = {'addEventListener': {'ret_val': None, 'parameters': ['JS_EVENT_LISTENER'], 'method': self.addEventListener},
                                              'appendChild': {'ret_val': None, 'parameters': ['JS_DOM_ELEMENT'], 'method': self.appendChild},
                                              'blur': {'ret_val': None, 'parameters': None, 'method': self.blur},
@@ -109,222 +107,222 @@ class JsDomElement(JsObject):
 # region METHODS
     def addEventListener(self, event, function):
         self.__registered_events[event] = function
-        return self.__name + ".addEventListener('" + event + "', " + function + ");"
+        return self._name + ".addEventListener('" + event + "', " + function + ")"
 
     def appendChild(self, child_node):
         self.__children.append(child_node)
-        return self.__name + ".appendChild(" + child_node + ");"
+        return self._name + ".appendChild(" + child_node + ")"
 
     def blur(self):
-        return self.__name + ".blur();"
+        return self._name + ".blur()"
 
     def click(self):
-        return self.__name + ".click();"
+        return self._name + ".click()"
 
     def cloneNode(self, deep):
-        return self.__name + ".cloneNode(" + str(deep).lower() + ");"
+        return self._name + ".cloneNode(" + str(deep).lower() + ")"
 
     def compareDocumentPosition(self, element):
-        return self.__name + ".compareDocumentPosition(" + element + ");"
+        return self._name + ".compareDocumentPosition(" + element + ")"
 
     def focus(self):
-        return self.__name + ".focus();"
+        return self._name + ".focus()"
 
     def getAttribute(self, attr_name):
-        return self.__name + ".getAttribute('" + attr_name + "');"
+        return self._name + ".getAttribute('" + attr_name + "')"
 
     def getAttributeNode(self, attr_name):
-        return self.__name + ".getAttributeNode('" + attr_name + "');"
+        return self._name + ".getAttributeNode('" + attr_name + "')"
 
     def getElementsByClassName(self, class_name):
-        return self.__name + ".getElementsByClassName('" + class_name + "');"
+        return self._name + ".getElementsByClassName('" + class_name + "')"
 
     def getElementsByTagName(self, tag_name):
-        return self.__name + ".getElementsByTagName('" + tag_name + "');"
+        return self._name + ".getElementsByTagName('" + tag_name + "')"
 
     def getFeature(self):
-        return self.__name + ".getFeature();"
+        return self._name + ".getFeature()"
 
     def getUserData(self):
-        return self.__name + ".getUserData();"
+        return self._name + ".getUserData()"
 
     def hasAttribute(self, attr_name):
-        return self.__name + ".hasAttribute('" + attr_name + "');"
+        return self._name + ".hasAttribute('" + attr_name + "')"
 
     def hasAttributes(self):
-        return self.__name + ".hasAttributes();"
+        return self._name + ".hasAttributes()"
 
     def hasChildNodes(self):
-        return self.__name + ".hasChildNodes();"
+        return self._name + ".hasChildNodes()"
 
     def insertBefore(self, new_element, child_element):
-        return self.__name + ".insertBefore(" + new_element + ", " + child_element + ");"
+        return self._name + ".insertBefore(" + new_element + ", " + child_element + ")"
 
     def isDefaultNamespace(self):
-        return self.__name + ".isDefaultNamespace();"
+        return self._name + ".isDefaultNamespace()"
 
     def isEqualNode(self, node):
-        return self.__name + ".isEqualNode(" + node + ");"
+        return self._name + ".isEqualNode(" + node + ")"
 
     def isSameNode(self, node):
-        return self.__name + ".isSameNode(" + node + ");"
+        return self._name + ".isSameNode(" + node + ")"
 
     def isSupported(self, feature, version):
-        return self.__name + ".isSupported('" + feature + "', '" + version + ");"
+        return self._name + ".isSupported('" + feature + "', '" + version + ")"
 
     def normalize(self):
-        return self.__name + ".normalize();"
+        return self._name + ".normalize()"
 
     def querySelector(self, html_class_name):
-        return self.__name + ".querySelector('." + html_class_name + "');"
+        return self._name + ".querySelector('." + html_class_name + "')"
 
     def querySelectorAll(self, html_class_name):
-        return self.__name + ".querySelectorAll('." + html_class_name + "');"
+        return self._name + ".querySelectorAll('." + html_class_name + "')"
 
     def removeAttribute(self, attr):
         del self.__attributes[attr]
-        return self.__name + ".removeAttribute('" + attr + "');"
+        return self._name + ".removeAttribute('" + attr + "')"
 
     def removeChild(self, child_node):
         self.__children.remove(child_node)
-        return self.__name + ".removeChild(" + child_node + ");"
+        return self._name + ".removeChild(" + child_node + ")"
 
     def replaceChild(self, new_node, child_node):
         self.__children.remove(child_node)
         self.__children.append(new_node)
-        return self.__name + ".replaceChild(" + new_node + ", " + child_node + ");"
+        return self._name + ".replaceChild(" + new_node + ", " + child_node + ")"
 
     def removeEventListener(self, event, function):
         del self.__registered_events[event]
-        return self.__name + ".removeEventListener('" + event + "', " + function + ");"
+        return self._name + ".removeEventListener('" + event + "', " + function + ")"
 
     def select(self):
-        return self.__name + ".select();"
+        return self._name + ".select()"
 
     def setAttribute(self, attr_name, attr_value):
         self.__attributes[attr_name] = attr_value
-        return self.__name + ".setAttribute('" + attr_name + "', '" + attr_value + "');"
+        return self._name + ".setAttribute('" + attr_name + "', '" + attr_value + "')"
 
     def setAttributeNode(self, attr):
-        return self.__name + ".setAtrributeNode(" + attr + ");"
+        return self._name + ".setAtrributeNode(" + attr + ")"
 
     def setUserData(self, data):
-        return self.__name + ".setUserData(" + data + ");"
+        return self._name + ".setUserData(" + data + ")"
 
 #    def toString(self):
-#        return self.__name + ".toString();"
+#        return self._name + ".toString()"
 
     def item(self, index):
-        return self.__name + ".item(" + index + ");"
+        return self._name + ".item(" + index + ")"
 # endregion
 
 # region PROPERTIES
     def accessKey(self):
-        return self.__name + ".accessKey"
+        return self._name + ".accessKey"
 
     def attributes_prop(self):
-        return self.__name + ".attributes"
+        return self._name + ".attributes"
 
     def childNodes(self):
-        return self.__name + ".childNodes"
+        return self._name + ".childNodes"
 
-    def className(self):
-        return self.__name + ".className"
+    def className(self, class_name=None):
+        return self._name + ".className" if class_name is None else self._name + ".className = " + class_name
 
     def clientHeight(self):
-        return self.__name + ".clientHeight"
+        return self._name + ".clientHeight"
 
     def clientWidth(self):
-        return self.__name + ".clientWidth"
+        return self._name + ".clientWidth"
 
     def contentEditable(self):
-        return self.__name + ".contentEditable"
+        return self._name + ".contentEditable"
 
-    def dir(self):
-        return self.__name + ".dir"
+    def dir(self, text_dir=None):
+        return self._name + ".dir" if text_dir is None else self._name + ".dir = " + text_dir
 
     def firstChild(self):
-        return self.__name + ".firstChild"
+        return self._name + ".firstChild"
 
     def id(self):
-        return self.__name + ".id"
+        return self._name + ".id"
 
-    def innerHtml(self):
-        return self.__name + ".innerHTML"
+    def innerHtml(self, html_code=None):
+        return self._name + ".innerHTML" if html_code is None else self._name + ".innerHtml = " + html_code
 
     def isContentEditable(self):
-        return self.__name + ".isContentEditable"
+        return self._name + ".isContentEditable"
 
-    def lang(self):
-        return self.__name + ".lang"
+    def lang(self, lang_code=None):
+        return self._name + ".lang" if lang_code is None else self._name + ".lang = " + lang_code
 
     def lastChild(self):
-        return self.__name + ".lastChild"
+        return self._name + ".lastChild"
 
     def namespaceURI(self):
-        return self.__name + ".namespaceURI"
+        return self._name + ".namespaceURI"
 
     def nextSibling(self):
-        return self.__name + ".nextSibling"
+        return self._name + ".nextSibling"
 
     def nodeName(self):
-        return self.__name + ".nodeName"
+        return self._name + ".nodeName"
 
     def nodeType(self):
-        return self.__name + ".nodeType"
+        return self._name + ".nodeType"
 
-    def nodeValue(self):
-        return self.__name + ".nodeValue"
+    def nodeValue(self, value=None):
+        return self._name + ".nodeValue" if value is None else self._name + ".nodeValue = " + value
 
     def offsetHeight(self):
-        return self.__name + ".offsetHeight"
+        return self._name + ".offsetHeight"
 
     def offsetWidth(self):
-        return self.__name + ".offsetWidth"
+        return self._name + ".offsetWidth"
 
     def offsetLeft(self):
-        return self.__name + ".offsetLeft"
+        return self._name + ".offsetLeft"
 
     def offsetParent(self):
-        return self.__name + ".offsetParent"
+        return self._name + ".offsetParent"
 
     def offsetTop(self):
-        return self.__name + ".offsetTop"
+        return self._name + ".offsetTop"
 
     def ownerDocument(self):
-        return self.__name + ".ownerDocument"
+        return self._name + ".ownerDocument"
 
     def parentNode(self):
-        return self.__name + ".parentNode"
+        return self._name + ".parentNode"
 
     def previousSibling(self):
-        return self.__name + ".previousSibling"
+        return self._name + ".previousSibling"
 
     def scrollHeight(self):
-        return self.__name + ".scrollHeight"
+        return self._name + ".scrollHeight"
 
     def scrollLeft(self):
-        return self.__name + ".scrollLeft"
+        return self._name + ".scrollLeft"
 
     def scrollTop(self):
-        return self.__name + ".scrollTop"
+        return self._name + ".scrollTop"
 
     def scrollWidth(self):
-        return self.__name + ".scrollWidth"
+        return self._name + ".scrollWidth"
 
     def style(self, style=None):
-        return self.__name + ".style" if style is None else self.__name + ".style." + style[0] + " = " + style[1]
+        return self._name + ".style" if style is None else self._name + ".style." + style[0] + " = " + style[1]
 
-    def tabIndex(self):
-        return self.__name + ".tabIndex"
+    def tabIndex(self, tab_index=None):
+        return self._name + ".tabIndex" if tab_index is None else self._name + ".tabIndex = " + str(tab_index)
 
     def tagName(self):
-        return self.__name + ".tagName"
+        return self._name + ".tagName"
 
-    def textContent(self):
-        return self.__name + ".textContent"
+    def textContent(self, text_content=None):
+        return self._name + ".textContent" if text_content is None else self._name + ".textContent = " + text_content
 
-    def title(self):
-        return self.__name + ".title"
+    def title(self, title=None):
+        return self._name + ".title" if title is None else self._name + ".title = " + title
 
 # endregion

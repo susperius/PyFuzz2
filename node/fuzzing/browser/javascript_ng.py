@@ -57,31 +57,7 @@ class JsFuzzer(Fuzzer):
         self._js_event_listener = []
         self._js_array_functions = []
         self._html_page = HtmlPage()
-        self._values_dict = {'BOOL',
-                             'CLASS_NAME',
-                             'CSS_SELECTOR',
-                             'CSS_STYLE',
-                             'EVENT',
-                             'HTML_ATTR',
-                             'HTML_ATTR_VAL',
-                             'HTML_CODE*',
-                             'HTML_TAG',
-                             'INT',
-                             'INT*',
-                             'JS_ARRAY',
-                             'JS_DOM_CHILD_ELEMENT',
-                             'JS_DOM_ELEMENT',
-                             'JS_EVENT_LISTENER',
-                             'JS_FUNCTION',
-                             'JS_OBJECT',
-                             'LANG_CODE*',
-                             'NAMESPACE_URI',
-                             'NUMBER',
-                             'REGEX',
-                             'STRING',
-                             'STRING*',
-                             'TEXT_DIRECTION*',
-                             'UNICODE_VALUE_LIST'}
+
 
     def __init_js_object_dict(self):
         for js_obj_type in JS_OBJECTS:
@@ -125,8 +101,13 @@ class JsFuzzer(Fuzzer):
             code += "\telem_" + element_id + " = " + JsDocument.getElementById(element_id) + ";\n"
             self._js_objects['JS_DOM_ELEMENT'].append(JsDomElement("elem_" + element_id,
                                                                    available_dom_elements[element_id]))
-        code += self.__build_js_array(self.FIRST_ARRAY_LENGTH)
+        #  Init a Object of each type
+        for i in range(0, 5):
+            code += "\t" + self.__build_js_array(self.FIRST_ARRAY_LENGTH)
+            code += "\t" + self.__add_js_string()
+            code += "\t" + self.__add_js_number()
         code += "\t" + self.CALLING_COMMENT + "\n"
+        code += "}\n"
         return code
 
     def __build_js_array(self, length):
@@ -136,12 +117,35 @@ class JsFuzzer(Fuzzer):
             array_obj_list.append(js_obj)
         js_array = JsArray("array_" + str(len(self._js_objects['JS_ARRAY'])), array_obj_list)
         self._js_objects['JS_ARRAY'].append(js_array)
-        return js_array.newArray()
+        return js_array.newArray() + ";\n"
+
+    def __add_js_string(self):
+        js_str = JsString("str_" + str(len(self._js_objects['JS_STRING'])))
+        self._js_objects['JS_STRING'].append(js_str)
+        return js_str.newString(random.choice(FuzzValues.STRINGS)) + ";\n"
+
+    def __add_js_number(self):
+        js_number = JsNumber("number_" + str(len(self._js_objects['JS_NUMBER'])))
+        self._js_objects['JS_NUMBER'].append(js_number)
+        return js_number.newNumber(random.choice(FuzzValues.INTS)) + ";\n"
 
     def __build_assignment(self):
-        code, ret_val = self.__create_a_method_or_prop_call()
+        js_obj = self.__get_an_js_object()
+        js_obj_function = js_obj.methods_and_properties[random.choice(js_obj.methods_and_properties.keys())]
+        if js_obj_function['parameters'] is not None:
+            params = self.__get_params(js_obj_function['parameters'])
+            print(params)
+            code = js_obj_function['method'](*params)
+        else:
+            code = js_obj_function['method']()
+        #  TODO: build the rest of the assignment with determination if it's a prop setter or not
+        """
+        ret_val = js_obj_function['ret_val']
         if ret_val in JS_OBJECTS or ret_val in ['STRING', 'INT']:
-            #  TODO: Fix the naming inconsistency
+            #  ---------------------------------------------------------------------------------------------------------
+            #  TODO: FIX the whole section ... figure sth out to determine whether it's a prop or method and then
+            #  TODO: decide if it's a prop it'll be an assignment or an call to receive the value
+            #  ---------------------------------------------------------------------------------------------------------
             if ret_val == 'STRING':
                 ret_val = 'JS_STRING'
             elif ret_val == 'INT':
@@ -163,13 +167,11 @@ class JsFuzzer(Fuzzer):
                 elif ret_val == "JS_DOM_ELEMENT":
                     assignment_obj = JsDomElement(assignment_obj_name, "")
                 self._js_objects[ret_val].append(assignment_obj)
-            code = assignment_obj.name + " = " + code + ";\n"
         else:
-            code += ";\n"
-        return code
+            code += ";\n" """
+        return code + ";\n"
 
     def __create_a_method_or_prop_call(self):
-        #  TODO: Handle the * in parameter list !!!!!!!! <----- GO ON HERE !!!!
         js_obj = self.__get_an_js_object()
         js_obj_function = js_obj.methods_and_properties[random.choice(js_obj.methods_and_properties.keys())]
         if js_obj_function['parameters'] is not None:
@@ -228,9 +230,9 @@ class JsFuzzer(Fuzzer):
                 if switch == 1:  # Get a JS_Number ID
                     ret_params.append((random.choice(self._js_objects['JS_NUMBER'])).name)
                 else:  # Get one from FuzzValues
-                    ret_params.append(FuzzValues.PURE_INTS)
+                    ret_params.append(random.choice(FuzzValues.PURE_INTS))
             elif param == 'JS_ARRAY':
-                ret_params.append((random.choice(self._js_objects['JS_ARRAY'])).name)
+                ret_params.append(random.choice(self._js_objects['JS_ARRAY']))
             elif param == 'JS_DOM_ELEMENT' or param == 'JS_DOM_CHILD_ELEMENT':
                 ret_params.append((random.choice(self._js_objects['JS_DOM_ELEMENT'])).name)
             elif param == 'JS_EVENT_LISTENER':
@@ -253,7 +255,7 @@ class JsFuzzer(Fuzzer):
                 ret_params.append(random.choice(FuzzValues.INTERESTING_VALUES))
             elif param == 'REGEX':
                 # TODO: Build a regex builder method
-                ret_params.append("g/*/")
+                ret_params.append("g/[*]+/")
             elif param == 'STRING':
                 switch = random.choice([0, 1])
                 if switch == 0:
@@ -264,12 +266,8 @@ class JsFuzzer(Fuzzer):
                 ret_params.append(random.choice(FuzzValues.TEXT_DIRECTION))
             elif param == 'UNICODE_VALUE_LIST':
                 value = random.randint(0x0000, 0xFFFF)
-                ret_params.append(value)
-        return param_list
-
-    def __create_js_string(self):
-        x = self._js_objects
-        return ""
+                ret_params.append(format(value, '04x'))
+        return ret_params
 
     def __create_bool_expression(self):
         code = "("

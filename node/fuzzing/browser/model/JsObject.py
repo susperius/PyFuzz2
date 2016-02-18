@@ -202,7 +202,7 @@ class JsArray(JsObject):
         code = self._name + " = [ "
         for js_object in self._array_elements:
             code += js_object.name + ", "
-        code = code[:-2] + " ];"
+        code = code[:-2] + " ]"
         return code
 
     def concat(self, js_array):

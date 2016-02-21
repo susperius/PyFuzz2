@@ -1,10 +1,11 @@
 __author__ = 'susperius'
 
-JS_OBJECTS = ['JS_STRING', 'JS_NUMBER', 'JS_ARRAY', 'JS_DOM_ELEMENT']  # 'JS_DATE',
+JS_OBJECTS = ['JS_OBJECT', 'JS_STRING', 'JS_NUMBER', 'JS_ARRAY', 'JS_DOM_ELEMENT']  # 'JS_DATE',
 
 
 class JsObject:
     TYPE = "JsObject"
+    OPERATORS = []
 
     def __init__(self, name):
         self._name = name
@@ -19,7 +20,7 @@ class JsObject:
         return self._methods_and_properties
 
     @property
-    def methods_and_properties_by_type(self):
+    def methods_and_properties_by_return_type(self):
         ret_val = {}
         for key in self._methods_and_properties.keys():
             if self._methods_and_properties[key]['ret_val'] not in ret_val.keys():
@@ -46,6 +47,7 @@ class JsObject:
 
 class JsString(JsObject):
     TYPE = "JsString"
+    OPERATORS = ['+']
 
     def __init__(self, name):
         JsObject.__init__(self, name)
@@ -88,7 +90,7 @@ class JsString(JsObject):
         ret = self._name + ".fromCharCode("
         for item in unicode_value:
             ret += str(item) + ", "
-        ret = ret[:-1] + ")"
+        ret = ret[:-2] + ")"
         return ret
 
     def indexOf(self, string):
@@ -145,6 +147,7 @@ class JsString(JsObject):
 
 class JsNumber(JsObject):
     TYPE = "JsNumber"
+    OPERATORS = ['+', '-', '*', '/', '%']
 
     def __init__(self, name):
         JsObject.__init__(self, name)
@@ -176,7 +179,7 @@ class JsNumber(JsObject):
 class JsArray(JsObject):
     TYPE = "JsArray"
 
-    def __init__(self, name, array_elements):
+    def __init__(self, name, array_elements=[]):
         JsObject.__init__(self, name)
         # list contents [ JsObject, ....]
         self._array_elements = array_elements
@@ -206,7 +209,7 @@ class JsArray(JsObject):
         return code
 
     def concat(self, js_array):
-        self._array_elements += js_array.array_elements
+        #self._array_elements += js_array.array_elements
         return self._name + ".concat(" + js_array.name + ")"
 
     def every(self, function_name):
@@ -228,20 +231,23 @@ class JsArray(JsObject):
         return self._name + ".map(" + function_name + ")"
 
     def pop(self):
-        self._array_elements.pop()
+        #self._array_elements.pop()
         return self._name + ".pop()"
 
     def push(self, js_object):
-        self._array_elements.append(js_object)
-        return self._name + ".push(" + js_object.name + ")"
+        #self._array_elements.append(js_object)
+        return self._name + ".push(" + js_object + ")"
 
     def reverse(self):
         self._array_elements.reverse()
         return self._name + ".reverse()"
 
     def shift(self):
-        self._array_elements.pop(0)
+        #self._array_elements.pop(0)
         return self._name + ".shift()"
+
+    def length(self):
+        return self._name + ".length"
 
 
 class JsDate(JsObject):

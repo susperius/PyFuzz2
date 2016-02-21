@@ -5,13 +5,13 @@ from JsObject import JsObject
 class JsDomElement(JsObject):
     TYPE = "JsElement"
 
-    def __init__(self, var_name, html_type):
+    def __init__(self, var_name, html_type=None):
         JsObject.__init__(self, var_name)
         self.__registered_events = {}
         self.__children = []
         self.__attributes = {}
         self.__html_type = html_type
-        js_element_methods_and_properties = {'addEventListener': {'ret_val': None, 'parameters': ['JS_EVENT_LISTENER'], 'method': self.addEventListener},
+        js_element_methods_and_properties = {'addEventListener': {'ret_val': None, 'parameters': ['EVENT', 'JS_EVENT_LISTENER'], 'method': self.addEventListener},
                                              'appendChild': {'ret_val': None, 'parameters': ['JS_DOM_ELEMENT'], 'method': self.appendChild},
                                              'blur': {'ret_val': None, 'parameters': None, 'method': self.blur},
                                              'click': {'ret_val': None, 'parameters': None, 'method': self.click},
@@ -27,8 +27,8 @@ class JsDomElement(JsObject):
                                              'hasAttribute': {'ret_val': 'BOOL', 'parameters': ['HTML_ATTR'], 'method': self.hasAttribute},
                                              'hasAttributes': {'ret_val': 'BOOL', 'parameters': None, 'method': self.hasAttributes},
                                              'hasChildNodes': {'ret_val': 'BOOL', 'parameters': None, 'method': self.hasChildNodes},
-                                             'insertBefore': {'ret_val': ['JS_DOM_ELEMENT'], 'parameters': ['JS_DOM_ELEMENT', 'JS_DOM_ELEMENT'], 'method': self.insertBefore},
-                                             'isDefaultNamespace': {'ret_val': 'BOOL', 'parameters': ['NAMESPACE_URI'], 'method': self.isDefaultNamespace},
+                                             'insertBefore': {'ret_val': 'JS_DOM_ELEMENT', 'parameters': ['JS_DOM_ELEMENT', 'JS_DOM_ELEMENT'], 'method': self.insertBefore},
+                                             'isDefaultNamespace': {'ret_val': 'BOOL', 'parameters': None, 'method': self.isDefaultNamespace},
                                              'isEqualNode': {'ret_val': 'BOOL', 'parameters': ['JS_DOM_ELEMENT'], 'method': self.isEqualNode},
                                              'isSameNode': {'ret_val': 'BOOL', 'parameters': ['JS_DOM_ELEMENT'], 'method': self.isSameNode},
                                              #'isSupported': {'ret_val': 0, 'parameters': 0, 'method': self.isSupported},
@@ -38,7 +38,7 @@ class JsDomElement(JsObject):
                                              'removeAttribute': {'ret_val': None, 'parameters': ['HTML_ATTR'], 'method': self.removeAttribute},
                                              'removeChild': {'ret_val': 'JS_DOM_ELEMENT', 'parameters': ['JS_DOM_CHILD_ELEMENT'], 'method': self.removeChild},
                                              'replaceChild': {'ret_val': 'JS_DOM_ELEMENT', 'parameters': ['JS_DOM_ELEMENT', 'JS_DOM_CHILD_ELEMENT'], 'method': self.replaceChild},
-                                             'removeEventListener': {'ret_val': None, 'parameters': ['EVENT', 'JS_EVENT_LISTENER', 'BOOL'], 'method': self.removeEventListener},
+                                             'removeEventListener': {'ret_val': None, 'parameters': ['EVENT', 'JS_EVENT_LISTENER'], 'method': self.removeEventListener},
                                              'select': {'ret_val': None, 'parameters': None, 'method': self.select},
                                              'setAttribute': {'ret_val': None, 'parameters': ['HTML_ATTR', 'HTML_ATTR_VAL'], 'method': self.setAttribute},
                                              #'setUserData': {'ret_val': 0, 'parameters': 0, 'method': self.setUserData},
@@ -180,20 +180,24 @@ class JsDomElement(JsObject):
         return self._name + ".querySelectorAll('." + html_class_name + "')"
 
     def removeAttribute(self, attr):
-        del self.__attributes[attr]
+        if attr in self.__attributes.keys():
+            del self.__attributes[attr]
         return self._name + ".removeAttribute('" + attr + "')"
 
     def removeChild(self, child_node):
-        self.__children.remove(child_node)
+        if self.__children.count(child_node) != 0:
+            self.__children.remove(child_node)
         return self._name + ".removeChild(" + child_node + ")"
 
     def replaceChild(self, new_node, child_node):
-        self.__children.remove(child_node)
-        self.__children.append(new_node)
+        if self.__children.count(child_node) != 0:
+            self.__children.remove(child_node)
+            self.__children.append(new_node)
         return self._name + ".replaceChild(" + new_node + ", " + child_node + ")"
 
     def removeEventListener(self, event, function):
-        del self.__registered_events[event]
+        if event in self.__registered_events.keys():
+            del self.__registered_events[event]
         return self._name + ".removeEventListener('" + event + "', " + function + ")"
 
     def select(self):

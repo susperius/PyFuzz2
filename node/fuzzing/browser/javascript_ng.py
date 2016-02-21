@@ -13,6 +13,7 @@ from model.HtmlObjects import *
 from model.CssProperties import CSS_STYLES
 from model.DomObjectTypes import DomObjectTypes
 from model.FuzzedHtmlPage import HtmlPage
+from model.JsWindow import JsWindow
 
 """
 1) Create a html page
@@ -42,45 +43,66 @@ needed methods:
 
 class JsFuzzer(Fuzzer):
     NAME = "js_fuzzer"
-    CONFIG_PARAMS = []
+    CONFIG_PARAMS = ['seed', 'starting_elements', 'html_depth', 'html_max_attr', 'canvas_size', 'js_block_size',
+                     'function_count', 'file_type']
     CALLING_COMMENT = "//CALLING COMMENT"
     FIRST_ARRAY_LENGTH = 5
+    FUNCTION_TYPES = ['default', 'event', 'array']
 
-    def __init__(self, seed, starting_elements, html_depth, html_max_attr, canvas_size, file_type):
-        self._html_fuzzer = Html5Fuzzer(seed, starting_elements, html_depth, html_max_attr, file_type)
-        self._canvas_fuzzer = CanvasFuzzer(canvas_size)
-        self._css_fuzzer = CssFuzzer(seed)
-        random.seed(0)
+    def __init__(self, seed, starting_elements, html_depth, html_max_attr, canvas_size, js_block_size, function_count, file_type):
+        self._html_fuzzer = Html5Fuzzer(int(seed), int(starting_elements), int(html_depth), int(html_max_attr), file_type)
+        self._canvas_fuzzer = CanvasFuzzer(int(canvas_size))
+        self._css_fuzzer = CssFuzzer(int(seed))
+        random.seed(int(seed))
+        self._size = int(js_block_size)
+        self._function_count = int(function_count)
         self._file_type = file_type
         self._js_objects = {}
         self.__init_js_object_dict()
+        self._js_default_functions = []
         self._js_event_listener = []
         self._js_array_functions = []
+        max_funcs = min((self._size / 10), 30)
+        for i in range(max_funcs):
+            self._js_array_functions.append("array_func_" + str(i))
+            self._js_event_listener.append("event_handler_" + str(i))
         self._html_page = HtmlPage()
-
 
     def __init_js_object_dict(self):
         for js_obj_type in JS_OBJECTS:
             self._js_objects[js_obj_type] = []
 
+    @property
     def file_type(self):
         return self._file_type
 
     @classmethod
     def from_list(cls, params):
-        pass
+        return cls(params[0], params[1], params[2], params[3], params[4], params[5], params[6], params[7])
 
+    @property
     def prng_state(self):
-        pass
+        return random.getstate
 
     def set_state(self, state):
-        pass
+        random.setstate(state)
 
     def create_testcases(self, count, directory):
-        pass
+        for i in range(count):
+            test_name = "/test" + str(i) if i > 9 else "/test0" + str(i)
+            with open(directory + test_name + "." + self._file_type, "wb+") as html_fd, open(directory + test_name + ".css", "wb+") as css_fd:
+                html, css = self.fuzz()
+                html = html.replace("TESTCASE", test_name)
+                html_fd.write(html)
+                css_fd.write(css)
 
     def set_seed(self, seed):
         pass
+
+    def __reinit(self):
+        self._js_objects = {}
+        self.__init_js_object_dict()
+        self._js_default_functions = []
 
     def fuzz(self):
         self._html_page = self._html_fuzzer.fuzz()
@@ -90,9 +112,29 @@ class JsFuzzer(Fuzzer):
         css = self._css_fuzzer.fuzz()
         code = ""
         code += self.__init_js_objects(self._html_page)
-        for i in range(20):
-            code += self.__build_assignment()
-        return code
+        i = 0
+        func_size = self._size / self._function_count
+        while i < self._size:
+            code += self.__build_function("default", func_size)
+            i += func_size
+        for func_name in self._js_event_listener:
+            code += self.__build_function("event", func_size, func_name)
+        for func_name in self._js_array_functions:
+            code += self.__build_function("array", func_size, func_name)
+        code += self.__add_event_dispatcher()
+        call_block = ""
+        for func_name in self._js_default_functions:
+            choice = random.randint(1, 20)
+            if choice < 15:
+                call_block += "\t" + func_name + "();\n"
+            else:
+                call_block += "\t" + JsWindow.setTimeout(func_name + "();", 100)
+        call_block += "\t" + "event_firing();\n"
+        code = code.replace(self.CALLING_COMMENT, call_block)
+        html = self._html_page.get_raw_html()
+        html = html.replace("SCRIPT_BODY", code)
+        self.__reinit()
+        return html, css
 
     def __init_js_objects(self, html_page):
         available_dom_elements = html_page.get_elements_by_id()
@@ -110,85 +152,154 @@ class JsFuzzer(Fuzzer):
         code += "}\n"
         return code
 
+    # region Little Helper
     def __build_js_array(self, length):
         array_obj_list = []
         for i in range(length):
             js_obj = self.__get_an_js_object()
             array_obj_list.append(js_obj)
-        js_array = JsArray("array_" + str(len(self._js_objects['JS_ARRAY'])), array_obj_list)
+        js_array = JsArray(self.__get_js_array_name(), array_obj_list)
         self._js_objects['JS_ARRAY'].append(js_array)
         return js_array.newArray() + ";\n"
 
     def __add_js_string(self):
-        js_str = JsString("str_" + str(len(self._js_objects['JS_STRING'])))
+        js_str = JsString(self.__get_js_string_name())
         self._js_objects['JS_STRING'].append(js_str)
         return js_str.newString(random.choice(FuzzValues.STRINGS)) + ";\n"
 
     def __add_js_number(self):
-        js_number = JsNumber("number_" + str(len(self._js_objects['JS_NUMBER'])))
+        js_number = JsNumber(self.__get_js_number_name())
         self._js_objects['JS_NUMBER'].append(js_number)
         return js_number.newNumber(random.choice(FuzzValues.INTS)) + ";\n"
 
-    def __build_assignment(self):
-        js_obj = self.__get_an_js_object()
-        js_obj_function = js_obj.methods_and_properties[random.choice(js_obj.methods_and_properties.keys())]
-        if js_obj_function['parameters'] is not None:
-            params = self.__get_params(js_obj_function['parameters'])
-            print(params)
-            code = js_obj_function['method'](*params)
-        else:
-            code = js_obj_function['method']()
-        #  TODO: build the rest of the assignment with determination if it's a prop setter or not
-        """
-        ret_val = js_obj_function['ret_val']
-        if ret_val in JS_OBJECTS or ret_val in ['STRING', 'INT']:
-            #  ---------------------------------------------------------------------------------------------------------
-            #  TODO: FIX the whole section ... figure sth out to determine whether it's a prop or method and then
-            #  TODO: decide if it's a prop it'll be an assignment or an call to receive the value
-            #  ---------------------------------------------------------------------------------------------------------
-            if ret_val == 'STRING':
-                ret_val = 'JS_STRING'
-            elif ret_val == 'INT':
-                ret_val = 'JS_NUMBER'
-            assignment_obj = None
-            what_do_to_next = random.choice(['REPLACE_AN_EXISTING_OBJ', 'CREATE_A_NEW_OBJ']) if self._js_objects[
-                ret_val] else 'CREATE_A_NEW_OBJ'
-            if what_do_to_next == "REPLACE_AN_EXISTING_OBJ":
-                assignment_obj = random.choice(self._js_objects[ret_val])
-                code = assignment_obj.name + " = " + code + ";\n"
-            elif what_do_to_next == "CREATE_A_NEW_OBJ":
-                assignment_obj_name = "elem_" + str(len(self._js_objects))
-                if ret_val == "JS_STRING" or ret_val == "STRING":
-                    assignment_obj = JsString(assignment_obj_name)
-                elif ret_val == "JS_ARRAY":
-                    assignment_obj = JsArray(assignment_obj_name, [])
-                elif ret_val == "JS_NUMBER" or ret_val == "INT":
-                    assignment_obj = JsNumber(assignment_obj_name)
-                elif ret_val == "JS_DOM_ELEMENT":
-                    assignment_obj = JsDomElement(assignment_obj_name, "")
-                self._js_objects[ret_val].append(assignment_obj)
-        else:
-            code += ";\n" """
-        return code + ";\n"
+    def __add_js_dom_element(self):
+        var_name = "elem_" + str(len(self._js_objects['JS_DOM_ELEMENT']))
+        html_type = random.choice(HTML5_OBJECTS.keys())
+        js_dom_element = JsDomElement(var_name, html_type)
+        self._js_objects['JS_DOM_ELEMENT'].append(js_dom_element)
+        return var_name + " = " + JsDocument.createElement(html_type) + ";\n"
 
-    def __create_a_method_or_prop_call(self):
+    def __get_js_dom_element_name(self):
+        return "elem_" + str(len(self._js_objects['JS_DOM_ELEMENT']))
+
+    def __get_js_string_name(self):
+        return "str_" + str(len((self._js_objects['JS_STRING'])))
+
+    def __get_js_number_name(self):
+        return "number_" + str(len(self._js_objects['JS_NUMBER']))
+
+    def __get_js_array_name(self):
+        return "array_" + str(len(self._js_objects['JS_ARRAY']))
+
+    def __get_js_object_name(self):
+        return "object_" + str(len(self._js_objects['JS_OBJECT']))
+    # endregion
+
+    def __build_function(self, func_type, length, func_name=None):
+        code = ""
+        block_length = length / 10
+        if func_type == 'default':
+            func_name = "func_" + str(len(self._js_default_functions))
+            self._js_default_functions.append(func_name)
+            code += "function " + func_name + "() { \n"
+            func_end = "}\n"
+        elif func_type == "array" or "event":
+            code += "function " + func_name + "(x) { \n"
+            func_end = "\treturn x;\n}\n" if func_type == "array" else "}\n"
+        for i in range(length):
+            choice = random.randint(1, 20)
+            if choice <= 10:
+                code += "\t" + self.__build_assignment()
+            elif 10 < choice < 15:
+                code += self.__build_if_statement_block(block_length)
+                i += block_length
+            elif choice > 15:
+                code += self.__build_for_loop_block(block_length)
+                i += block_length
+        code += func_end
+        return code
+
+    def __build_if_statement_block(self, length):
+        code = "\tif " + self.__create_bool_expression() + "{ \n"
+        for i in range(length):
+            code += "\t\t" + self.__build_assignment(False)
+        code += "\t}\n"
+        return "\t" + JsGlobal.try_catch_block("\n" + code)
+
+    def __build_for_loop_block(self, length):
+        code = "\tfor (var i = 0; i < " + (random.choice(self._js_objects['JS_ARRAY'])).length() + ";i++) {\n"
+        for i in range(length):
+            code += "\t\t" + self.__build_assignment(False)
+        code += "\t}\n"
+        return "\t" + JsGlobal.try_catch_block("\n" + code)
+
+    def __build_assignment(self, try_catch=True):
         js_obj = self.__get_an_js_object()
-        js_obj_function = js_obj.methods_and_properties[random.choice(js_obj.methods_and_properties.keys())]
-        if js_obj_function['parameters'] is not None:
-            params = self.__get_params(js_obj_function['parameters'])
+        js_function_name = random.choice(js_obj.methods_and_properties.keys())
+        if js_function_name == "removeChild" or js_function_name == "replaceChild":
+            children = js_obj.get_children()
+            if not children:
+                js_function_name = "appendChild"
+        js_obj_function = js_obj.methods_and_properties[js_function_name]
+        parameters = js_obj_function['parameters']
+        ret_val = js_obj_function['ret_val']
+        optional = False
+        if parameters is not None:
+            for params in parameters:
+                if "*" in params:
+                    choice = random.randint(1, 10)
+                    if choice > 6:
+                        parameters = None
+                    else:
+                        optional = True
+        if parameters is not None:
+            params = self.__get_params(js_obj, js_obj_function['parameters'])
             code = js_obj_function['method'](*params)
         else:
             code = js_obj_function['method']()
-        return code, js_obj_function['ret_val']
+        #  TODO: how to involve operators in numbers and strings ...
+        if not optional:
+            ret_val = "JS_STRING" if ret_val == "STRING" else ret_val
+            ret_val = "JS_NUMBER" if ret_val == "INT" or ret_val == "EXP_FLOAT" or ret_val == "FLOAT" else ret_val
+            if ret_val == "JS_DOM_ELEMENT":
+                new_js_obj = JsDomElement(self.__get_js_dom_element_name())
+                self._js_objects['JS_DOM_ELEMENT'].append(new_js_obj)
+            elif ret_val == "JS_STRING":
+                choice = random.randint(1, 20)
+                new_js_obj = JsString(self.__get_js_string_name())
+                self._js_objects['JS_STRING'].append(new_js_obj)
+                if choice >= 15:
+                    js_str = random.choice(self._js_objects['JS_STRING'])
+                    js_str_func = random.choice(js_str.methods_and_properties_by_return_type['STRING'])
+                    js_str_func_params = self.__get_params(js_str, js_str_func['parameters']) if js_str_func['parameters'] is not None else None
+                    code += " + " + js_str_func['method'](*js_str_func_params) if js_str_func['parameters'] is not None else " + " + js_str_func['method']()
+            elif ret_val == "JS_NUMBER":
+                new_js_obj = JsNumber(self.__get_js_number_name())
+                self._js_objects['JS_NUMBER'].append(new_js_obj)
+                choice = random.randint(1, 20)
+                if choice >= 15:
+                    number_operator = random.choice(JsNumber.OPERATORS)
+                    js_number = random.choice(self._js_objects['JS_NUMBER'])
+                    code += " " + number_operator + " " + js_number.name
+            elif ret_val == "JS_ARRAY":
+                new_js_obj = JsArray(self.__get_js_array_name())
+                self._js_objects['JS_ARRAY'].append(new_js_obj)
+            else:
+                new_js_obj = JsObject(self.__get_js_object_name())
+                self._js_objects['JS_OBJECT'].append(new_js_obj)
+            code = new_js_obj.name + " = " + code
+        return JsGlobal.try_catch_block(code + "; ") if try_catch else code +";\n"
 
     def __get_an_js_object(self):
-        js_obj_type = random.choice(self._js_objects.keys())
+        usable_object = self._js_objects.keys()
+        usable_object.remove('JS_OBJECT')
+        js_obj_type = random.choice(usable_object)
         while not self._js_objects[js_obj_type]:
             js_obj_type = random.choice(self._js_objects.keys())
         js_obj = random.choice(self._js_objects[js_obj_type])
         return js_obj
 
-    def __get_params(self, param_list):
+    def __get_params(self, calling_obj, param_list):
         ret_params = []
         for param in param_list:
             if param == 'BOOL':
@@ -212,12 +323,18 @@ class JsFuzzer(Fuzzer):
                 ret_params.append(style[0])
                 ret_params.append(random.choice(style[1:]))
             elif param == 'EVENT':
-                ret_params.append(DomObjectTypes.DOM_EVENTS)
+                ret_params.append(random.choice(DomObjectTypes.DOM_EVENTS))
             elif param == 'HTML_ATTR':
                 html_attr = random.choice(HTML5_GLOBAL_ATTR.keys())
                 ret_params.append(html_attr)
                 if 'HTML_ATTR_VAL' in param_list:
-                    ret_params.append(random.choice(Html5Fuzzer.TYPES_DICT[HTML5_GLOBAL_ATTR[html_attr]]))
+                    if HTML5_GLOBAL_ATTR[html_attr] == "CSS_CLASS":
+                        ret_params.append(random.choice(self._html_page.get_css_class_names()))
+                    elif html_attr == "style":
+                        style = random.choice(CSS_STYLES)
+                        ret_params.append(style[0] + " " + random.choice(style[1:]))
+                    else:
+                        ret_params.append(random.choice(Html5Fuzzer.TYPES_DICT[HTML5_GLOBAL_ATTR[html_attr]]))
             elif param == 'HTML_ATTR_VAL':
                 continue
             elif param == 'HTML_CODE':
@@ -233,16 +350,17 @@ class JsFuzzer(Fuzzer):
                     ret_params.append(random.choice(FuzzValues.PURE_INTS))
             elif param == 'JS_ARRAY':
                 ret_params.append(random.choice(self._js_objects['JS_ARRAY']))
-            elif param == 'JS_DOM_ELEMENT' or param == 'JS_DOM_CHILD_ELEMENT':
+            elif param == 'JS_DOM_ELEMENT':
                 ret_params.append((random.choice(self._js_objects['JS_DOM_ELEMENT'])).name)
+            elif param == 'JS_DOM_CHILD_ELEMENT':
+                if not calling_obj.get_children():
+                    ret_params.append((random.choice(self._js_objects['JS_DOM_ELEMENT'])).name)
+                else:
+                    ret_params.append(random.choice(calling_obj.get_children()))
             elif param == 'JS_EVENT_LISTENER':
-                listener_name = "event_listner_" + str(len(self._js_event_listener))
-                self._js_event_listener.append(listener_name)
-                ret_params.append(listener_name)
+                ret_params.append(random.choice(self._js_event_listener))
             elif param == 'JS_ARRAY_FUNCTION':
-                function_name = "array_function_" + str(len(self._js_array_functions))
-                self._js_array_functions.append(function_name)
-                ret_params.append(function_name)
+                ret_params.append(random.choice(self._js_array_functions))
             elif param == 'JS_OBJECT':
                 obj_type = random.choice(self._js_objects.keys())
                 ret_params.append((random.choice(self._js_objects[obj_type])).name)
@@ -252,7 +370,7 @@ class JsFuzzer(Fuzzer):
                 # TODO: think about namespace URIs
                 ret_params.append("localhost")
             elif param == 'NUMBER':
-                ret_params.append(random.choice(FuzzValues.INTERESTING_VALUES))
+                ret_params.append(random.choice(FuzzValues.INTS))
             elif param == 'REGEX':
                 # TODO: Build a regex builder method
                 ret_params.append("g/[*]+/")
@@ -275,14 +393,39 @@ class JsFuzzer(Fuzzer):
         operand_type = random.choice(self._js_objects.keys())
         operand1 = random.choice(self._js_objects[operand_type])
         operand2 = random.choice(self._js_objects[operand_type])
-        same_ret_val = [x for x in operand1.methods_and_properties_by_type.keys() if x in operand2.methods_and_properties_by_type.keys()]
+        same_ret_val = [x for x in operand1.methods_and_properties_by_return_type.keys() if x in operand2.methods_and_properties_by_return_type.keys()]
         ret_val = random.choice(same_ret_val)
-        operand1_func = random.choice(operand1.methods_and_properties_by_type[ret_val])
-        operand2_func = random.choice(operand2.methods_and_properties_by_type[ret_val])
-        operand1_param = self.__get_params(operand1_func['parameters']) if operand1_func['parameters'] is not None else None
-        operand2_param = self.__get_params(operand2_func['parameters']) if operand2_func['parameters'] is not None else None
+        operand1_func = random.choice(operand1.methods_and_properties_by_return_type[ret_val])
+        operand2_func = random.choice(operand2.methods_and_properties_by_return_type[ret_val])
+        operand1_param = self.__get_params(operand1, operand1_func['parameters']) if operand1_func['parameters'] is not None and '*' not in ("" + x for x in operand1_func['parameters']) else None
+        operand2_param = self.__get_params(operand2, operand2_func['parameters']) if operand2_func['parameters'] is not None and '*' not in ("" + x for x in operand2_func['parameters'])else None
         code += operand1_func['method'](*operand1_param) if operand1_param is not None else operand1_func['method']()
         code += operator
-        code += operand1_func['method'](*operand2_param) if operand2_param is not None else operand2_func['method']()
+        code += operand2_func['method'](*operand2_param) if operand2_param is not None else operand2_func['method']()
         code += ")"
+        return code
+
+    def __add_event_dispatcher(self):
+        code = "function event_firing() {\n"
+        for elem in self._js_objects['JS_DOM_ELEMENT']:
+            for event in elem.registered_events.keys():
+                if 'DOM' in event:
+                    continue
+                elif event == 'click':
+                    code += JsGlobal.try_catch_block(elem.click() + "\n", "ex")
+                elif event == 'error':
+                    pass
+                elif event == 'load':
+                    pass
+                elif event == 'scroll':
+                    code += JsGlobal.try_catch_block(elem.scrollLeft() + " = 10;" + "\n", "ex")
+                elif event == 'resize' or event == 'change':
+                    code += JsGlobal.try_catch_block(elem.innerHtml() + " = \"" + "A" * 100 + "\";\n", "ex")
+                elif event == 'focus' or event == 'focusin':
+                    code += JsGlobal.try_catch_block(elem.focus() + "\n", "ex")
+                elif event == 'blur':
+                    code += JsGlobal.try_catch_block(elem.blur() + "\n", "ex")
+                elif event == 'select':
+                    code += JsGlobal.try_catch_block(elem.select() + "\n", "ex")
+        code += "}\n"
         return code

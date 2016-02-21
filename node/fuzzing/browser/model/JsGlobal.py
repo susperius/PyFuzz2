@@ -63,11 +63,3 @@ class JsGlobal:
     @staticmethod
     def try_catch_block(try_code, exception_code="ex", catch_code=""):
         return "try{ " + try_code + " } catch(" + exception_code + ") { " + catch_code + " }\n"
-
-    @staticmethod
-    def for_loop(start, end, code):
-        return "for(int i = " + str(start) + "; i < " + str(end) + "; i++){\n" + code + "}\n"
-
-    @staticmethod
-    def if_clause(value, compare_value, code, else_code=""):
-        return "if( " + value + " == " + compare_value + "){\n" + code + "}else{\n" + else_code + "}\n"

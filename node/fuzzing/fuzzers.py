@@ -1,6 +1,7 @@
 __author__ = 'susperius'
 
 import browser.javascript as javascript
+from browser.javascript_ng import JsFuzzer
 import bytemutation
 
 """
@@ -11,4 +12,7 @@ parameters as first value and a reference to your fuzzers class as the second va
 """
 #  FUZZERS = {FuzzerName: (CONFIG_PARAMS, CONSTRUCTOR())}
 FUZZERS = {bytemutation.ByteMutation.NAME: (bytemutation.ByteMutation.CONFIG_PARAMS, bytemutation.ByteMutation),
-           javascript.JsDomFuzzer.NAME: (javascript.JsDomFuzzer.CONFIG_PARAMS, javascript.JsDomFuzzer)}
+           javascript.JsDomFuzzer.NAME: (javascript.JsDomFuzzer.CONFIG_PARAMS, javascript.JsDomFuzzer),
+           JsFuzzer.NAME: (JsFuzzer.CONFIG_PARAMS, JsFuzzer)
+           }
+

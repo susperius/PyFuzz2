@@ -53,7 +53,7 @@ class JsFuzzer(Fuzzer):
         self._html_fuzzer = Html5Fuzzer(int(seed), int(starting_elements), int(html_depth), int(html_max_attr), file_type)
         self._canvas_fuzzer = CanvasFuzzer(int(canvas_size))
         self._css_fuzzer = CssFuzzer(int(seed))
-        random.seed(int(seed))
+        random.seed(int(seed)) if int(seed) != 0 else random.seed()
         self._size = int(js_block_size)
         self._function_count = int(function_count)
         self._file_type = file_type
@@ -62,7 +62,7 @@ class JsFuzzer(Fuzzer):
         self._js_default_functions = []
         self._js_event_listener = []
         self._js_array_functions = []
-        max_funcs = min((self._size / 10), 30)
+        max_funcs = min((self._size / 10), 20)
         for i in range(max_funcs):
             self._js_array_functions.append("array_func_" + str(i))
             self._js_event_listener.append("event_handler_" + str(i))
@@ -148,6 +148,7 @@ class JsFuzzer(Fuzzer):
             code += "\t" + self.__build_js_array(self.FIRST_ARRAY_LENGTH)
             code += "\t" + self.__add_js_string()
             code += "\t" + self.__add_js_number()
+            code += "\t" + self.__add_js_object()
         code += "\t" + self.CALLING_COMMENT + "\n"
         code += "}\n"
         return code
@@ -178,6 +179,14 @@ class JsFuzzer(Fuzzer):
         js_dom_element = JsDomElement(var_name, html_type)
         self._js_objects['JS_DOM_ELEMENT'].append(js_dom_element)
         return var_name + " = " + JsDocument.createElement(html_type) + ";\n"
+
+    def __add_js_object(self):
+        var_name = self.__get_js_object_name()
+        self._js_objects['JS_OBJECT'].append(JsObject(var_name))
+        available_types = self._js_objects.keys()
+        available_types.remove('JS_OBJECT')
+        js_obj_type = random.choice(available_types)
+        return var_name + " = " + (random.choice(self._js_objects[js_obj_type])).name + ";\n"
 
     def __get_js_dom_element_name(self):
         return "elem_" + str(len(self._js_objects['JS_DOM_ELEMENT']))

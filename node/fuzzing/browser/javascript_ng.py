@@ -128,8 +128,9 @@ class JsFuzzer(Fuzzer):
             if choice < 15:
                 call_block += "\t" + func_name + "();\n"
             else:
-                call_block += "\t" + JsWindow.setTimeout(func_name + "();", 100)
+                call_block += "\t" + JsWindow.setTimeout(func_name + "();", 100) + "\n"
         call_block += "\t" + "event_firing();\n"
+        call_block += "\t" + "location.reload();\n"
         code = code.replace(self.CALLING_COMMENT, call_block)
         html = self._html_page.get_raw_html()
         html = html.replace("SCRIPT_BODY", code)

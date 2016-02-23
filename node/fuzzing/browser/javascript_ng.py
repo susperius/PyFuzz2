@@ -150,7 +150,7 @@ class JsFuzzer(Fuzzer):
             code += "\t" + self.__add_js_string()
             code += "\t" + self.__add_js_number()
             code += "\t" + self.__add_js_object()
-        code += "\t" + self.CALLING_COMMENT + "\n"
+        code += self.CALLING_COMMENT + "\n"
         code += "}\n"
         return code
 
@@ -244,6 +244,7 @@ class JsFuzzer(Fuzzer):
         return "\t" + JsGlobal.try_catch_block("\n" + code)
 
     def __build_assignment(self, try_catch=True):
+        choice = random.randint(1, 20)
         js_obj = self.__get_an_js_object()
         js_function_name = random.choice(js_obj.methods_and_properties.keys())
         if js_function_name == "removeChild" or js_function_name == "replaceChild":
@@ -257,8 +258,7 @@ class JsFuzzer(Fuzzer):
         if parameters is not None:
             for params in parameters:
                 if "*" in params:
-                    choice = random.randint(1, 10)
-                    if choice > 6:
+                    if choice > 8:
                         parameters = None
                     else:
                         optional = True
@@ -272,11 +272,10 @@ class JsFuzzer(Fuzzer):
             ret_val = "JS_STRING" if ret_val == "STRING" else ret_val
             ret_val = "JS_NUMBER" if ret_val == "INT" or ret_val == "EXP_FLOAT" or ret_val == "FLOAT" else ret_val
             if ret_val == "JS_DOM_ELEMENT":
-                new_js_obj = JsDomElement(self.__get_js_dom_element_name())
+                new_js_obj = JsDomElement(self.__get_js_dom_element_name()) if choice < 10 else random.choice(self._js_objects['JS_DOM_ELEMENT'])
                 self._js_objects['JS_DOM_ELEMENT'].append(new_js_obj)
             elif ret_val == "JS_STRING":
-                choice = random.randint(1, 20)
-                new_js_obj = JsString(self.__get_js_string_name())
+                new_js_obj = JsString(self.__get_js_string_name()) if choice < 10 else random.choice(self._js_objects['JS_STRING'])
                 self._js_objects['JS_STRING'].append(new_js_obj)
                 if choice >= 15:
                     js_str = random.choice(self._js_objects['JS_STRING'])
@@ -284,21 +283,20 @@ class JsFuzzer(Fuzzer):
                     js_str_func_params = self.__get_params(js_str, js_str_func['parameters']) if js_str_func['parameters'] is not None else None
                     code += " + " + js_str_func['method'](*js_str_func_params) if js_str_func['parameters'] is not None else " + " + js_str_func['method']()
             elif ret_val == "JS_NUMBER":
-                new_js_obj = JsNumber(self.__get_js_number_name())
+                new_js_obj = JsNumber(self.__get_js_number_name()) if choice < 10 else random.choice(self._js_objects['JS_NUMBER'])
                 self._js_objects['JS_NUMBER'].append(new_js_obj)
-                choice = random.randint(1, 20)
                 if choice >= 15:
                     number_operator = random.choice(JsNumber.OPERATORS)
                     js_number = random.choice(self._js_objects['JS_NUMBER'])
                     code += " " + number_operator + " " + js_number.name
             elif ret_val == "JS_ARRAY":
-                new_js_obj = JsArray(self.__get_js_array_name())
+                new_js_obj = JsArray(self.__get_js_array_name()) if choice < 10 else random.choice(self._js_objects['JS_ARRAY'])
                 self._js_objects['JS_ARRAY'].append(new_js_obj)
             else:
-                new_js_obj = JsObject(self.__get_js_object_name())
+                new_js_obj = JsObject(self.__get_js_object_name()) if choice < 10 else random.choice(self._js_objects['JS_OBJECT'])
                 self._js_objects['JS_OBJECT'].append(new_js_obj)
             code = new_js_obj.name + " = " + code
-        return JsGlobal.try_catch_block(code + "; ") if try_catch else code +";\n"
+        return JsGlobal.try_catch_block(code + "; ") if try_catch else code + ";\n"
 
     def __get_an_js_object(self):
         usable_object = self._js_objects.keys()

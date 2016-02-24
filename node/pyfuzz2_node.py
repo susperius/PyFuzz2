@@ -52,8 +52,8 @@ class PyFuzz2Node:
                     with open("fuzz_state.pickle", 'r') as fd:
                         self._fuzzer.set_state(pickle.load(fd))
                     os.remove("fuzz_state.pickle")
-                except KeyError as er:
-                    self._logger.error("Error while restoring the PRNG state -> " + er.message)
+                except Exception as ex:
+                    self._logger.error("Error while restoring the PRNG state -> " + ex.message)
                     self._fuzzer.set_seed()
             self._operation_worker = FuzzingWorker(self._node_config.programs, self._fuzzer, self._reporter_queue,)
         elif self._node_config.node_op_mode == 'reducing':
@@ -76,9 +76,12 @@ class PyFuzz2Node:
             self._tcp_listener.stop()
 
     def __save_fuzz_state(self):
-        fuzz_state = self._fuzzer.prng_state
-        with open("fuzz_state.pickle", 'w+') as fd:
-            pickle.dump(fuzz_state, fd)  # Save the state of the prng
+        try:
+            fuzz_state = self._fuzzer.prng_state
+            with open("fuzz_state.pickle", 'w+') as fd:
+                pickle.dump(fuzz_state, fd)  # Save the state of the prng
+        except Exception as ex:
+            self._logger.error('Was not able to save the prng state in a file: ' + ex.message)
 
     def main(self):
         start = time.time()

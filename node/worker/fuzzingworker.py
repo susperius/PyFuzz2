@@ -97,9 +97,9 @@ class FuzzingWorker(Worker):
                             # Structure crash message (0xFF, (prog['name'], crash_report, testcases[]))
                             self._report_queue.put((0xFF, (prog['name'], crash_report, testcases)))
                         #  --------------------------------------------------------------------------------------------
-                        else:
-                            testcases = self.__bundle_testcase(testcase_dir, filename, dir_listing)
-                            self._report_queue.put((0xFE, (prog['name'], testcases)))
+                        #else: Do not save unknowns ...
+                        #    testcases = self.__bundle_testcase(testcase_dir, filename, dir_listing)
+                        #    self._report_queue.put((0xFE, (prog['name'], testcases)))
                     gevent.sleep(1)
             if self._need_web_server:
                 self._web_process.kill()

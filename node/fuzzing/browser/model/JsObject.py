@@ -9,7 +9,7 @@ class JsObject:
 
     def __init__(self, name):
         self._name = name
-        self._methods_and_properties = {'toString': {'ret_val': 'STRING', 'parameters': None, 'method': self.toString}}
+        self._methods_and_properties = {'toString': {'ret_val': 'JS_STRING', 'parameters': None, 'method': self.toString}}
 
     @property
     def name(self):
@@ -51,25 +51,25 @@ class JsString(JsObject):
 
     def __init__(self, name):
         JsObject.__init__(self, name)
-        js_string_methods = {'charAt': {'ret_val': 'STRING', 'parameters': ['INT'], 'method': self.charAt},
+        js_string_methods = {'charAt': {'ret_val': 'JS_STRING', 'parameters': ['INT'], 'method': self.charAt},
                              'charCodeAt': {'ret_val': 'INT', 'parameters': ['INT'], 'method': self.charCodeAt},
-                             'concat': {'ret_val': 'STRING', 'parameters': ['STRING'], 'method': self.concat},
-                             'fromCharCode': {'ret_val': 'STRING', 'parameters': ['UNICODE_VALUE_LIST'], 'method': self.fromCharCode},
-                             'indexOf': {'ret_val': 'INT', 'parameters': ['STRING'], 'method': self.indexOf},
-                             'lastIndexOf': {'ret_val': 'INT', 'parameters': ['STRING'], 'method': self.lastIndexOf},
-                             'localeCompare': {'ret_val': 'INT', 'parameters': ['STRING'], 'method': self.localeCompare},
-                             'match': {'ret_val': 'STRING', 'parameters': ['REGEX'], 'method': self.match},
-                             'replace': {'ret_val': 'STRING' ,'parameters': ['STRING', 'STRING'], 'method': self.replace},
-                             'slice': {'ret_val': 'STRING','parameters': ['INT', 'INT'], 'method': self.slice},
-                             'split': {'ret_val': 'STRING', 'parameters': ['STRING'], 'method': self.split},
-                             'substr': {'ret_val': 'STRING', 'parameters': ['INT', 'INT'], 'method': self.substr},
-                             'substring': {'ret_val': 'STRING', 'parameters': ['INT', 'INT'], 'method': self.substring},
-                             'toLocaleLowerCase': {'ret_val': 'STRING', 'parameters': None, 'method': self.toLocaleLowerCase},
-                             'toLowerCase': {'ret_val': 'STRING', 'parameters': None, 'method': self.toLowerCase},
-                             'toLocaleUpperCase': {'ret_val': 'STRING', 'parameters': None, 'method': self.toLocaleUpperCase},
-                             'toUpperCase': {'ret_val': 'STRING', 'parameters': None, 'method': self.toUpperCase},
-                             'trim': {'ret_val': 'STRING', 'parameters': None, 'method': self.trim},
-                             'valueOf': {'ret_val': 'STRING', 'parameters': None, 'method': self.valueOf},
+                             'concat': {'ret_val': 'JS_STRING', 'parameters': ['JS_STRING'], 'method': self.concat},
+                             'fromCharCode': {'ret_val': 'JS_STRING', 'parameters': ['UNICODE_VALUE_LIST'], 'method': self.fromCharCode},
+                             'indexOf': {'ret_val': 'INT', 'parameters': ['JS_STRING'], 'method': self.indexOf},
+                             'lastIndexOf': {'ret_val': 'INT', 'parameters': ['JS_STRING'], 'method': self.lastIndexOf},
+                             'localeCompare': {'ret_val': 'INT', 'parameters': ['JS_STRING'], 'method': self.localeCompare},
+                             'match': {'ret_val': 'JS_STRING', 'parameters': ['REGEX'], 'method': self.match},
+                             'replace': {'ret_val': 'JS_STRING' ,'parameters': ['JS_STRING', 'JS_STRING'], 'method': self.replace},
+                             'slice': {'ret_val': 'JS_STRING','parameters': ['INT', 'INT'], 'method': self.slice},
+                             'split': {'ret_val': 'JS_STRING', 'parameters': ['JS_STRING'], 'method': self.split},
+                             'substr': {'ret_val': 'JS_STRING', 'parameters': ['INT', 'INT'], 'method': self.substr},
+                             'substring': {'ret_val': 'JS_STRING', 'parameters': ['INT', 'INT'], 'method': self.substring},
+                             'toLocaleLowerCase': {'ret_val': 'JS_STRING', 'parameters': None, 'method': self.toLocaleLowerCase},
+                             'toLowerCase': {'ret_val': 'JS_STRING', 'parameters': None, 'method': self.toLowerCase},
+                             'toLocaleUpperCase': {'ret_val': 'JS_STRING', 'parameters': None, 'method': self.toLocaleUpperCase},
+                             'toUpperCase': {'ret_val': 'JS_STRING', 'parameters': None, 'method': self.toUpperCase},
+                             'trim': {'ret_val': 'JS_STRING', 'parameters': None, 'method': self.trim},
+                             'valueOf': {'ret_val': 'JS_STRING', 'parameters': None, 'method': self.valueOf},
                              'length': {'ret_val': 'INT', 'parameters': None, 'method': self.length}
                              }
         self._methods_and_properties.update(js_string_methods)
@@ -152,7 +152,7 @@ class JsNumber(JsObject):
     def __init__(self, name):
         JsObject.__init__(self, name)
         js_number_methods = {'toExponential': {'ret_val': 'EXP_FLOAT', 'parameters': ['NUMBER'], 'method': self.toExponential},
-                             'toFixed': {'ret_val': 'STRING', 'parameters': ['INT'], 'method': self.toFixed},
+                             'toFixed': {'ret_val': 'JS_STRING', 'parameters': ['INT'], 'method': self.toFixed},
                              'toPrecision': {'ret_val': 'FLOAT', 'parameters': ['INT'], 'method': self.toPrecision},
                              'valueOf': {'ret_val': 'INT', 'parameters': None, 'method': self.valueOf}
                              }
@@ -179,15 +179,18 @@ class JsNumber(JsObject):
 class JsArray(JsObject):
     TYPE = "JsArray"
 
-    def __init__(self, name, array_elements=[]):
+    def __init__(self, name, array_elements=None):
         JsObject.__init__(self, name)
-        # list contents [ JsObject, ....]
-        self._array_elements = array_elements
+        if array_elements is not None:
+            # list contents [ JsObject, ....]
+            self._array_elements = array_elements
+        else:
+            self._array_elements = []
         self._js_array_methods_and_properties = {'concat': {'ret_val': 'JS_ARRAY', 'parameters': ['JS_ARRAY'], 'method': self.concat},
                                                  'every': {'ret_val': 'BOOL', 'parameters': ['JS_ARRAY_FUNCTION'], 'method': self.every},
                                                  'filter': {'ret_val': 'JS_ARRAY', 'parameters': ['JS_ARRAY_FUNCTION'], 'method': self.filter},
                                                  'indexOf': {'ret_val': 'INT', 'parameters': ['JS_OBJECT'], 'method': self.indexOf},
-                                                 'join': {'ret_val': 'STRING', 'parameters': None, 'method': self.join},
+                                                 'join': {'ret_val': 'JS_STRING', 'parameters': None, 'method': self.join},
                                                  'lastIndexOf': {'ret_val': 'INT', 'parameters': ['JS_OBJECT'], 'method': self.lastIndexOf},
                                                  'map': {'ret_val': 'JS_ARRAY', 'parameters': ['JS_ARRAY_FUNCTION'], 'method': self.map},
                                                  'pop': {'ret_val': 'JS_OBJECT', 'parameters': None, 'method': self.pop},
@@ -209,7 +212,8 @@ class JsArray(JsObject):
         return code
 
     def concat(self, js_array):
-        #self._array_elements += js_array.array_elements
+        if self._array_elements and js_array.array_elements:
+            self._array_elements += js_array.array_elements
         return self._name + ".concat(" + js_array.name + ")"
 
     def every(self, function_name):
@@ -231,19 +235,22 @@ class JsArray(JsObject):
         return self._name + ".map(" + function_name + ")"
 
     def pop(self):
-        #self._array_elements.pop()
+        if self._array_elements:
+            self._array_elements.pop()
         return self._name + ".pop()"
 
     def push(self, js_object):
-        #self._array_elements.append(js_object)
+        self._array_elements.append(js_object)
         return self._name + ".push(" + js_object + ")"
 
     def reverse(self):
-        self._array_elements.reverse()
+        if self._array_elements:
+            self._array_elements.reverse()
         return self._name + ".reverse()"
 
     def shift(self):
-        #self._array_elements.pop(0)
+        if self._array_elements:
+            self._array_elements.pop(0)
         return self._name + ".shift()"
 
     def length(self):
@@ -253,13 +260,22 @@ class JsArray(JsObject):
 class JsDate(JsObject):
     TYPE = "JsDate"
 
-    @property
-    def methods_and_properties(self):
-        js_data_methods_and_properties = {}  # TODO: Write down the stuff
-        return js_data_methods_and_properties
+    def __init__(self, name):
+        JsObject.__init__(self, name)
+        self._js_date_methods_and_properties = {'getDate': {'ret_val': 'INT', 'parameters': None, 'method': self.getDate},
+                                                'getDay': {'ret_val': 'INT', 'parameters': None, 'method': self.getDay},
+                                                'getFullYear': {'ret_val': 'INT', 'parameters': None, 'method': self.getFullYear},
+                                                'getHours': {'ret_val': 'INT', 'parameters': None, 'method': self.getHours},
+                                                'getMilliseconds': {'ret_val': 'INT', 'parameters': None, 'method': self.getMilliseconds},
+                                                'getMinutes': {'ret_val': 'INT', 'parameters': None, 'method': self.getMinutes},
+                                                'getMonth': {'ret_val': 'INT', 'parameters': None, 'method': self.getMonth},
+                                                'getSeconds': {'ret_val': 'INT', 'parameters': None, 'method': self.getSeconds},
+                                                'getTime': {'ret_val': 'INT', 'parameters': None, 'method': self.getTime},
+                                                'getTimezoneOffset': {'ret_val': 'INT', 'parameters': None, 'method': self.getTimezoneOffset},
+                                                }
 
     def newDate(self, value):
-        return "new Date()"
+        return self.name + " = " + "new Date()"
 
     def getDate(self):
         return self._name + ".getDate()"
@@ -284,5 +300,35 @@ class JsDate(JsObject):
 
     def getSeconds(self):
         return self._name + ".getSeconds()"
+
+    def getTime(self):
+        return self._name + ".getTime()"
+
+    def getTimezoneOffset(self):
+        return self._name + ".getTimezoneOffset()"
+
+    def getUTCDate(self):
+        return self._name + ".getUTCDate()"
+
+    def getUTCDay(self):
+        return self._name + ".getUTCDay()"
+
+    def getUTCFullYear(self):
+        return self._name + ".getUTCFullYear()"
+
+    def getUTCHours(self):
+        return self._name + ".getUTCHours()"
+
+    def getUTCMilliseconds(self):
+        return self._name + ".getUTCMilliseconds()"
+
+    def getUTCMinutes(self):
+        return self._name + ".getUTCMinutes()"
+
+    def getUTCMonth(self):
+        return self._name + ".getUTCMonth()"
+
+    def getUTCSeconds(self):
+        return self._name + ".getUTCSeconds()"
 
 #  Go on ....

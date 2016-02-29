@@ -18,7 +18,7 @@ class JsDomElement(JsObject):
                                              'cloneNode': {'ret_val': 'JS_DOM_ELEMENT', 'parameters': ['BOOL'], 'method': self.cloneNode}, #  TODO: parameters
                                              'compareDocumentPosition': {'ret_val': 'INT', 'parameters': ['JS_DOM_ELEMENT'], 'method': self.compareDocumentPosition},
                                              'focus': {'ret_val': None, 'parameters': None, 'method': self.focus},
-                                             'getAttribute': {'ret_val': 'STRING', 'parameters': ['HTML_ATTR'], 'method': self.getAttribute},
+                                             'getAttribute': {'ret_val': 'JS_STRING', 'parameters': ['HTML_ATTR'], 'method': self.getAttribute},
                                              'getAttributeNode': {'ret_val': 'JS_ATTR', 'parameters': ['HTML_ATTR'], 'method': self.getAttributeNode},
                                              'getElementsByClassName': {'ret_val': 'JS_NODE_LIST', 'parameters': ['CLASS_NAME'], 'method': self.getElementsByClassName},
                                              'getElementsByTagName': {'ret_val': 'JS_NODE_LIST', 'parameters': ['HTML_TAG'], 'method': self.getElementsByTagName},
@@ -46,10 +46,10 @@ class JsDomElement(JsObject):
                                              # -------------------------- PROPERTIES -----------------------------------
                                              #  TODO: think about how to change PROPERTIES ....
                                              # -------------------------------------------------------------------------
-                                             'accessKey': {'ret_val': 'STRING', 'parameters': None, 'method': self.accessKey},
+                                             'accessKey': {'ret_val': 'JS_STRING', 'parameters': None, 'method': self.accessKey},
                                              'attributes_prop': {'ret_val': 'JS_NODE_MAP', 'parameters': None, 'method': self.attributes_prop},
                                              'childNodes': {'ret_val': 'JS_NODE_LIST', 'parameters': None, 'method': self.childNodes},
-                                             'className': {'ret_val': 'STRING', 'parameters': ['STRING*'], 'method': self.className},
+                                             'className': {'ret_val': 'JS_STRING', 'parameters': ['JS_STRING*'], 'method': self.className},
                                              'clientHeight': {'ret_val': 'INT', 'parameters': None, 'method': self.clientHeight},
                                              'clientWidth': {'ret_val': 'INT', 'parameters': None, 'method': self.clientWidth},
                                              'contentEditable': {'ret_val': 'BOOL', 'parameters': None, 'method': self.contentEditable},
@@ -61,10 +61,10 @@ class JsDomElement(JsObject):
                                              'lang': {'ret_val': 'LANG', 'parameters': ['LANG_CODE*'], 'method': self.lang},
                                              'lastChild': {'ret_val': 'JS_DOM_ELEMENT', 'parameters': None, 'method': self.lastChild},
                                              'namespaceURI': {'ret_val': 'NAMESPACE_URI', 'parameters': None, 'method': self.namespaceURI},
-                                             'nodeName': {'ret_val': 'STRING', 'parameters': None, 'method': self.nodeName},
+                                             'nodeName': {'ret_val': 'JS_STRING', 'parameters': None, 'method': self.nodeName},
                                              'nextSibling': {'ret_val': 'JS_DOM_ELEMENT', 'parameters': None, 'method': self.nextSibling},
                                              'nodeType': {'ret_val': 'INT', 'parameters': None, 'method': self.nodeType},
-                                             'nodeValue': {'ret_val': 'STRING', 'parameters': ['STRING*'], 'method': self.nodeValue},
+                                             'nodeValue': {'ret_val': 'JS_STRING', 'parameters': ['JS_STRING*'], 'method': self.nodeValue},
                                              'offsetHeight': {'ret_val': 'INT', 'parameters': None, 'method': self.offsetHeight},
                                              'offsetWidth': {'ret_val': 'INT', 'parameters': None, 'method': self.offsetWidth},
                                              'offsetLeft': {'ret_val': 'INT', 'parameters': None, 'method': self.offsetLeft},
@@ -80,8 +80,8 @@ class JsDomElement(JsObject):
                                              'style': {'ret_val': 'CSS_STYLE', 'parameters': ['CSS_STYLE*'], 'method': self.style},
                                              'tabIndex': {'ret_val': 'INT', 'parameters': ['INT*'], 'method': self.tabIndex},
                                              'tagName': {'ret_val': 'HTML_TAG', 'parameters': None, 'method': self.tagName},
-                                             'textContent': {'ret_val': 'STRING', 'parameters': ['STRING*'], 'method': self.textContent},
-                                             'title': {'ret_val': 'STRING', 'parameters': ['STRING*'], 'method': self.title},
+                                             'textContent': {'ret_val': 'JS_STRING', 'parameters': ['JS_STRING*'], 'method': self.textContent},
+                                             'title': {'ret_val': 'JS_STRING', 'parameters': ['JS_STRING*'], 'method': self.title},
 
                                              }
         self._methods_and_properties.update(js_element_methods_and_properties)

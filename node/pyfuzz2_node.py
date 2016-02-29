@@ -1,14 +1,10 @@
-__author__ = 'susperius'
-
 import logging
-
 import gevent
 import gevent.monkey
 import pickle
 import os
 import time
 from gevent.queue import Queue
-# from fuzzing.fuzzers import FUZZERS
 from communication.beaconclient import BeaconClient
 from communication.nodelistener import Listener
 from worker.listenerworker import ListenerWorker
@@ -19,6 +15,7 @@ from model.config import ConfigParser
 from fuzzing.fuzzers import FUZZERS
 from reducing.reducers import REDUCERS
 
+__author__ = 'susperius'
 
 gevent.monkey.patch_all()
 

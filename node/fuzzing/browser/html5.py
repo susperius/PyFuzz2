@@ -26,6 +26,7 @@ class Html5Fuzzer(Fuzzer):
                   'REGEXP': None,
                   'REL': FuzzValues.REL, 'SCROLLING': FuzzValues.SCROLLING, 'SHAPE': FuzzValues.SHAPE,
                   'SANDBOX': FuzzValues.SANDBOX, 'SORTED': FuzzValues.SORTED, 'STRING': FuzzValues.STRINGS,
+                  'SRC': None,
                   'TABLE_SCOPE': FuzzValues.TABLE_SCOPE, 'TARGET': FuzzValues.TARGET,
                   'TRACK_KIND': FuzzValues.TRACK_KIND, 'URL': None, 'WRAP': FuzzValues.WRAP,
                   'YESNO': FuzzValues.YESNO}
@@ -48,6 +49,7 @@ class Html5Fuzzer(Fuzzer):
         self._header_ids = []
         self._map_names = []
         self._file_type = file_type
+        self._embed_sources_list = []
         self._max_attr = int(max_attr)
         self._max_depth = int(max_depth)
         self._elements = int(elements)
@@ -59,6 +61,17 @@ class Html5Fuzzer(Fuzzer):
     @classmethod
     def from_list(cls, params):
         pass  # TODO: implement
+
+    @property
+    def embed_sources_list(self):
+        return self._embed_sources_list
+
+    @embed_sources_list.setter
+    def embed_sources_list(self, sources_list):
+        self._embed_sources_list = sources_list
+
+    def add_embed_source(self, item):
+        self.embed_sources_list.append(item)
 
     def file_type(self):
         return self._file_type
@@ -115,6 +128,8 @@ class Html5Fuzzer(Fuzzer):
         if len(self._canvas_ids) == 0:
             tag, open_tag, close_tag = self.__build_tag('canvas')
             self._body += open_tag + close_tag + "\r\n"
+        for source in self._embed_sources_list:
+            self._body += "<embed src=\"" + source + "\">\r\n"
         html = "<!DOCTYPE html>\r\n<html>\r\n" + self._head + close_head + "\r\n" + self._body + close_body + "\r\n" + \
                "</html>\r\n"
         self._html_page.set_raw_html(html)
@@ -243,6 +258,8 @@ class Html5Fuzzer(Fuzzer):
             return self.__get_form_id() if len(self._form_ids) > 0 else "none"
         elif attr_type == "URL":
             return "http://127.0.0.1:8080"
+        elif attr_type == "SRC":
+            return self._embed_sources_list.pop() if self._embed_sources_list is not None and self._embed_sources_list else ""
         return ""
 
     def __get_app_data(self):

@@ -1,4 +1,5 @@
 import random
+import os
 
 from html5 import Html5Fuzzer
 from canvas import CanvasFuzzer
@@ -14,6 +15,7 @@ from model.CssProperties import CSS_STYLES
 from model.DomObjectTypes import DomObjectTypes
 from model.FuzzedHtmlPage import HtmlPage
 from model.JsWindow import JsWindow
+from ..bytemutation import ByteMutation
 
 """
 1) Create a html page
@@ -44,13 +46,13 @@ needed methods:
 class JsFuzzer(Fuzzer):
     NAME = "js_fuzzer"
     CONFIG_PARAMS = ['seed', 'starting_elements', 'html_depth', 'html_max_attr', 'canvas_size', 'js_block_size',
-                     'function_count', 'file_type']
+                     'function_count', 'file_type', 'media_folder']
     CALLING_COMMENT = "//CALLING COMMENT"
     FIRST_ARRAY_LENGTH = 5
     FUNCTION_TYPES = ['default', 'event', 'array']
     SPECIAL_PARAMETERS = ['JS_ARRAY', 'JS_DOM_CHILD_ELEMENT']
 
-    def __init__(self, seed, starting_elements, html_depth, html_max_attr, canvas_size, js_block_size, function_count, file_type):
+    def __init__(self, seed, starting_elements, html_depth, html_max_attr, canvas_size, js_block_size, function_count, file_type, media_folder="NONE"):
         self._html_fuzzer = Html5Fuzzer(int(seed), int(starting_elements), int(html_depth), int(html_max_attr), file_type)
         self._canvas_fuzzer = CanvasFuzzer(int(canvas_size))
         self._css_fuzzer = CssFuzzer(int(seed))
@@ -59,6 +61,7 @@ class JsFuzzer(Fuzzer):
         self._function_count = int(function_count)
         self._file_type = file_type
         self._js_objects = {}
+        self._media_folder = media_folder
         self.__init_js_object_dict()
         self._js_default_functions = []
         self._js_event_listener = []
@@ -79,7 +82,7 @@ class JsFuzzer(Fuzzer):
 
     @classmethod
     def from_list(cls, params):
-        return cls(params[0], params[1], params[2], params[3], params[4], params[5], params[6], params[7])
+        return cls(params[0], params[1], params[2], params[3], params[4], params[5], params[6], params[7], params[8])
 
     @property
     def prng_state(self):
@@ -89,8 +92,24 @@ class JsFuzzer(Fuzzer):
         random.setstate(state)
 
     def create_testcases(self, count, directory):
+        media_file_names = []
+        byte_mutation_fuzzers = []
+        if self._media_folder is not "NONE":
+            media_folder_listing = os.listdir(self._media_folder)
+            for i in range(5):
+                file_name = random.choice(media_folder_listing)
+                media_file_names.append(file_name)
+                byte_mutation_fuzzers.append(ByteMutation(self._media_folder + "/" + file_name, 5, 200, 0, file_name.split(".")[1]))
         for i in range(count):
             test_name = "/test" + str(i) if i > 9 else "/test0" + str(i)
+            fuzzer_number = 0
+            for byte_mutation_fuzzer in byte_mutation_fuzzers:
+                fuzz_data_file_name = test_name + "_" + str(fuzzer_number) + "." + byte_mutation_fuzzer.file_type
+                fuzz_data = byte_mutation_fuzzer.fuzz()
+                with open(directory + fuzz_data_file_name, 'wb+') as data_fd:
+                    data_fd.write(fuzz_data)
+                self._html_fuzzer.add_embed_source(fuzz_data_file_name.replace("/", ""))
+                fuzzer_number += 1
             with open(directory + test_name + "." + self._file_type, "wb+") as html_fd, open(directory + test_name + ".css", "wb+") as css_fd:
                 html, css = self.fuzz()
                 html = html.replace("TESTCASE", test_name)
@@ -293,10 +312,10 @@ class JsFuzzer(Fuzzer):
                 elif '*' in param:
                     star_param = True
         # region Default assignment
-        if not star_param and not special_param[0]:
+        if ((star_param and choice <= 10) or (not star_param)) and not special_param[0]:
             #  TODO: going deeper,
             #  TODO: e.g for strings call a method on a method call on method call and add it inside or outside
-            if js_method_parameters is None:
+            if js_method_parameters is None or star_param:
                 code += js_obj_method()
             else:
                 parameters = self.__get_params(js_obj, js_method_parameters)
@@ -305,6 +324,7 @@ class JsFuzzer(Fuzzer):
             if js_method_ret_val == "JS_DOM_ELEMENT":
                 new_js_obj = JsDomElement(self.__get_js_dom_element_name()) if choice < 10 else random.choice(self._js_objects['JS_DOM_ELEMENT'])
                 pass
+            # region JS_STRING
             elif js_method_ret_val == "JS_STRING":
                 new_js_obj = JsString(self.__get_js_string_name()) if choice < 10 else random.choice(self._js_objects['JS_STRING'])
                 if choice > 15:
@@ -326,6 +346,7 @@ class JsFuzzer(Fuzzer):
                         else:
                             second_obj_code = "(" + second_obj_code + ")" + (add_js_str_func['method']()).replace(add_js_str_obj.name, "")
                     code = code + " + " + second_obj_code
+            # endregion
             elif js_method_ret_val == "JS_NUMBER":
                 new_js_obj = JsNumber(self.__get_js_number_name()) if choice < 10 else random.choice(self._js_objects['JS_NUMBER'])
                 pass
@@ -337,10 +358,11 @@ class JsFuzzer(Fuzzer):
                 pass
             code = new_js_obj.name + " = " + code
         #  endregion
-        # region properties
-        elif star_param:
+        # region properties setting
+        elif star_param and choice > 10:
             print("Star param")
-            pass
+            parameters = self.__get_params(js_obj, js_method_parameters)
+            code = js_obj_method(*parameters)
         # endregion
         # region JS_ARRAY or JS_DOM_CHILD_ELEMENT
         elif special_param[0]:
@@ -385,7 +407,7 @@ class JsFuzzer(Fuzzer):
                 self._js_objects['JS_STRING'].append(new_js_obj)
                 if choice >= 15:
                     js_str = random.choice(self._js_objects['JS_STRING'])
-                    js_str_func = random.choice(js_str.methods_and_properties_by_return_type['STRING'])
+                    js_str_func = random.choice(js_str.methods_and_properties_by_return_type['JS_STRING'])
                     js_str_func_params = self.__get_params(js_str, js_str_func['parameters']) if js_str_func['parameters'] is not None else None
                     code += " + " + js_str_func['method'](*js_str_func_params) if js_str_func['parameters'] is not None else " + " + js_str_func['method']()
             elif ret_val == "JS_NUMBER":
@@ -403,7 +425,6 @@ class JsFuzzer(Fuzzer):
                 self._js_objects['JS_OBJECT'].append(new_js_obj)
             code = new_js_obj.name + " = " + code
         return JsGlobal.try_catch_block(code + "; ") if try_catch else code + ";\n"
-
 
     def __get_params(self, calling_obj, param_list):
         ret_params = []

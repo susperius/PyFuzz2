@@ -59,7 +59,7 @@ HTML5_DEL_ATTR = {'cite': 'URL', 'datetime': 'DATETIME'}
 
 HTML5_DETAILS_ATTR = {'open': None}
 
-HTML5_EMBED_ATTR = {'height': 'PIXELS', 'src': 'URL', 'type': 'MEDIA_TYPE', 'width': 'PIXELS'}
+HTML5_EMBED_ATTR = {'height': 'PIXELS', 'src': 'SRC', 'type': 'MEDIA_TYPE', 'width': 'PIXELS'}
 
 HTML5_FIELDSET_ATTR = {'disabled': None, 'form': 'FORM_ID', 'name': 'STRING'}
 

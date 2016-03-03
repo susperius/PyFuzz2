@@ -51,7 +51,7 @@ class PyFuzz2Node:
                     os.remove("fuzz_state.pickle")
                 except Exception as ex:
                     self._logger.error("Error while restoring the PRNG state -> " + ex.message)
-                    self._fuzzer.set_seed()
+                    self._fuzzer.set_seed(0)
             self._operation_worker = FuzzingWorker(self._node_config.programs, self._fuzzer, self._reporter_queue,)
         elif self._node_config.node_op_mode == 'reducing':
             self._reducer = self.__choose_reducer()

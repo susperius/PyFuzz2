@@ -92,6 +92,7 @@ class JsFuzzer(Fuzzer):
         random.setstate(state)
 
     def create_testcases(self, count, directory):
+        self.__clear_folder(directory)
         media_file_names = []
         byte_mutation_fuzzers = []
         if self._media_folder is not "NONE":
@@ -99,7 +100,7 @@ class JsFuzzer(Fuzzer):
             for i in range(5):
                 file_name = random.choice(media_folder_listing)
                 media_file_names.append(file_name)
-                byte_mutation_fuzzers.append(ByteMutation(self._media_folder + "/" + file_name, 5, 200, 0, file_name.split(".")[1]))
+                byte_mutation_fuzzers.append(ByteMutation(self._media_folder + "/" + file_name, 5, 50, 0, file_name.split(".")[1]))
         for i in range(count):
             test_name = "/test" + str(i) if i > 9 else "/test0" + str(i)
             fuzzer_number = 0
@@ -115,6 +116,18 @@ class JsFuzzer(Fuzzer):
                 html = html.replace("TESTCASE", test_name)
                 html_fd.write(html)
                 css_fd.write(css)
+
+    @staticmethod
+    def __clear_folder(folder):
+        for file_name in os.listdir(folder):
+            if "py" in file_name:
+                continue
+            file_path = os.path.join(folder, file_name)
+            try:
+                if os.path.isfile(file_path):
+                    os.unlink(file_path)
+            except Exception, e:
+                print e
 
     def set_seed(self, seed):
         pass
@@ -268,7 +281,7 @@ class JsFuzzer(Fuzzer):
         for i in range(length):
             choice = random.randint(1, 20)
             if choice <= 10:
-                code += "\t" + self.__build_assignment2()
+                code += "\t" + self.__build_assignment()
             elif 10 < choice < 15:
                 code += self.__build_if_statement_block(block_length)
                 i += block_length

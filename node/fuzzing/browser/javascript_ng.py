@@ -116,6 +116,7 @@ class JsFuzzer(Fuzzer):
                 html = html.replace("TESTCASE", test_name)
                 html_fd.write(html)
                 css_fd.write(css)
+            self._html_fuzzer.embed_sources_list = []
 
     @staticmethod
     def __clear_folder(folder):

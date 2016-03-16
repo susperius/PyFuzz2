@@ -1,12 +1,13 @@
-__author__ = 'susperius'
-
 import random
+import logging
 
 from model.HtmlObjects import *
 from model.values import FuzzValues
 from model.CssProperties import CSS_STYLES
 from ..fuzzer import Fuzzer
 from model.FuzzedHtmlPage import HtmlPage
+
+__author__ = 'susperius'
 
 
 class Html5Fuzzer(Fuzzer):
@@ -38,6 +39,7 @@ class Html5Fuzzer(Fuzzer):
     NO_CHILD_LIST = ['select', 'time', 'iframe', 'style', 'canvas']
 
     def __init__(self, seed, elements, max_depth, max_attr, file_type):
+        self._logger = logging.getLogger(__name__)
         if int(seed) == 0:
             random.seed()
         else:
@@ -128,7 +130,7 @@ class Html5Fuzzer(Fuzzer):
         if len(self._canvas_ids) == 0:
             tag, open_tag, close_tag = self.__build_tag('canvas')
             self._body += open_tag + close_tag + "\r\n"
-        for source in self._embed_sources_list:
+        for source in self.embed_sources_list:
             self._body += "<embed src=\"" + source + "\">\r\n"
         html = "<!DOCTYPE html>\r\n<html>\r\n" + self._head + close_head + "\r\n" + self._body + close_body + "\r\n" + \
                "</html>\r\n"

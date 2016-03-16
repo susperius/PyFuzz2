@@ -1,5 +1,6 @@
 import random
 import os
+import logging
 
 from html5 import Html5Fuzzer
 from canvas import CanvasFuzzer
@@ -53,6 +54,7 @@ class JsFuzzer(Fuzzer):
     SPECIAL_PARAMETERS = ['JS_ARRAY', 'JS_DOM_CHILD_ELEMENT']
 
     def __init__(self, seed, starting_elements, html_depth, html_max_attr, canvas_size, js_block_size, function_count, file_type, media_folder="NONE"):
+        self._logger = logging.getLogger(__name__)
         self._html_fuzzer = Html5Fuzzer(int(seed), int(starting_elements), int(html_depth), int(html_max_attr), file_type)
         self._canvas_fuzzer = CanvasFuzzer(int(canvas_size))
         self._css_fuzzer = CssFuzzer(int(seed))
@@ -144,6 +146,10 @@ class JsFuzzer(Fuzzer):
         for func_name in self._js_array_functions:
             code += self.__build_function("array", func_size, func_name)
         code += self.__add_event_dispatcher()
+        for canvas_id in self._html_page.get_elements_by_html_tag()['canvas']:
+            self._canvas_fuzzer.set_canvas_id(canvas_id)
+            self._js_default_functions.append("func_" + canvas_id)
+            code += self._canvas_fuzzer.fuzz()
         call_block = ""
         for func_name in self._js_default_functions:
             choice = random.randint(1, 20)
@@ -325,7 +331,6 @@ class JsFuzzer(Fuzzer):
             js_method_ret_val = 'JS_NUMBER' if js_method_ret_val == "INT" or js_method_ret_val == "FLOAT" else js_method_ret_val
             if js_method_ret_val == "JS_DOM_ELEMENT":
                 new_js_obj = JsDomElement(self.__get_js_dom_element_name()) if choice < 10 else random.choice(self._js_objects['JS_DOM_ELEMENT'])
-                pass
             # region JS_STRING
             elif js_method_ret_val == "JS_STRING":
                 new_js_obj = JsString(self.__get_js_string_name()) if choice < 10 else random.choice(self._js_objects['JS_STRING'])

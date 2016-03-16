@@ -63,9 +63,12 @@ class JsReducer(Reducer):
 
     def reduce(self):
         if self._phase == 0:
-            self.__remove_function(self._functions.pop(0), self._functions[0])
+            function_name = self._functions.pop(0)
+            self.__remove_function_call(function_name)
+            self.__remove_function_body(function_name)
         elif self._phase == 1:
-            self.__remove_function(self._event_handler.pop(0))
+            self._reduced_case = self._test_case
+            self.__remove_function_body(self._event_handler.pop(0))
         elif self._phase == 2:
             self.__remove_try_catch_block()
         return self._reduced_case
@@ -73,16 +76,16 @@ class JsReducer(Reducer):
     def __get_functions(self):
         # func_list = ['function startup']
         func_list = []
-        func_list += re.findall('function func[0-9]+', self._test_case)  # normal functions
+        func_list += re.findall('func_[0-9]+', self._test_case)  # normal functions
         # func_list.append('function event_firing')
         return func_list
 
     def __get_event_handler_functions(self):
-        func_list = re.findall('function [a-zA-Z]+_handler', self._test_case)
+        func_list = re.findall('[a-zA-Z]+_handler', self._test_case)
         return func_list
 
     def __get_canvas_functions(self):
-        func_list = re.findall('function func_id[0-9]+', self._test_case)
+        func_list = re.findall('func_id[0-9]+', self._test_case)
         return func_list
 
     def __remove_function(self, function_name, next_function=None):
@@ -97,6 +100,19 @@ class JsReducer(Reducer):
                     function_name + "() }, ",
                     next_function + "() }, "
             )
+
+    def __remove_function_call(self, function_name):
+        self._logger.info("Removing function: " + function_name)
+        # First remove the function call
+        function_call_start_pos = self._test_case.find(function_name)
+        function_call_line_start = self._test_case.rfind("\t", 0, function_call_start_pos)
+        function_call_line_end = self._test_case.find(";\n", function_call_start_pos) + 2
+        self._reduced_case = self._test_case[:function_call_line_start] + self._test_case[function_call_line_end:]
+
+    def __remove_function_body(self, function_name):
+        function_start_pos = self._test_case.find("function " + function_name)
+        function_end_pos = self._test_case.find("}\nfunction", function_start_pos) + 2
+        self._reduced_case = self._reduced_case[:function_start_pos] + self._reduced_case[function_end_pos:]
 
     def __remove_try_catch_block(self):
         self._try_start_pos = self._test_case.find("try{ ", self._start)

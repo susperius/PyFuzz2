@@ -8,6 +8,7 @@ class HtmlPage:
         self._elements = {}
         self._raw_html = ""
         self._css_class_names = []
+        self._elements_by_tag = {}
 
     def set_raw_html(self, html):
         self._raw_html = html
@@ -17,6 +18,10 @@ class HtmlPage:
 
     def add_element(self, element_id, html_tag):
         self._elements[element_id] = html_tag
+        if html_tag in self._elements_by_tag.keys():
+            self._elements_by_tag[html_tag].append(element_id)
+        else:
+            self._elements_by_tag[html_tag] = [element_id]
 
     def get_elements_by_id(self):
         return self._elements
@@ -28,13 +33,7 @@ class HtmlPage:
         self._elements[element_id] = element_type
 
     def get_elements_by_html_tag(self):
-        elements_by_type = {}
-        for element_id in self._elements.keys():
-            if self._elements[element_id] in elements_by_type.keys():
-                elements_by_type[self._elements[element_id]].append(element_id)
-            else:
-                elements_by_type[self._elements[element_id]] = [element_id]
-        return elements_by_type
+        return self._elements_by_tag
 
     def get_element_ids(self):
         return self._elements.keys()

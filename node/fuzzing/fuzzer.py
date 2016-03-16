@@ -1,8 +1,11 @@
+import os
+
 __author__ = 'susperius'
 
 """
 Abstract class used to implement own fuzzers
 """
+
 
 class Fuzzer:
     NAME = []
@@ -31,3 +34,15 @@ class Fuzzer:
     @property
     def file_type(self):
         raise NotImplementedError("ABSTRACT METHOD")
+
+    @staticmethod
+    def clear_folder(folder):
+        for file_name in os.listdir(folder):
+            if "py" in file_name:
+                continue
+            file_path = os.path.join(folder, file_name)
+            try:
+                if os.path.isfile(file_path):
+                    os.unlink(file_path)
+            except Exception, e:
+                print e

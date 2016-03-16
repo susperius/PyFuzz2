@@ -29,7 +29,7 @@ class FuzzingWorker(Worker):
         self._programs = programs
         self._need_web_server = False
         for prog in programs:
-            if bool(prog['use_http']):
+            if "True" == prog['use_http']:
                 self._need_web_server = True
         self._testcase = ""
         self._crash_report = ""
@@ -52,6 +52,7 @@ class FuzzingWorker(Worker):
                         continue
                 count += 1
                 for prog in self._programs:
+                    prog['use_http'] = "True" == prog['use_http']
                     pyfuzzdbg = PyFuzzDbg.Debugger(int(prog['sleep_time']))
                     if not self._running:
                         break
@@ -61,18 +62,18 @@ class FuzzingWorker(Worker):
                     # start a program with DEBUG_PROCESS and return 0 if nothing happens else the exception code
                     self._logger.debug("Test starting...\r\n\tprogram: " + prog['name'] + " testcase: " + filename +
                                        " #testcases: " + str(count))
-                    if bool(prog['use_http']):
+                    if prog['use_http']:
                         pyfuzzdbg.set_app_name(unicode(prog['path'] + " \"http://127.0.0.1:8080/" + filename +
                                                        "\"\x00\x00"))
                         return_code = pyfuzzdbg.start_test()
                     else:
-                        pyfuzzdbg.set_app_name(unicode(prog['path'] + "\"" + testcase_dir + filename + "\"\x00\x00"))
+                        pyfuzzdbg.set_app_name(unicode(prog['path'] + " \"" + testcase_dir + filename + "\"\x00\x00"))
                         return_code = pyfuzzdbg.start_test()
                     gevent.sleep(1)
                     #  --------------------------------------------------------------------------------------------
                     #  Just involve the whole Windows Debug Engine if a crash appeared else just save the resources
                     if return_code in INTERESTING_EXCEPTIONS.keys():
-                        if bool(prog['use_http']):
+                        if prog['use_http']:
                             self._processes.append(subprocess.Popen(
                                 "python debugging\\windbg.py -p \"" + prog['path']
                                 + "\" -t \"http://127.0.0.1:8080/" + filename + "\" -c True -X", stdout=self._DEVNULL,

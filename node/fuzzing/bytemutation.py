@@ -48,7 +48,11 @@ class ByteMutation(fuzzer.Fuzzer):
         random.seed(seed)
 
     def create_testcases(self, count, directory):
-        pass
+        self.clear_folder(directory)
+        for i in range(count):
+            file_name = "test_0" + str(i) + "." + self.file_type if i < 10 else "test_" + str(i) + "." + self.file_type
+            with open(directory + "/" + file_name, 'wb+') as fd:
+                fd.write(self.fuzz())
 
     def fuzz(self):
         data_length = len(self._data)

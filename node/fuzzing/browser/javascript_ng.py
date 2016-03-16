@@ -92,12 +92,12 @@ class JsFuzzer(Fuzzer):
         random.setstate(state)
 
     def create_testcases(self, count, directory):
-        self.__clear_folder(directory)
+        self.clear_folder(directory)
         media_file_names = []
         byte_mutation_fuzzers = []
         if self._media_folder is not "NONE":
             media_folder_listing = os.listdir(self._media_folder)
-            for i in range(5):
+            for i in range(8):
                 file_name = random.choice(media_folder_listing)
                 media_file_names.append(file_name)
                 byte_mutation_fuzzers.append(ByteMutation(self._media_folder + "/" + file_name, 5, 50, 0, file_name.split(".")[1]))
@@ -117,18 +117,6 @@ class JsFuzzer(Fuzzer):
                 html_fd.write(html)
                 css_fd.write(css)
             self._html_fuzzer.embed_sources_list = []
-
-    @staticmethod
-    def __clear_folder(folder):
-        for file_name in os.listdir(folder):
-            if "py" in file_name:
-                continue
-            file_path = os.path.join(folder, file_name)
-            try:
-                if os.path.isfile(file_path):
-                    os.unlink(file_path)
-            except Exception, e:
-                print e
 
     def set_seed(self, seed):
         pass

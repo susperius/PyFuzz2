@@ -187,6 +187,8 @@ class ReducingWorker(Worker):
         return False
 
     def __write_reduced_case(self, directory, reduced_case):
+        if os.path.exists(directory + "reduced." + self._reducer.file_type):
+            os.remove(directory + "reduced." + self._reducer.file_type)
         with open(directory + "reduced." + self._reducer.file_type, 'wb+') as fd:
             fd.write(reduced_case)
 

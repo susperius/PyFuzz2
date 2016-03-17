@@ -21,6 +21,7 @@ class JsReducer(Reducer):
         self._phase = 0
         self._try_start_pos = 0
         self._try_end_pos = 0
+        self._html_pos = 0
         '''
         Phases in reducing:
         0 - Determine which functions are necessary
@@ -45,6 +46,7 @@ class JsReducer(Reducer):
         self._phase = 0
         self._try_start_pos = 0
         self._try_end_pos = 0
+        self._html_pos = 0
 
     @property
     def file_type(self):
@@ -63,29 +65,28 @@ class JsReducer(Reducer):
 
     def reduce(self):
         if self._phase == 0:
-            function_name = self._functions.pop(0)
+            function_name = self._functions.pop()
             self.__remove_function_call(function_name)
             self.__remove_function_body(function_name)
         elif self._phase == 1:
             self._reduced_case = self._test_case
-            self.__remove_function_body(self._event_handler.pop(0))
+            self.__remove_function_body(self._event_handler.pop())
         elif self._phase == 2:
             self.__remove_try_catch_block()
         return self._reduced_case
 
     def __get_functions(self):
         # func_list = ['function startup']
-        func_list = []
-        func_list += re.findall('func_[0-9]+', self._test_case)  # normal functions
+        func_list = set(re.findall('func_[0-9]+', self._test_case))  # normal functions
         # func_list.append('function event_firing')
         return func_list
 
     def __get_event_handler_functions(self):
-        func_list = re.findall('[a-zA-Z]+_handler', self._test_case)
+        func_list = set(re.findall('[a-zA-Z]+_handler', self._test_case))
         return func_list
 
     def __get_canvas_functions(self):
-        func_list = re.findall('func_id[0-9]+', self._test_case)
+        func_list = set(re.findall('func_id[0-9]+', self._test_case))
         return func_list
 
     def __remove_function(self, function_name, next_function=None):
@@ -121,4 +122,24 @@ class JsReducer(Reducer):
         else:
             self._try_end_pos = self._test_case.find(" }\n", self._try_start_pos) + 3
             self._reduced_case = self._test_case[:self._try_start_pos] + self._test_case[self._try_end_pos:]
+
+    def __remove_html_tag(self):
+        body_start_pos = self._test_case.find("<body")
+        body_end_pos = self._test_case.find("</body>")
+        open_tag_start_pos = self._test_case.find("<", body_start_pos + 1, body_end_pos)
+        open_tag_end_pos = self._test_case.find(">", open_tag_start_pos) + 1
+        id_start = self._test_case.find(" id", open_tag_start_pos, open_tag_end_pos)
+        html_tag = self._test_case[open_tag_start_pos + 1:id_start]
+        close_tag_start_pos = self._test_case.find("</" + html_tag + ">")
+        another_open_tag_pos = self._test_case.find(html_tag, open_tag_end_pos, close_tag_start_pos)
+        while another_open_tag_pos != -1:  # Their might be another html tag opened which is closed by our found end tag
+            old_close_tag_start_pos = close_tag_start_pos
+            close_tag_start_pos = self._test_case.find("</" + html_tag + ">", old_close_tag_start_pos + 1)
+            another_open_tag_pos = self._test_case.find(html_tag, old_close_tag_start_pos + 1, close_tag_start_pos)
+        close_tag_end_pos = self._test_case.find(">", close_tag_start_pos) + 1
+        # first remove the closing tag so the positions are not destroyed
+        self._reduced_case = self._test_case[:close_tag_start_pos] + self._test_case[close_tag_end_pos:]
+        self._reduced_case = self._reduced_case[:open_tag_start_pos] + self._reduced_case[open_tag_end_pos:]
+
+
 

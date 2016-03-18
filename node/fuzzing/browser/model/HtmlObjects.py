@@ -279,3 +279,6 @@ HTML5_OBJECTS = {
     'video': {'outer_tag': None, 'attr': HTML5_GLOBAL_ATTR, 'req_attr': None},
     'wbr': {'outer_tag': None, 'attr': HTML5_GLOBAL_ATTR, 'req_attr': None}
     }
+
+HTML5_OUTER_TAGS = ['table', 'head', 'tr', 'details', 'audio', 'video', 'ruby', 'select', 'optgroup', 'ol', 'ul',
+                    'fieldset', 'form', 'figure', 'dl', 'colgroup', 'map']

@@ -1,6 +1,7 @@
 from reducer import Reducer
 import re
 import logging
+from fuzzing.browser.model.HtmlObjects import HTML5_OUTER_TAGS
 
 __author__ = 'susperius'
 
@@ -22,6 +23,9 @@ class JsReducer(Reducer):
         self._try_start_pos = 0
         self._try_end_pos = 0
         self._html_pos = 0
+        self._tag_removal_search_start_pos = 0
+        self._removed_tag_pos = 0
+        self._actual_tag_end = 0
         '''
         Phases in reducing:
         0 - Determine which functions are necessary
@@ -43,10 +47,11 @@ class JsReducer(Reducer):
         self._event_handler = self.__get_event_handler_functions()
         self._canvas_function = self.__get_canvas_functions()
         self._start = 0
-        self._phase = 0
+        self._phase = 3
         self._try_start_pos = 0
         self._try_end_pos = 0
         self._html_pos = 0
+        self._tag_removal_search_start_pos = self._test_case.find("<br")
 
     @property
     def file_type(self):
@@ -62,6 +67,11 @@ class JsReducer(Reducer):
         elif self._phase == 2:
             if not crashed:
                 self._start = self._try_end_pos
+        elif self._phase == 3:
+            if not crashed:
+                self._tag_removal_search_start_pos = self._actual_tag_end
+            else:
+                self._tag_removal_search_start_pos = self._test_case.find("<br")
 
     def reduce(self):
         if self._phase == 0:
@@ -73,6 +83,8 @@ class JsReducer(Reducer):
             self.__remove_function_body(self._event_handler.pop())
         elif self._phase == 2:
             self.__remove_try_catch_block()
+        elif self._phase == 3:
+            self.__remove_html_tag()
         return self._reduced_case
 
     def __get_functions(self):
@@ -124,22 +136,72 @@ class JsReducer(Reducer):
             self._reduced_case = self._test_case[:self._try_start_pos] + self._test_case[self._try_end_pos:]
 
     def __remove_html_tag(self):
-        body_start_pos = self._test_case.find("<body")
-        body_end_pos = self._test_case.find("</body>")
-        open_tag_start_pos = self._test_case.find("<", body_start_pos + 1, body_end_pos)
-        open_tag_end_pos = self._test_case.find(">", open_tag_start_pos) + 1
-        id_start = self._test_case.find(" id", open_tag_start_pos, open_tag_end_pos)
-        html_tag = self._test_case[open_tag_start_pos + 1:id_start]
-        close_tag_start_pos = self._test_case.find("</" + html_tag + ">")
-        another_open_tag_pos = self._test_case.find(html_tag, open_tag_end_pos, close_tag_start_pos)
-        while another_open_tag_pos != -1:  # Their might be another html tag opened which is closed by our found end tag
-            old_close_tag_start_pos = close_tag_start_pos
-            close_tag_start_pos = self._test_case.find("</" + html_tag + ">", old_close_tag_start_pos + 1)
-            another_open_tag_pos = self._test_case.find(html_tag, old_close_tag_start_pos + 1, close_tag_start_pos)
-        close_tag_end_pos = self._test_case.find(">", close_tag_start_pos) + 1
-        # first remove the closing tag so the positions are not destroyed
-        self._reduced_case = self._test_case[:close_tag_start_pos] + self._test_case[close_tag_end_pos:]
-        self._reduced_case = self._reduced_case[:open_tag_start_pos] + self._reduced_case[open_tag_end_pos:]
+        ids = []
+        opening_tag_start = self._test_case.find("<", self._tag_removal_search_start_pos + 1)
+        opening_tag_end = self._test_case.find(">", opening_tag_start)
+        self._actual_tag_end = opening_tag_end
+        html_tag, id_value = self.__get_html_tag_info(self._test_case[opening_tag_start:opening_tag_end + 1])
+        ids.append(id_value)
+        closing_tag_start = self._test_case.find("</" + html_tag)
+        closing_tag_end = self._test_case.find(">", closing_tag_start)
+        """
+        another_open_tag = self._test_case.find("<" + html_tag, opening_tag_end)
+        opening_count = 1 if another_open_tag != -1 else 0
+        while opening_count > 0:
+            while another_open_tag != -1:
+                another_open_tag = self._test_case.find("<" + html_tag, another_open_tag + 1, closing_tag_start)
+                if another_open_tag != -1:
+                    opening_count += 1
+            closing_tag_start = self._test_case.find("</" + html_tag, closing_tag_end)
+            closing_tag_end = self._test_case.find(">", closing_tag_start)
+            opening_count -= 1
+            another_open_tag = self._test_case.find("<" + html_tag, closing_tag_end)
+            print opening_count
+        """
+        if html_tag in HTML5_OUTER_TAGS:
+            # check html tag if it's a required outer tag and try to delete the whole block ...
+            self._reduced_case = self._test_case[:opening_tag_start] + self._test_case[closing_tag_end + 1:]
+            ids += self.__get_all_ids_in_block(self._test_case[opening_tag_end:closing_tag_start])
+        else:
+            # just cut the html tag
+            self._reduced_case = self._test_case[:closing_tag_start] + self._test_case[closing_tag_end + 1:]
+            self._reduced_case = self._reduced_case[:opening_tag_start] + self._reduced_case[opening_tag_end + 1:]
+        self.__remove_element_declarations(ids)
 
+    def __remove_element_declarations(self, ids):
+        for identifier in ids:
+            declaration_start = self._reduced_case.find("elem_" + identifier)
+            declaration_end = self._reduced_case.find(";", declaration_start)
+            self._reduced_case = self._reduced_case[:declaration_start] + self._reduced_case[declaration_end + 1:]
 
+    @staticmethod
+    def __get_html_tag_info(opening_tag):
+        id_start_pos = opening_tag.find(" id")
+        html_tag = opening_tag[1:id_start_pos]
+        id_value_start = opening_tag.find("\"", id_start_pos)
+        id_value_end = opening_tag.find("\"", id_value_start + 1)
+        id_value = opening_tag[id_value_start + 1:id_value_end]
+        return html_tag, id_value
+
+    @staticmethod
+    def __get_all_ids_in_block(code_block):
+        ids = []
+        id_start_pos = code_block.find(" id")
+        id_value_start = code_block.find("\"", id_start_pos)
+        id_value_end = code_block.find("\"", id_value_start + 1)
+        while id_start_pos != -1:
+            ids.append(code_block[id_value_start + 1:id_value_end])
+            id_start_pos = code_block.find(" id", id_value_end)
+            id_value_start = code_block.find("\"", id_start_pos)
+            id_value_end = code_block.find("\"", id_value_start + 1)
+        return ids
+
+    def __remove_link_tag(self):
+        link_tag_start = self._test_case.find("<link")
+        link_tag_end = self._test_case.find(">", link_tag_start)
+        self._reduced_case = self._test_case[link_tag_start:link_tag_end + 1]
+
+    def test(self):
+        self.__remove_html_tag()
+        return self._reduced_case
 

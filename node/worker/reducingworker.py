@@ -190,7 +190,6 @@ class ReducingWorker(Worker):
         if os.path.exists(directory + "reduced." + self._reducer.file_type):
             os.remove(directory + "reduced." + self._reducer.file_type)
         with open(directory + "reduced." + self._reducer.file_type, 'wb+') as fd:
-            print(len(reduced_case))
             fd.write(reduced_case)
 
     def __get_all_crash_results(self):

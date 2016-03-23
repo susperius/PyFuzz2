@@ -109,7 +109,13 @@ class JsReducer(Reducer):
             if not self._showed:
                 self._logger.info("Phase 3: HTML-TAGS REMOVING")
                 self._showed = True
-            self.__remove_html_tag(self._html_tag_list.pop(0))
+            html_tag = self._html_tag_list.pop(0)
+            while not self.__remove_html_tag(html_tag):
+                if self._html_tag_list:
+                    html_tag = self._html_tag_list.pop(0)
+                else:
+                    self._reduced_case = None
+                    break
         return self._reduced_case
 
     def __get_functions(self):
@@ -223,23 +229,28 @@ class JsReducer(Reducer):
         return tag_list
 
     def __remove_html_tag(self, tag):
+        result = True
         ids = []
         opening_tag_start_pos = self._test_case.find("<" + tag, self._tag_removal_search_start_pos)
-        opening_tag_end_pos = self._test_case.find(">", opening_tag_start_pos)
-        self._actual_tag_end = opening_tag_end_pos
-        tag_id = self.__get_tag_id(self._test_case[opening_tag_start_pos:opening_tag_end_pos])
-        if tag_id is not None:
-            ids.append(tag_id)
-        closing_tag_start_pos = self._test_case.find("</" + tag, opening_tag_end_pos)
-        if closing_tag_start_pos != -1:
-            closing_tag_end_pos = self._test_case.find(">", closing_tag_start_pos)
-            if tag in HTML5_OUTER_TAGS:
-                self._reduced_case = self._test_case[:opening_tag_start_pos] + self._test_case[closing_tag_end_pos + 1:]
-                ids += self.__get_all_ids_in_block(self._test_case[opening_tag_start_pos:closing_tag_end_pos])
-            else:
-                self._reduced_case = self._test_case[:closing_tag_start_pos] + self._test_case[closing_tag_end_pos + 1:]
-                self._reduced_case = self._reduced_case[:opening_tag_start_pos] + \
-                                     self._reduced_case[opening_tag_end_pos + 1:]
+        if opening_tag_start_pos == -1:
+            result = False
         else:
-            self._reduced_case = self._test_case[:opening_tag_start_pos] + self._test_case[opening_tag_end_pos + 1]
-        self.__remove_element_declarations(ids)
+            opening_tag_end_pos = self._test_case.find(">", opening_tag_start_pos)
+            self._actual_tag_end = opening_tag_end_pos
+            tag_id = self.__get_tag_id(self._test_case[opening_tag_start_pos:opening_tag_end_pos])
+            if tag_id is not None:
+                ids.append(tag_id)
+            closing_tag_start_pos = self._test_case.find("</" + tag, opening_tag_end_pos)
+            if closing_tag_start_pos != -1:
+                closing_tag_end_pos = self._test_case.find(">", closing_tag_start_pos)
+                if tag in HTML5_OUTER_TAGS:
+                    self._reduced_case = self._test_case[:opening_tag_start_pos] + self._test_case[closing_tag_end_pos + 1:]
+                    ids += self.__get_all_ids_in_block(self._test_case[opening_tag_start_pos:closing_tag_end_pos])
+                else:
+                    self._reduced_case = self._test_case[:closing_tag_start_pos] + self._test_case[closing_tag_end_pos + 1:]
+                    self._reduced_case = self._reduced_case[:opening_tag_start_pos] + \
+                                         self._reduced_case[opening_tag_end_pos + 1:]
+            else:
+                self._reduced_case = self._test_case[:opening_tag_start_pos] + self._test_case[opening_tag_end_pos + 1]
+            self.__remove_element_declarations(ids)
+        return result

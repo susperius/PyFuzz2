@@ -125,7 +125,7 @@ class ReducingWorker(Worker):
                 continue
             test_case = self._reducer.reduce()
             while test_case is not None:
-                self.__write_reduced_case(crash['directory'], test_case)
+                self.__write_reduced_case(crash['directory'], test_case, crash)
                 if program['use_http']:
                     pyfuzzdbg = PyFuzzDbg.Debugger(int(program['sleep_time']))
                     pyfuzzdbg.set_app_name(unicode(program['path'] + " \"http://127.0.0.1:8080/reduced." +
@@ -186,11 +186,23 @@ class ReducingWorker(Worker):
                 return True
         return False
 
-    def __write_reduced_case(self, directory, reduced_case):
-        if os.path.exists(directory + "reduced." + self._reducer.file_type):
-            os.remove(directory + "reduced." + self._reducer.file_type)
-        with open(directory + "reduced." + self._reducer.file_type, 'wb+') as fd:
-            fd.write(reduced_case)
+    def __write_reduced_case(self, directory, reduced_case, crash):
+        if not self._reducer.reduce_add_file[0]:
+            if os.path.exists(directory + "reduced." + self._reducer.file_type):
+                os.remove(directory + "reduced." + self._reducer.file_type)
+            with open(directory + "reduced." + self._reducer.file_type, 'wb+') as fd:
+                fd.write(reduced_case)
+        else:
+            reducer_file_name = ""
+            for file_name in crash['additional_files']:
+                if self._reducer.reduce_add_file[1] in file_name and "backup" not in file_name:
+                    reducer_file_name = file_name
+                    break
+            print(reducer_file_name)
+            if os.path.exists(directory + reducer_file_name):
+                os.remove(directory + reducer_file_name)
+            with open(directory + reducer_file_name, 'wb+') as fd:
+                fd.write(reduced_case)
 
     def __get_all_crash_results(self):
         results = []

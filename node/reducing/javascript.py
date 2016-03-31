@@ -56,10 +56,13 @@ class JsReducer(Reducer):
         self._html_pos = 0
         self._tag_removal_search_start_pos = self._test_case.find("<br")
 
-
     @property
     def file_type(self):
         return self._file_type
+
+    @property
+    def reduce_add_file(self):
+        return False, None
 
     def crashed(self, crashed):
         if crashed:

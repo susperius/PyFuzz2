@@ -91,27 +91,19 @@ class JsReducer(Reducer):
 
     def reduce(self):
         if self._phase == 0:
-            if not self._showed:
-                self._logger.info("Phase 0: JS FUNCTION REMOVING")
-                self._showed = True
+            self._logger.info("Phase 0: JS FUNCTION REMOVING -> Length Functions: " + str(len(self._functions)))
             function_name = self._functions.pop()
             self.__remove_function_call(function_name)
             self.__remove_function_body(function_name)
         elif self._phase == 1:
-            if not self._showed:
-                self._logger.info("Phase 1: JS EVENT HANDLER REMOVING")
-                self._showed = True
+            self._logger.info("Phase 1: JS EVENT HANDLER REMOVING -> Length Event Handler: " + str(len(self._event_handler)))
             self._reduced_case = self._test_case
             self.__remove_function_body(self._event_handler.pop())
         elif self._phase == 2:
-            if not self._showed:
-                self._logger.info("Phase 2: TRY-CATCH-BLOCK REMOVING")
-                self._showed = True
+            self._logger.info("Phase 2: TRY-CATCH-BLOCK REMOVING")
             self.__remove_try_catch_block()
         elif self._phase == 3:
-            if not self._showed:
-                self._logger.info("Phase 3: HTML-TAGS REMOVING")
-                self._showed = True
+            self._logger.info("Phase 3: HTML-TAGS REMOVING -> Length Html Tags: " + str(len(self._html_tag_list)))
             html_tag = self._html_tag_list.pop(0)
             while not self.__remove_html_tag(html_tag):
                 if self._html_tag_list:

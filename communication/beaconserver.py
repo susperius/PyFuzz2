@@ -1,14 +1,12 @@
-__author__ = 'susperius'
-
 import logging
 import gevent
 import gevent.monkey
 from gevent.server import DatagramServer
-
+from server import Server
 gevent.monkey.patch_all()
 
 
-class BeaconServer:
+class BeaconServer(Server):
     def __init__(self, port, task_queue):
         self._port = port
         self._serving = False
@@ -18,17 +16,22 @@ class BeaconServer:
         self._task_queue = task_queue
 
     def __serve(self):
-        self._logger.info("[Beacon Server] initialized on port " + str(self._port) + " ...")
+        self._logger.info("[BeaconServer] initialized on port " + str(self._port) + " ...")
         self._beacon_server = DatagramServer(('', self._port), self.__beacon_receiver)
         self._beacon_server.serve_forever()
 
     def __beacon_receiver(self, msg, address):
         self._task_queue.put([address, msg])
 
-    def serve(self):
+    def start_server(self):
         if not self._serving:
             self._serving_greenlet = gevent.spawn(self.__serve)
             self._serving = True
             gevent.sleep(0)
-        else:
-            pass
+
+    def stop_server(self):
+        if self._serving:
+            gevent.kill(self._serving_greenlet)
+            self._serving = False
+            self._beacon_server.close()
+            self._logger.info("[BeaconServer] shut down")

@@ -1,11 +1,8 @@
-__author__ = 'susperius'
-
 import logging
-from urlparse import parse_qs
-
 import gevent
 import gevent.monkey
 from gevent.queue import Queue
+from urlparse import parse_qs
 
 import node.model.config
 from communication.beaconserver import BeaconServer
@@ -18,6 +15,7 @@ from worker.reportworker import ReportWorker
 from worker.nodeclientworker import NodeClientWorker
 from web.main import WebSite
 from node.model.message_types import MESSAGE_TYPES
+from web.app import WebInterface
 gevent.monkey.patch_all()
 
 CONFIG_FILENAME = "server_config.xml"
@@ -45,22 +43,33 @@ class PyFuzz2Server:
         self._report_server = ReportServer(report_port, self._report_queue)
         self._report_worker = ReportWorker(self._report_queue, self._db_queue, self._node_dict, self._crash_dict)
         self._node_client_worker = NodeClientWorker(self._node_queue)
-        self._web_server = WebServer(web_port, self._web_queue, self.web_main)
+        self._web_intf = WebInterface(self._web_queue)
+        self._web_server = WebServer(web_port, self._web_queue, self._web_intf.app)
 
     def main(self):
         self._logger.info("PyFuzz2 Server started...")
-        self._beacon_server.serve()
+        self._beacon_server.start_server()
         self._beacon_worker.start_worker()
-        self._report_server.serve()
+        self._report_server.start_server()
         self._report_worker.start_worker()
-        self._web_server.serve()
+        self._web_server.start_server()
         self._node_client_worker.start_worker()
         self._db_worker.start_worker()
         while True:
             try:
                 gevent.wait()
             except KeyboardInterrupt:
+                self.__shut_down()
                 exit(0)
+
+    def __shut_down(self):
+        self._beacon_server.stop_server()
+        self._beacon_worker.stop_worker()
+        self._report_server.stop_server()
+        self._report_worker.stop_worker()
+        self._web_server.stop_server()
+        self._node_client_worker.stop_worker()
+        self._db_worker.stop_worker()
 
     def web_main(self, environ, start_response):
         site = WebSite()

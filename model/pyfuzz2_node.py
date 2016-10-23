@@ -26,12 +26,11 @@ class PyFuzz2Node:
 
     @property
     def info(self):
-        return [("Status", "Active" if self.status else "Inactive"),
-                ("Crashes", str(self.crashes)),
-                ("Last Contact", self.last_contact),
-                ("Address", self.address),
-                ("Node Name", self.name),
-                ("Listener Port", str(self.listener_port))]
+        return {"status": "Active" if self.status else "Inactive",
+                "crashes": str(self.crashes),
+                "last_contact": self.last_contact,
+                "addr": self.address,
+                "name": self.name}
 
     @property
     def name(self):

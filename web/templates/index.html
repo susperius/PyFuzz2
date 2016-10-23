@@ -9,16 +9,18 @@
 <body>
     <div id="header">
         <h1>PyFuzz 2</h1>
+
     </div>
     <div id="nav">
-        <li class="active"><a href='index.py?func=home'><span>Overview</span></a></li>
-        <li class="active"><a href='index.py?func=stats'><span>Stats</span></a></li>
-        <li class="active"><a href='index.py?func=about'><span>About</span></a></li>
+        <li class="active"><a href='/index.html'><span>Overview</span></a></li>
+        <li class="active"><a href='/stats.html'><span>Stats</span></a></li>
+        <li class="active"><a href='/about.html'><span>About</span></a></li>
     </div>
     <div id="section">
-        <h2>SECTION_TITLE</h2>
+        <h2>{{ section_title }}</h2>
 
-        REPLACE_ME<br>
+            {{ body_space }}
+
     </div>
 
 <div id="footer">

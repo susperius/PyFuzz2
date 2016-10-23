@@ -43,8 +43,8 @@ class PyFuzz2Server:
         self._report_server = ReportServer(report_port, self._report_queue)
         self._report_worker = ReportWorker(self._report_queue, self._db_queue, self._node_dict, self._crash_dict)
         self._node_client_worker = NodeClientWorker(self._node_queue)
-        self._web_intf = WebInterface(self._web_queue)
-        self._web_server = WebServer(web_port, self._web_queue, self._web_intf.app)
+        self._web_intf = WebInterface(self._web_queue, self._node_dict, self._crash_dict)
+        self._web_server = WebServer(web_port, self._web_intf.app)
 
     def main(self):
         self._logger.info("PyFuzz2 Server started...")
@@ -70,6 +70,7 @@ class PyFuzz2Server:
         self._web_server.stop_server()
         self._node_client_worker.stop_worker()
         self._db_worker.stop_worker()
+        gevent.sleep(0)
 
     def web_main(self, environ, start_response):
         site = WebSite()

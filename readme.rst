@@ -17,7 +17,7 @@ You can easily add your own fuzzer, all you have to do is inherit from *fuzzing.
 necessary methods. After this you add your fuzzer to the dictionary in *fuzzing.fuzzers*. Now you can use your
 own fuzzer.
 
-For the client/server you need the following modules and software installed:
+For the client you need the following modules and software installed:
 
 * WinDbg
 * `Microsoft Visual C++ Compiler for Python 2.7 <http://www.microsoft.com/en-us/download/details.aspx?id=44266>`_
@@ -25,7 +25,13 @@ For the client/server you need the following modules and software installed:
 * Gevent
 * psutil
 
-Both software parts are configured via xml files. The config-files show some possible values and example of how to
+The server needs the following modules:
+
+* Gevent
+* Flask
+* Flask-Table
+
+Both software parts are configured via xml files. The config-files show some possible values and examples of how to
 config the client/server.
 
 You should **never** use this software in open networks (e.g. internet) there are no checks implemented to

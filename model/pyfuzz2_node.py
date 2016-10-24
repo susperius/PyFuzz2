@@ -1,7 +1,4 @@
-__author__ = 'susperius'
-
 import time
-
 
 
 class PyFuzz2Node:

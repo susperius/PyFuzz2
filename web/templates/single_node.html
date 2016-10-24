@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block content %}
+    {{ node_info_table }}
+    {{ general_config_table }}
+    {{ programs_table }}
+    {{ op_mode_conf_table }}
+<script>
+function upload_clk(){
+    var file_btn = document.getElementById("file_input");
+    file_btn.click();
+}
+function submit_clk(){
+    document.getElementById("upload_submit").click();
+    form.submit();
+}
+</script>
+<div id="nodes">
+    <a href="{{ href_base }}download">Download Config</a>
+    <form enctype="multipart/form-data" action="{{ href_base }}upload" method="post">
+        <input type="file" name="conf_file" id="file_input" hidden required onchange="submit_clk();"/>
+        <input type="submit" id="upload_submit" hidden/>
+    </form>
+    <a href="#" id="upload_link" onclick="upload_clk()">Upload Config</a>
+    <a href="{{ href_base }}reboot">Reboot node</a>
+</div>
+
+{% endblock %}

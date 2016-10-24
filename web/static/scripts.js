@@ -2,7 +2,7 @@
  * Created by susperius on 11.07.15.
  */
 
-FUZZERS;
+
 
 
 function changeFuzzer(){

@@ -59,6 +59,22 @@
     padding:5px;
     font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
+#nodes a:hover{
+    background-color: white;
+    border-bottom: 1px solid black;
+    color: black;
+    padding-bottom: 8px;
+}
+#nodes a{
+    background: black;
+    border-bottom: 1px solid white;
+    color: white;
+    display: block;
+    margin: 0;
+    padding: 8px 12px;
+    text-decoration: none;
+    font-weight: normal;
+}
 
 table {
     width:100%;

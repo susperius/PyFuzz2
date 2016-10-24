@@ -17,20 +17,20 @@ class HtmlPage:
         return self._raw_html
 
     def add_element(self, element_id, html_tag):
-        self._elements[element_id] = html_tag
+        self._elements[element_id] = self.__new_element(html_tag)  # {'tag': html_tag, 'children': []}
         if html_tag in self._elements_by_tag.keys():
             self._elements_by_tag[html_tag].append(element_id)
         else:
             self._elements_by_tag[html_tag] = [element_id]
+
+    def add_child_to_element(self, element_id, child_id):
+        self._elements[element_id]['children'].append(child_id)
 
     def get_elements_by_id(self):
         return self._elements
 
     def get_element_by_id(self, element_id):
         return self._elements[element_id]
-
-    def change_element(self, element_id, element_type):
-        self._elements[element_id] = element_type
 
     def get_elements_by_html_tag(self):
         return self._elements_by_tag
@@ -44,3 +44,6 @@ class HtmlPage:
     def get_css_class_names(self):
         return self._css_class_names
 
+    @staticmethod
+    def __new_element(tag):
+        return {'tag': tag, 'children': []}

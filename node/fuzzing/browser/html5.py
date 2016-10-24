@@ -27,6 +27,7 @@ class Html5Fuzzer(Fuzzer):
                   'REGEXP': None,
                   'REL': FuzzValues.REL, 'SCROLLING': FuzzValues.SCROLLING, 'SHAPE': FuzzValues.SHAPE,
                   'SANDBOX': FuzzValues.SANDBOX, 'SORTED': FuzzValues.SORTED, 'STRING': FuzzValues.STRINGS,
+                  'JS_STRING': FuzzValues.STRINGS,  # TODO: avoid workaround
                   'SRC': None,
                   'TABLE_SCOPE': FuzzValues.TABLE_SCOPE, 'TARGET': FuzzValues.TARGET,
                   'TRACK_KIND': FuzzValues.TRACK_KIND, 'URL': None, 'WRAP': FuzzValues.WRAP,
@@ -59,6 +60,8 @@ class Html5Fuzzer(Fuzzer):
         self._body = ""
         self._used_tags = set()
         self._html_page = HtmlPage()
+        self._actual_elem_id = ""
+        self._actual_parent_id = ""
 
     @classmethod
     def from_list(cls, params):
@@ -91,6 +94,8 @@ class Html5Fuzzer(Fuzzer):
         pass
 
     def __reinit(self):
+        self._head = ""
+        self._body = ""
         self._elem_ids = []
         self._css_classes = []
         self._form_ids = []
@@ -104,26 +109,37 @@ class Html5Fuzzer(Fuzzer):
         self.__reinit()
         count = 0
         tag, self._head, close_head = self.__build_tag("head")
+        head_id = self._actual_elem_id
         tag, title_open, title_close = self.__build_tag("title", ignore_outer_tag=True)
+        self._html_page.add_child_to_element(head_id, self._actual_elem_id)
         self._head += title_open + random.choice(FuzzValues.STRINGS) + title_close + "\r\n"
         self._head += "<link rel=\"stylesheet\" href=\"TESTCASE.css\">\r\n"
         self._head += "<script type='text/javascript'>\r\nSCRIPT_BODY\r\n</script>\r\n"
         tag, self._body, close_body = self.__build_tag("body")
+        body_id = self._actual_elem_id
         self._body = self._body[:-2] + " onload=\"eval(setTimeout(function () { startup(); }, 200))\">\r\n"
         self._body += "HELLO WORLD!\r\n<br>"
         while self._elements >= count:
             closing_list = []
+            self._actual_parent_id = body_id
             for i in range(random.randint(1, self._max_depth)):
                 tag, open_tag, close_tag = self.__build_tag()
                 count += 1
                 if HTML5_OBJECTS[tag]['outer_tag'] is not None\
                    and HTML5_OBJECTS[tag]['outer_tag'] == "head":  # Tags only allowed in head
                     self._head += open_tag + random.choice(FuzzValues.STRINGS) + close_tag + "\r\n"
+                    self._html_page.add_child_to_element(head_id, self._actual_elem_id)
                 else:  # default body tags
-                    self._body += open_tag + random.choice(FuzzValues.STRINGS) + "\r\n"
-                    closing_list.append(close_tag if tag != "br" else "")
-                if tag in self.NO_CHILD_LIST:  # don't go deeper if tag is in no child list
-                    break
+                    self._body += open_tag + random.choice(FuzzValues.STRINGS)
+                    go_deeper = random.choice([0, 1])  # 0 = don't go deeper; 1 = go deeper
+                    if go_deeper == 0 or tag in self.NO_CHILD_LIST:
+                        self._html_page.add_child_to_element(self._actual_parent_id, self._actual_elem_id)
+                        self._body += close_tag + "\r\n"
+                    else:
+                        self._html_page.add_child_to_element(self._actual_parent_id, self._actual_elem_id)
+                        self._actual_parent_id = self._actual_elem_id
+                        self._body += "\r\n"
+                        closing_list.append(close_tag if tag != "br" else "")
             closing_list.reverse()
             for close_tag in closing_list:
                 self._body += close_tag + "\r\n"
@@ -151,18 +167,19 @@ class Html5Fuzzer(Fuzzer):
         open_tag = ""
         close_tag = ""
         elem_id = "id" + str(len(self._elem_ids))
-        self._elem_ids.append(elem_id)
         if tag is None:
             tags = [x for x in HTML5_OBJECTS.keys() if x not in self.NO_SINGLE_USE_TAGS]
             tag = random.choice(tags)
             self._used_tags.add(tag)
             if tag == "table":
-                self._html_page.add_element(elem_id, tag)
+                # self._html_page.add_element(elem_id, tag)
                 return "table", self.__build_table(), ""
             elif tag == "dl":
                 # self._html_page.add_element(elem_id, tag)
                 return "dl", self.__build_dl(), ""
+        self._elem_ids.append(elem_id)
         self._html_page.add_element(elem_id, tag)
+        self._actual_elem_id = elem_id
         if tag == "canvas":
             self._canvas_ids.append(elem_id)
         close_tag += "</" + tag + ">"
@@ -205,34 +222,52 @@ class Html5Fuzzer(Fuzzer):
 
     def __build_table(self):
         table = ""
+        parent_id = self._actual_parent_id
         tag, open_table, close_table = self.__build_tag("table", ignore_outer_tag=True)
+        table_id = self._actual_elem_id
+        self._html_page.add_child_to_element(parent_id, self._actual_elem_id)
         table += open_table + "\r\n"
         #  Table header
         tag, open_thead, close_thead = self.__build_tag("thead", ignore_outer_tag=True)
+        self._html_page.add_child_to_element(table_id, self._actual_elem_id)
+        parent_id = self._actual_elem_id
         table += open_thead + "\r\n"
         tag, open_tr, close_tr = self.__build_tag("tr", ignore_outer_tag=True)
+        self._html_page.add_child_to_element(parent_id, self._actual_elem_id)
+        parent_id = self._actual_elem_id
         table += open_tr + "\r\n"
         for i in range(random.randint(1, self._max_depth)):
             tag, open_th, close_th = self.__build_tag("th", ignore_outer_tag=True)
+            self._html_page.add_child_to_element(parent_id, self._actual_elem_id)
             table += open_th +random.choice(FuzzValues.STRINGS) + close_th + "\r\n"
         table += close_tr + "\r\n" + close_thead + "\r\n"
         #  Table foot
         tag, open_tfoot, close_tfoot = self.__build_tag("tfoot", ignore_outer_tag=True)
+        self._html_page.add_child_to_element(table_id, self._actual_elem_id)
+        parent_id = self._actual_elem_id
         table += open_tfoot + "\r\n"
         tag, open_tr, close_tr = self.__build_tag("tr", ignore_outer_tag=True)
+        self._html_page.add_child_to_element(parent_id, self._actual_elem_id)
+        parent_id = self._actual_elem_id
         table += open_tr + "\r\n"
         for i in range(random.randint(1, self._max_depth)):
             tag, open_td, close_td = self.__build_tag("td", ignore_outer_tag=True)
+            self._html_page.add_child_to_element(parent_id, self._actual_elem_id)
             table += open_td + random.choice(FuzzValues.STRINGS) + close_td + "\r\n"
         table += close_tr + "\r\n" + close_tfoot + "\r\n"
         #  Table body
         tag, open_tbody, close_tbody = self.__build_tag("tbody", ignore_outer_tag=True)
+        self._html_page.add_child_to_element(table_id, self._actual_elem_id)
+        parent_id = self._actual_elem_id
         table += open_tbody + "\r\n"
         for i in range(random.randint(1, self._max_depth)):
             tag, open_tr, close_tr = self.__build_tag("tr", ignore_outer_tag=True)
+            self._html_page.add_child_to_element(parent_id, self._actual_elem_id)
+            actual_tr = self._actual_elem_id
             table += open_tr + "\r\n"
             for i in range(random.randint(1, self._max_depth)):
                 tag, open_td, close_td = self.__build_tag("td", ignore_outer_tag=True)
+                self._html_page.add_child_to_element(actual_tr, self._actual_elem_id)
                 table += open_td + random.choice(FuzzValues.STRINGS) + close_td + "\r\n"
             table += close_tr + "\r\n"
         table += close_tbody + "\r\n"

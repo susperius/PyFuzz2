@@ -111,7 +111,8 @@ class JsDomFuzzer(Fuzzer):
         i = 0
         for elem_id in self._html_page.get_element_ids():
             code += "\t" + "elem" + str(i) + " = " + JsDocument.getElementById(elem_id) + "\n"
-            self._js_elements["elem"+str(i)] = JsDomElement("elem" + str(i), self._html_page.get_element_by_id(elem_id))
+            self._js_elements["elem"+str(i)] = JsDomElement("elem" + str(i),
+                                                            self._html_page.get_element_by_id(elem_id)['tag'])
             i += 1
         code += "\t" + self.CALLING_COMMENT + \
                 "\n\tevent_firing();\n}\n"

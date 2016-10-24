@@ -1,14 +1,15 @@
 # coding=utf8
 from JsObject import JsObject
+from JsDocument import JsDocument
 
 
 class JsDomElement(JsObject):
     TYPE = "JsElement"
 
-    def __init__(self, var_name, html_type=None):
+    def __init__(self, var_name, html_type=None, children=None):
         JsObject.__init__(self, var_name)
         self.__registered_events = {}
-        self.__children = []
+        self.__children = [] if not children else children
         self.__attributes = {}
         self.__html_type = html_type
         js_element_methods_and_properties = {'addEventListener': {'ret_val': None, 'parameters': ['EVENT', 'JS_EVENT_LISTENER'], 'method': self.addEventListener},
@@ -105,6 +106,9 @@ class JsDomElement(JsObject):
         return self.__attributes
 
 # region METHODS
+    def newElement(self):
+        return self._name + " = " + JsDocument.createElement(self.__html_type)
+
     def addEventListener(self, event, function):
         self.__registered_events[event] = function
         return self._name + ".addEventListener('" + event + "', " + function + ")"

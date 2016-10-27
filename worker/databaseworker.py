@@ -7,9 +7,7 @@ import pickle
 from worker import Worker
 from model.crash import Crash
 from model.pyfuzz2_node import PyFuzz2Node
-
-DB_TYPES = {'CRASH': 0x01, 'NODE': 0x02, 'DELETE_NODE': 0x03}
-SEPARATOR = "_;_"
+from model.database import DB_TYPES, SEPARATOR
 
 
 class DatabaseWorker(Worker):
@@ -48,7 +46,7 @@ class DatabaseWorker(Worker):
         return self._cursor.fetchone()
 
     def delete_single_node(self, address):
-        self._cursor.execute("DELETE FROM nodes WHERE address=?", address)
+        self._cursor.execute("DELETE FROM nodes WHERE address=(?)", (address, ))
 
     def crash_exists(self, key):
         binding = [key]

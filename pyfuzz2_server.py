@@ -8,12 +8,14 @@ import node.model.config
 from communication.beaconserver import BeaconServer
 from communication.reportserver import ReportServer
 from communication.webserver import WebServer
-from model.config import ConfigParser
-from worker.databaseworker import DatabaseWorker, DB_TYPES
+from worker.databaseworker import DatabaseWorker
 from worker.beaconworker import BeaconWorker
 from worker.reportworker import ReportWorker
 from worker.nodeclientworker import NodeClientWorker
+from worker.webworker import WebWorker
 from web.main import WebSite
+from model.database import DB_TYPES
+from model.config import ConfigParser
 from node.model.message_types import MESSAGE_TYPES
 from web.app import WebInterface
 gevent.monkey.patch_all()
@@ -45,6 +47,7 @@ class PyFuzz2Server:
         self._node_client_worker = NodeClientWorker(self._node_queue)
         self._web_intf = WebInterface(self._web_queue, self._node_dict, self._crash_dict)
         self._web_server = WebServer(web_port, self._web_intf.app)
+        self._web_worker = WebWorker(self._node_dict, self._web_queue, self._node_queue, self._db_queue)
 
     def main(self):
         self._logger.info("PyFuzz2 Server started...")
@@ -55,6 +58,7 @@ class PyFuzz2Server:
         self._web_server.start_server()
         self._node_client_worker.start_worker()
         self._db_worker.start_worker()
+        self._web_worker.start_worker()
         while True:
             try:
                 gevent.wait()
@@ -70,51 +74,8 @@ class PyFuzz2Server:
         self._web_server.stop_server()
         self._node_client_worker.stop_worker()
         self._db_worker.stop_worker()
+        self._web_worker.stop_worker()
         gevent.sleep(0)
-
-    def web_main(self, environ, start_response):
-        site = WebSite()
-        func = "home"
-        if environ['PATH_INFO'] == "/index.py" or environ['PATH_INFO'] == "/":
-            parameters = parse_qs(environ['QUERY_STRING'])
-            if "func" in parameters:
-                func = parameters['func'][0] if parameters['func'][0] in site.funcs else "home"
-            if func == "home":
-                if 'reboot' in parameters:
-                    key = parameters['reboot'][0]
-                    self._beacon_worker.nodes[key].status = False
-                    self._node_queue.put([(key, self._beacon_worker.nodes[key].listener_port), MESSAGE_TYPES['RESET'],
-                                          ""])
-                if "submit" in parameters and "node" in parameters:
-                    key = parameters['node'][0]
-                    self._logger.debug("Preparing new config")
-                    node_conf = node.model.config.ConfigParser.create_config(environ['wsgi.input'].read())
-                    self._beacon_worker.nodes[key].status = False
-                    self._node_queue.put([(key, self._beacon_worker.nodes[key].listener_port),
-                                         MESSAGE_TYPES['SET_CONFIG'], node_conf])
-                if "del" in parameters:
-                    key = parameters['del'][0]
-                    del(self._beacon_worker.nodes[key])
-                    self._db_queue.put(DB_TYPES['DELETE_NODE'], key)
-                status, headers, html = site.home(self._beacon_worker.nodes)
-            elif func == "node_detail":
-                if "node" in parameters and parameters['node'][0] in self._beacon_worker.nodes.keys():
-                    key = parameters['node'][0]
-                    status, headers, html = site.node_detail(self._beacon_worker.nodes[key])
-                else:
-                    status, headers, html = site.file_not_found()
-            elif func == "stats":
-                status, headers, html = site.stats(self._node_dict, self._crash_dict)
-        elif environ['PATH_INFO'] == "/style.css":
-            status, headers, html = site.get_style()
-        elif environ['PATH_INFO'] == "/scripts.js":
-            status, headers, html = site.get_scripts()
-        else:
-            status, headers, html = site.file_not_found()
-        if self._logger.level == logging.DEBUG:
-            html += "<br><br>" + str(environ) + "<br><br>" + func + "<br><br>" + environ['wsgi.input'].read()
-        start_response(status, headers)
-        return [str(html)]
 
 
 if __name__ == "__main__":

@@ -1,0 +1,1 @@
+WEB_QUEUE_TASKS = {'TO_NODE': 0x00, 'TO_DB': 0x01}

@@ -4,7 +4,7 @@ import logging
 import pickle
 import gevent
 from model.pyfuzz2_node import PyFuzz2Node
-from databaseworker import DB_TYPES, SEPARATOR
+from model.database import DB_TYPES, SEPARATOR
 from node.model.message_types import MESSAGE_TYPES
 
 
@@ -34,7 +34,7 @@ class BeaconWorker:
         if ip not in self._node_dict.keys():
             self._node_dict[ip] = PyFuzz2Node(node_name, ip, listener_port)
             self._node_worker_queue.put([(ip, listener_port), MESSAGE_TYPES["GET_CONFIG"], ""])  # [(ip, port), GET_CONFIG, ""]
-        elif not self._node_dict[ip].status:  # e.g. after a reboot the config also may have changed
+        elif not self._node_dict[ip].status or self._node_dict[ip].config is None:  # e.g. after a reboot the config also may have changed
             self._node_dict[ip].beacon_received()
             self._node_dict[ip].address = ip
             self._node_dict[ip].name = node_name
@@ -58,7 +58,6 @@ class BeaconWorker:
 
     def __get_all_configs_beacon(self):
         while True:
-            self._logger.debug("Calling nodes for configs")
             for key, node in self._node_dict.items():
                 if node.status:
                     self._node_worker_queue.put([(key, node.listener_port), MESSAGE_TYPES["GET_CONFIG"], ""])  # [(ip, port), GET_CONFIG, ""]

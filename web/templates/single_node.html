@@ -1,19 +1,13 @@
 {% extends "base.html" %}
 {% block content %}
+    {% if message_from_server %}
+        <br><h3>{{ message_from_server }}</h3><br>
+    {% endif %}
     {{ node_info_table }}
     {{ general_config_table }}
     {{ programs_table }}
     {{ op_mode_conf_table }}
-<script>
-function upload_clk(){
-    var file_btn = document.getElementById("file_input");
-    file_btn.click();
-}
-function submit_clk(){
-    document.getElementById("upload_submit").click();
-    form.submit();
-}
-</script>
+
 <div id="nodes">
     <a href="{{ href_base }}download">Download Config</a>
     <form enctype="multipart/form-data" action="{{ href_base }}upload" method="post">
@@ -22,6 +16,7 @@ function submit_clk(){
     </form>
     <a href="#" id="upload_link" onclick="upload_clk()">Upload Config</a>
     <a href="{{ href_base }}reboot">Reboot node</a>
+    <a href="{{ href_base }}delete">Delete Node</a>
 </div>
 
 {% endblock %}

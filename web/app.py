@@ -1,10 +1,13 @@
 from flask import Flask, render_template, send_file, abort, request, flash
 from table import SingleNodeTable, NodeTable
 from gevent.queue import Queue
+from model.web import WEB_QUEUE_TASKS
+from model.database import DB_TYPES
 from node.model.config import ConfigParser
 from node.model.message_types import MESSAGE_TYPES
 
 
+#  TODO: Implement the stats and about sites
 class WebInterface:
     def __init__(self, web_queue, node_dict, crash_dict):
         self._inc_confs = 0  # keep track of the actual open in and out going config files
@@ -21,6 +24,7 @@ class WebInterface:
         self.app.add_url_rule("/node/<string:addr>/download", 'node_get_config', self.node_get_config)
         self.app.add_url_rule("/node/<string:addr>/upload", 'node_set_config', self.node_set_config, methods=['POST'])
         self.app.add_url_rule("/node/<string:addr>/reboot", 'node_reboot', self.node_reboot)
+        self.app.add_url_rule("/node/<string:addr>/delete", 'node_delete', self.node_delete)
 
     def index_site(self):
         table_items = []
@@ -36,7 +40,7 @@ class WebInterface:
     def about_site(self):
         return render_template("main.html", section_title="ABOUT")
 
-    def node_detail(self, addr):
+    def node_detail(self, addr, msg=""):
         if addr not in self._node_dict.keys():
             abort(404)
         node = self._node_dict[addr]
@@ -73,41 +77,64 @@ class WebInterface:
             op_mode_conf_table = SingleNodeTable(op_mode_items)
             return render_template("single_node.html", section_title="NODE DETAIL", node_info_table=node_info_table,
                                    general_config_table=general_config_table, program_table=program_table,
-                                   op_mode_conf_table=op_mode_conf_table, href_base=href_base)
+                                   op_mode_conf_table=op_mode_conf_table, href_base=href_base, message_from_server=msg)
         else:
             return render_template("single_node.html", section_title="NODE DETAIL", body_space=node_info_table,
-                                   href_base=href_base)
+                                   href_base=href_base, message_from_server=msg)
 
     def node_get_config(self, addr):
         if addr not in self._node_dict.keys():
             abort(404)
         else:
+            path = "tmp/" + addr + "-out_conf.xml" if __name__ == "__main__" else "web/tmp/" + addr + "-out_conf.xml"
             node = self._node_dict[addr]
             if node.config is None:
-                flash("Config not found")
-                return self.node_detail(addr)
+                return self.node_detail(addr, msg="Config not found")
             else:
-                with open("tmp/node_config.xml", 'w+') as fd:
+                with open(path, 'w+') as fd:
                     fd.write(node.config)
-                return send_file("tmp/node_config.xml")
+                return send_file(path.replace("web/", ""))  #  send file is using the path, where the app is located as cwd (seems like)
 
     def node_set_config(self, addr):
-        if "conf_file" not in request.files:
+        if "conf_file" not in request.files or addr not in self._node_dict.keys():
             abort(404)
-        file = request.files['conf_file']
-        file.save("tmp/inc_conf.xml")
-        print file
-        #TODO: do all the necessary stuff in order to change node config
-        return self.node_detail(addr)
+        path = "tmp/" + addr + "-inc_conf.xml" if __name__ == "__main__" else "web/tmp/" + addr + "-inc_conf.xml"
+        node = self._node_dict[addr]
+        rec_file = request.files['conf_file']
+        rec_file.save(path)
+        #  Check if it's a valid config
+        message = "Config parsed successfully"
+        error = False
+        try:
+            ConfigParser(path)
+        except ValueError as v_err:
+            message = "An error occured while parsing your config: " + v_err.message
+            error = True
+        except:
+            message = "There was a general error with your configuration"
+            error = True
+        #  -----------------------------
+        if not error:
+            node.status = False
+            with open(path) as fd:
+                config = fd.read()
+            self._web_queue.put((WEB_QUEUE_TASKS['TO_NODE'], [(addr, node.listener_port), MESSAGE_TYPES['SET_CONFIG'], config]))
+        return self.node_detail(addr, message)
 
     def node_reboot(self, addr):
         if addr not in self._node_dict.keys():
             abort(404)
-        else:
-            node = self._node_dict[addr]
-            node.status = False
-            self._web_queue.put([(addr, node.listener_port), MESSAGE_TYPES['RESET'], ""])
-            return self.node_detail(addr)
+        node = self._node_dict[addr]
+        node.status = False
+        self._web_queue.put((WEB_QUEUE_TASKS['TO_NODE'], [(addr, node.listener_port), MESSAGE_TYPES['RESET'], ""]))
+        return self.node_detail(addr)
+
+    def node_delete(self, addr):
+        if addr not in self._node_dict.keys():
+            abort(404)
+        self._web_queue.put((WEB_QUEUE_TASKS['TO_DB'], (DB_TYPES['DELETE_NODE'], addr)))
+        del(self._node_dict[addr])
+        return self.index_site()
 
 if __name__ == "__main__":
     from model.pyfuzz2_node import PyFuzz2Node

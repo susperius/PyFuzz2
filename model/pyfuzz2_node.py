@@ -1,5 +1,5 @@
 import time
-
+from node.model.config import ConfigParser
 
 class PyFuzz2Node:
     def __init__(self, name, address, listener_port):

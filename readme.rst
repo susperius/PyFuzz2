@@ -24,6 +24,7 @@ For the client you need the following modules and software installed:
 * PyKd (use the installer on  the `PyKd <https://pykd.codeplex.com/>`_ project page)
 * Gevent
 * psutil
+* My `PyFuzzDbg <https://github.com/susperius/PyFuzzDbg>`_ Library
 
 The server needs the following modules:
 

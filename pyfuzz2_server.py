@@ -13,7 +13,6 @@ from worker.beaconworker import BeaconWorker
 from worker.reportworker import ReportWorker
 from worker.nodeclientworker import NodeClientWorker
 from worker.webworker import WebWorker
-from web.main import WebSite
 from model.database import DB_TYPES
 from model.config import ConfigParser
 from node.model.message_types import MESSAGE_TYPES

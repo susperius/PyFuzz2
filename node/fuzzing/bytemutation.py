@@ -1,5 +1,3 @@
-__author__ = 'susperius'
-
 import random
 
 import helper
@@ -8,9 +6,9 @@ import fuzzer
 
 class ByteMutation(fuzzer.Fuzzer):
     NAME = "bytemutation"
-    CONFIG_PARAMS = ["fuzz_file", "min_change", "max_change", "seed", "file_type"]
+    CONFIG_PARAMS = ["fuzz_file", "min_change", "max_change", "file_type"]
 
-    def __init__(self, fuzz_file, min_change=1, max_change=1, seed=31337, file_type="png"):
+    def __init__(self, fuzz_file, min_change=1, max_change=1, file_type="png"):
         self._fuzz_file = fuzz_file
         self._data = ""
         self._count = 0
@@ -19,10 +17,6 @@ class ByteMutation(fuzzer.Fuzzer):
         self._min_change = int(min_change)
         self._max_change = int(max_change)
         self._file_type = file_type
-        if seed == 0:
-            random.seed()
-        else:
-            random.seed(self._seed)
 
     @classmethod
     def from_list(cls, params):

@@ -15,17 +15,7 @@ class Fuzzer:
     def from_list(cls, params):
         raise NotImplementedError("ABSTRACT METHOD")
 
-    @property
-    def prng_state(self):
-        raise NotImplementedError("ABSTRACT METHOD")
-
     def fuzz(self):
-        raise NotImplementedError("ABSTRACT METHOD")
-
-    def set_state(self, state):
-        raise NotImplementedError("ABSTRACT METHOD")
-
-    def set_seed(self, seed):
         raise NotImplementedError("ABSTRACT METHOD")
 
     def create_testcases(self, count, directory):

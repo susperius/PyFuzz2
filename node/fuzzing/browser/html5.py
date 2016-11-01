@@ -7,8 +7,6 @@ from model.CssProperties import CSS_STYLES
 from ..fuzzer import Fuzzer
 from model.FuzzedHtmlPage import HtmlPage
 
-__author__ = 'susperius'
-
 
 class Html5Fuzzer(Fuzzer):
     TYPES_DICT = {'APP_DATA': None, 'BOOL': FuzzValues.BOOL, 'BUTTON_TYPE': FuzzValues.BUTTON_TYPE,
@@ -38,12 +36,8 @@ class Html5Fuzzer(Fuzzer):
     NO_SINGLE_USE_TAGS = ['head', 'body', 'th', 'tr', 'td', 'tfoot', 'tbody', 'thead', 'title', 'dt', 'dd']
     NO_CHILD_LIST = ['select', 'time', 'iframe', 'style', 'canvas']
 
-    def __init__(self, seed, elements, max_depth, max_attr, file_type):
+    def __init__(self, elements, max_depth, max_attr, file_type):
         self._logger = logging.getLogger(__name__)
-        if int(seed) == 0:
-            random.seed()
-        else:
-            random.seed(int(seed))
         self._css_classes = []
         self._elem_ids = []
         self._form_ids = []

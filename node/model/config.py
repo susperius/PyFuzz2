@@ -1,5 +1,3 @@
-__author__ = 'susperius'
-
 import xml.etree.ElementTree as ET
 import logging
 try:
@@ -48,23 +46,25 @@ class ConfigParser:
                 self._report_port = reporting.attrib['port']
                 self._listener_port = int(listener.attrib['port'])
             elif self._node_net_mode != "single":
-                raise ValueError("Only net and single are available modes for node!")
+                raise ValueError("Only 'net' and 'single' are valid modes for the node!")
             programs = self._root.find("programs")
             sleep_times = []
             for prog in programs:
                 sleep_times.append(prog.attrib['sleep_time'])
                 self._programs.append(prog.attrib)
-            # self._program_path = self._root.find("program").attrib['path']
-            # self._program_dbg_child = bool(self._root.find("program").attrib['dbg_child'])
             self._sleep_time = max(sleep_times)
             if self._node_op_mode == 'fuzzing':
                 fuzzer = self._root.find("fuzzer")
                 self._fuzzer_type = fuzzer.attrib['type']
-                self._fuzz_config = []
+                if "seed" in fuzzer.attrib.keyes():
+                    self._fuzzer_seed = fuzzer.attrib['seed']
+                else:
+                    self._fuzzer_seed = None
+                self._fuzzer_config = []
                 if self._fuzzer_type not in FUZZERS.keys():
                     raise ValueError("Unsupported fuzzing type")
                 for elem in FUZZERS[self._fuzzer_type][0]:
-                    self._fuzz_config.append(fuzzer.attrib[elem])
+                    self._fuzzer_config.append(fuzzer.attrib[elem])
                 self._file_type = fuzzer.attrib['file_type']
             elif self._node_op_mode == 'reducing':
                 reducer = self._root.find('reducer')
@@ -126,8 +126,12 @@ class ConfigParser:
         return self._fuzzer_type
 
     @property
+    def fuzzer_seed(self):
+        return self._fuzzer_seed
+
+    @property
     def fuzzer_config(self):
-        return self._fuzz_config
+        return self._fuzzer_config
 
     @property
     def reducer_type(self):
@@ -147,7 +151,7 @@ class ConfigParser:
             op_mode_conf = {"fuzzer_type": self._fuzzer_type, "fuzz_conf": {}}
             i = 0
             for opt in FUZZERS[self._fuzzer_type][0]:
-                op_mode_conf["fuzz_conf"][opt] = self._fuzz_config[i]
+                op_mode_conf["fuzz_conf"][opt] = self._fuzzer_config[i]
                 i += 1
         else:
             op_mode_conf = None

@@ -12,8 +12,8 @@ from worker.fuzzingworker import FuzzingWorker
 from worker.reducingworker import ReducingWorker
 from worker.reportworker import ReportWorker
 from model.config import ConfigParser
-from fuzzing.fuzzers import FUZZERS
-from reducing.reducers import REDUCERS
+from fuzzing.fuzzers import *
+from reducing.reducers import REDUCERS, get_reducer
 
 __author__ = 'susperius'
 
@@ -43,42 +43,22 @@ class PyFuzz2Node:
             self._report_worker = ReportWorker(False, self._reporter_queue, self._node_config.file_type,
                                                self._node_config.programs)
         if self._node_config.node_op_mode == 'fuzzing':
-            self._fuzzer = self.__choose_fuzzer()
-            if os.path.isfile("fuzz_state.pickle"):
-                try:
-                    with open("fuzz_state.pickle", 'r') as fd:
-                        self._fuzzer.set_state(pickle.load(fd))
-                    os.remove("fuzz_state.pickle")
-                except Exception as ex:
-                    self._logger.error("Error while restoring the PRNG state -> " + ex.message)
-                    self._fuzzer.set_seed(0)
-            self._operation_worker = FuzzingWorker(self._node_config.programs, self._fuzzer, self._reporter_queue,)
+            if check_for_prng_state():
+                restore_prng_state()
+            else:
+                init_random_seed(self._node_config.fuzzer_seed)
+            self._fuzzer = get_fuzzer(self._node_config.fuzzer_type, self._node_config.fuzzer_config)
+            self._operation_mode_worker = FuzzingWorker(self._node_config.programs, self._fuzzer, self._reporter_queue, )
         elif self._node_config.node_op_mode == 'reducing':
-            self._reducer = self.__choose_reducer()
-            self._operation_worker = ReducingWorker(self._reducer, self._node_config.programs, self._reporter_queue)
-        else:
-            raise ValueError('Unsupported operation mode!')
-
-    def __choose_fuzzer(self):
-        return FUZZERS[self._node_config.fuzzer_type][1].from_list(self._node_config.fuzzer_config)
-
-    def __choose_reducer(self):
-        return REDUCERS[self._node_config.reducer_type][1].from_list(self._node_config.reducer_config)
+            self._reducer = get_reducer(self._node_config.reducer_type, self._node_config.reducer_config)
+            self._operation_mode_worker = ReducingWorker(self._reducer, self._node_config.programs, self._reporter_queue)
 
     def __stop_all_workers(self):
-        self._operation_worker.stop_worker()
+        self._operation_mode_worker.stop_worker()
         if self._node_config.node_net_mode == "net":
             self._listener_worker.stop_worker()
             self._beacon_client.stop_beacon()
             self._tcp_listener.stop()
-
-    def __save_fuzz_state(self):
-        try:
-            fuzz_state = self._fuzzer.prng_state
-            with open("fuzz_state.pickle", 'w+') as fd:
-                pickle.dump(fuzz_state, fd)  # Save the state of the prng
-        except Exception as ex:
-            self._logger.error('Was not able to save the prng state in a file: ' + ex.message)
 
     def main(self):
         start = time.time()
@@ -88,21 +68,20 @@ class PyFuzz2Node:
             self._tcp_listener.serve()
             self._listener_worker.start_worker()
         self._report_worker.start_worker()
-        self._operation_worker.start_worker()
+        self._operation_mode_worker.start_worker()
         while True:
             try:
                 if self._node_config.node_net_mode == "net":
                     if self._listener_worker.new_config:
                         self._logger.info("Received new config")
                         self.__stop_all_workers()
-                        # self.__save_fuzz_state() if there is a new config it shouldn't restore the state??
                         restart(self._node_config.sleep_time + 5)
                     elif self._listener_worker.reset:
                         self._logger.info("Node is going to reboot on received command")
                         self.__stop_all_workers()
                         gevent.sleep(5)
                         if self._node_config.node_op_mode == "fuzzing":
-                            self.__save_fuzz_state()
+                            save_prng_state()
                         gevent.sleep(self._node_config.sleep_time + 5)
                         reboot()
                 if time.time() - start > self._node_config.reboot_time:  # Reboot after eight hours
@@ -110,7 +89,7 @@ class PyFuzz2Node:
                     self.__stop_all_workers()
                     gevent.sleep(5)
                     if self._node_config.node_op_mode == "fuzzing":
-                        self.__save_fuzz_state()
+                        save_prng_state()
                     gevent.sleep(self._node_config.sleep_time + 5)
                     reboot()
                 gevent.sleep(5)  # It's enough to check the above stuff every 5 seconds instead of burning cpu time

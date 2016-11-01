@@ -20,23 +20,18 @@ TEMPLATE_FILE = "fuzzing/model/template.dat"
 
 class JsDomFuzzer(Fuzzer):
     NAME = "js_dom_fuzzer"
-    CONFIG_PARAMS = ["starting_elements", "total_operations", "browser", "seed", "canvas_size", "file_type"]
+    CONFIG_PARAMS = ["starting_elements", "total_operations", "browser", "canvas_size", "file_type"]
     CALLING_COMMENT = "//FUNCTION_CALLING"
     TIMEOUT = 20
 
-    def __init__(self, starting_elements, total_operations, browser, seed, canvas_size, file_type='html'):
+    def __init__(self, starting_elements, total_operations, browser, canvas_size, file_type='html'):
         self._starting_elements = int(starting_elements)
         self._total_operations = int(total_operations)
         self._browser = browser
-        seed = int(seed)
         #  self._html_fuzzer = HtmlFuzzer(self._starting_elements, 3, seed)
-        self._html_fuzzer = Html5Fuzzer(int(seed), self._starting_elements, 10, 5, file_type)
-        self._css_fuzzer = CssFuzzer(seed)
+        self._html_fuzzer = Html5Fuzzer(self._starting_elements, 10, 5, file_type)
+        self._css_fuzzer = CssFuzzer()
         self._canvas_fuzzer = CanvasFuzzer(int(canvas_size))
-        if seed == 0:
-            random.seed()
-        else:
-            random.seed(seed)
         self._file_type = file_type
         self._function_count = 0
         self._operations_count = 0

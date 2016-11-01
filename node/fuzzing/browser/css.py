@@ -1,23 +1,17 @@
-__author__ = 'susperius'
-#  TODO: Make it pretty and functional as fuzzer
 import random
-
 from ..fuzzer import Fuzzer
 from model.values import FuzzValues
 from model.CssProperties import CSS_STYLES
+#  TODO: Make it pretty and functional as fuzzer
 
 
 class CssFuzzer(Fuzzer):
     NAME = "CssFuzzer"
-    CONFIG_PARAMS = ["seed"]
+    CONFIG_PARAMS = []
 
-    def __init__(self, seed="0"):
+    def __init__(self):
         self._tags = []
         self._class_names = []
-        if int(seed) == 0:
-            random.seed()
-        else:
-            random.seed(int(seed))
 
     def set_tags(self, tags):
         self._tags = tags

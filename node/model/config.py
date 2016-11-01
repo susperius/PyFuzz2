@@ -56,7 +56,7 @@ class ConfigParser:
             if self._node_op_mode == 'fuzzing':
                 fuzzer = self._root.find("fuzzer")
                 self._fuzzer_type = fuzzer.attrib['type']
-                if "seed" in fuzzer.attrib.keyes():
+                if "seed" in fuzzer.attrib.keys():
                     self._fuzzer_seed = fuzzer.attrib['seed']
                 else:
                     self._fuzzer_seed = None

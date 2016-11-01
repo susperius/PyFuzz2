@@ -50,4 +50,4 @@ def save_prng_state():
 
 
 def get_fuzzer(fuzzer_type, config):
-    return FUZZERS[fuzzer_type].from_list(config)
+    return FUZZERS[fuzzer_type][1].from_list(config)

@@ -47,7 +47,7 @@ class JsDomFuzzer(Fuzzer):
 
     @classmethod
     def from_list(cls, params):
-        return cls(params[0], params[1], params[2], params[3], params[4], params[5])
+        return cls(params[0], params[1], params[2], params[3], params[4])
 
     @property
     def prng_state(self):

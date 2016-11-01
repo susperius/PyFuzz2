@@ -43,10 +43,6 @@ class PyFuzz2Node:
             self._report_worker = ReportWorker(False, self._reporter_queue, self._node_config.file_type,
                                                self._node_config.programs)
         if self._node_config.node_op_mode == 'fuzzing':
-            if check_for_prng_state():
-                restore_prng_state()
-            else:
-                init_random_seed(self._node_config.fuzzer_seed)
             self._fuzzer = get_fuzzer(self._node_config.fuzzer_type, self._node_config.fuzzer_config)
             self._operation_mode_worker = FuzzingWorker(self._node_config.programs, self._fuzzer, self._reporter_queue, )
         elif self._node_config.node_op_mode == 'reducing':
@@ -63,6 +59,11 @@ class PyFuzz2Node:
     def main(self):
         start = time.time()
         self._logger.info("PyFuzz 2 Node started ...")
+        if self._node_config.node_op_mode == 'fuzzing':
+            if check_for_prng_state():
+                self._logger.info(restore_prng_state())
+            else:
+                init_random_seed(self._node_config.fuzzer_seed)
         if self._node_config.node_net_mode == "net":
             self._beacon_client.start_beacon()
             self._tcp_listener.serve()

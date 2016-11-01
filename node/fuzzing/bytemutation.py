@@ -13,14 +13,13 @@ class ByteMutation(fuzzer.Fuzzer):
         self._data = ""
         self._count = 0
         self.__load_fuzz_file()
-        self._seed = int(seed)
         self._min_change = int(min_change)
         self._max_change = int(max_change)
         self._file_type = file_type
 
     @classmethod
     def from_list(cls, params):
-        return cls(params[0], params[1], params[2], params[3], params[4])
+        return cls(params[0], params[1], params[2], params[3])
 
     def __load_fuzz_file(self):
         with open(self._fuzz_file, "rb") as fd:

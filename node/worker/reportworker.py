@@ -26,7 +26,6 @@ class ReportWorker(Worker):
     def __worker_green(self):
         while self._running:
             msg_type, msg = self._report_queue.get()
-            self._logger.debug("Report job Type --> " + str(msg_type))
             if MESSAGE_TYPES['CRASH'] == msg_type:
                 # Structure crash message (0xFF, (prog['name'], crash_report, testcases[]))
                 self.__report_crash_local(msg)

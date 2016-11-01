@@ -46,19 +46,18 @@ needed methods:
 
 class JsFuzzer(Fuzzer):
     NAME = "js_fuzzer"
-    CONFIG_PARAMS = ['seed', 'starting_elements', 'html_depth', 'html_max_attr', 'canvas_size', 'js_block_size',
+    CONFIG_PARAMS = ['starting_elements', 'html_depth', 'html_max_attr', 'canvas_size', 'js_block_size',
                      'function_count', 'file_type', 'media_folder']
     CALLING_COMMENT = "//CALLING COMMENT"
     FIRST_ARRAY_LENGTH = 5
     FUNCTION_TYPES = ['default', 'event', 'array']
     SPECIAL_PARAMETERS = ['JS_ARRAY', 'JS_DOM_CHILD_ELEMENT']
 
-    def __init__(self, seed, starting_elements, html_depth, html_max_attr, canvas_size, js_block_size, function_count, file_type, media_folder="NONE"):
+    def __init__(self, starting_elements, html_depth, html_max_attr, canvas_size, js_block_size, function_count, file_type, media_folder="NONE"):
         self._logger = logging.getLogger(__name__)
-        self._html_fuzzer = Html5Fuzzer(int(seed), int(starting_elements), int(html_depth), int(html_max_attr), file_type)
+        self._html_fuzzer = Html5Fuzzer(int(starting_elements), int(html_depth), int(html_max_attr), file_type)
         self._canvas_fuzzer = CanvasFuzzer(int(canvas_size))
-        self._css_fuzzer = CssFuzzer(int(seed))
-        random.seed(int(seed)) if int(seed) != 0 else random.seed()
+        self._css_fuzzer = CssFuzzer()
         self._size = int(js_block_size)
         self._function_count = int(function_count)
         self._file_type = file_type
@@ -84,7 +83,7 @@ class JsFuzzer(Fuzzer):
 
     @classmethod
     def from_list(cls, params):
-        return cls(params[0], params[1], params[2], params[3], params[4], params[5], params[6], params[7], params[8])
+        return cls(params[0], params[1], params[2], params[3], params[4], params[5], params[6], params[7])
 
     @property
     def prng_state(self):
@@ -97,12 +96,12 @@ class JsFuzzer(Fuzzer):
         self.clear_folder(directory)
         media_file_names = []
         byte_mutation_fuzzers = []
-        if self._media_folder is not "NONE":
+        if self._media_folder != "NONE":
             media_folder_listing = os.listdir(self._media_folder)
             for i in range(8):
                 file_name = random.choice(media_folder_listing)
                 media_file_names.append(file_name)
-                byte_mutation_fuzzers.append(ByteMutation(self._media_folder + "/" + file_name, 5, 50, 0, file_name.split(".")[1]))
+                byte_mutation_fuzzers.append(ByteMutation(self._media_folder + "/" + file_name, 5, 50, file_name.split(".")[1]))
         for i in range(count):
             test_name = "/test" + str(i) if i > 9 else "/test0" + str(i)
             fuzzer_number = 0

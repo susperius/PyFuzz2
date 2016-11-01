@@ -31,10 +31,10 @@ class CssFuzzer(Fuzzer):
 
     @classmethod
     def from_list(cls, params):
-        pass
+        pass  # TODO: implement
 
     def create_testcases(self, count, directory):
-        pass
+        pass  # TODO: implement
 
     def fuzz(self):
         style = ""

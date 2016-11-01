@@ -2,6 +2,7 @@ import logging
 import gevent
 import gevent.monkey
 import time
+import os
 from gevent.queue import Queue
 from communication.beaconclient import BeaconClient
 from communication.nodelistener import Listener
@@ -12,8 +13,6 @@ from worker.reportworker import ReportWorker
 from model.config import ConfigParser
 from fuzzing.fuzzers import init_random_seed, check_for_prng_state, restore_prng_state, save_prng_state
 from reducing.reducers import get_reducer
-
-__author__ = 'susperius'
 
 gevent.monkey.patch_all()
 

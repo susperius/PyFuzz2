@@ -30,7 +30,7 @@ class BeaconWorker:
         data_unpacked = pickle.loads(task[1])
         node_name = data_unpacked[1][0]
         listener_port = data_unpacked[1][1]
-        ip, port = task[0]
+        ip = task[0]
         if ip not in self._node_dict.keys():
             self._node_dict[ip] = PyFuzz2Node(node_name, ip, listener_port)
             self._node_worker_queue.put([(ip, listener_port), MESSAGE_TYPES["GET_CONFIG"], ""])  # [(ip, port), GET_CONFIG, ""]

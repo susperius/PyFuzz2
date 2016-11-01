@@ -8,7 +8,7 @@ class BoldCol(Col):
 
 
 class NodeTable(Table):
-    name = LinkCol("NODE NAME", "node_detail", url_kwargs=dict(addr='addr'), attr='addr')
+    name = LinkCol("NODE NAME", "node_detail", url_kwargs=dict(addr='addr'), attr='name')
     addr = Col("NODE ADDRESS")
     crashes = Col("CRASHES")
     status = Col("STATUS")

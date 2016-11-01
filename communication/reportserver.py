@@ -28,7 +28,8 @@ class ReportServer(Server):
             fp.flush()
         sock.shutdown(socket.SHUT_WR)
         sock.close()
-        self._task_queue.put((address[0], report))
+        ip_addr = address[0] if "ffff" not in address[0] else address[0][7:]
+        self._task_queue.put((ip_addr, report))
 
     def __serve(self):
         self._logger.info("[ReportServer] initialized on port " + str(self._port) + " ...")

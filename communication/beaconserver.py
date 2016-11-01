@@ -21,7 +21,12 @@ class BeaconServer(Server):
         self._beacon_server.serve_forever()
 
     def __beacon_receiver(self, msg, address):
-        self._task_queue.put([address, msg])
+        if "ffff" in address[0]:
+            ipv4_addr = address[0][7:]
+            port = address[1]
+            self._task_queue.put([(ipv4_addr, port), msg])
+        else:
+            self._task_queue.put([address, msg])
 
     def start_server(self):
         if not self._serving:

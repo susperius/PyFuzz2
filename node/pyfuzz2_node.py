@@ -11,7 +11,7 @@ from worker.fuzzingworker import FuzzingWorker
 from worker.reducingworker import ReducingWorker
 from worker.reportworker import ReportWorker
 from model.config import ConfigParser
-from fuzzing.fuzzers import init_random_seed, check_for_prng_state, restore_prng_state, save_prng_state
+from fuzzing.fuzzers import init_random_seed, check_for_prng_state, restore_prng_state, save_prng_state, get_fuzzer
 from reducing.reducers import get_reducer
 
 gevent.monkey.patch_all()

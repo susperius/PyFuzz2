@@ -159,7 +159,8 @@ class BrowserFuzzer(Fuzzer):
         else:
             obj_type = random.choice(RETURN_TYPES[return_type])
             js_obj = random.choice(self._js_objects[obj_type])
-        method = random.choice(js_obj.methods_and_properties_by_return_type()[return_type])
+        print js_obj
+        method = random.choice(js_obj.methods_and_properties_by_return_type[return_type])
         if method['parameters'] is not None:
             param_list = []
             for param in method['parameters']:

@@ -9,7 +9,8 @@ from node.model.config import ConfigParser
 from node.model.message_types import MESSAGE_TYPES
 from model.database import SEPARATOR
 
-#  TODO: Implement the stats and about sites
+
+#  TODO: Implement about sites
 class WebInterface:
     def __init__(self, web_queue, node_dict, crash_dict):
         self._inc_confs = 0  # keep track of the actual open in and out going config files

@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block content %}
+    <br>
+    {% for item in programs.items() %}
+        <h2>{{ item[0] }}</h2>
+        {{ item[1] }}
+        <br><br>
+    {% endfor %}
+{% endblock %}

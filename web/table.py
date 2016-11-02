@@ -18,3 +18,14 @@ class NodeTable(Table):
 class SingleNodeTable(Table):
     descr = BoldCol("")
     value = Col("")
+
+
+class CrashTable(Table):
+    maj_hash = Col("MAJOR HASH")
+    min_hash = Col("MINOR HASH")
+    descr = Col("DESCRIPTION")
+    nodes = Col("NODES")
+    classification = Col("CLASSIFICTION")
+    download = LinkCol("DOWNLOAD", "download_crash", url_kwargs=dict(program='program', maj_hash='maj_hash',
+                                                                     descr='descr'),
+                       attr='download')

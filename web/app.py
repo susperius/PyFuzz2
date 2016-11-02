@@ -1,11 +1,13 @@
-from flask import Flask, render_template, send_file, abort, request, flash
-from table import SingleNodeTable, NodeTable
+import os
+from zipfile import ZipFile
+from flask import Flask, render_template, send_file, abort, request
+from table import SingleNodeTable, NodeTable, CrashTable
 from gevent.queue import Queue
 from model.web import WEB_QUEUE_TASKS
 from model.database import DB_TYPES
 from node.model.config import ConfigParser
 from node.model.message_types import MESSAGE_TYPES
-
+from model.database import SEPARATOR
 
 #  TODO: Implement the stats and about sites
 class WebInterface:
@@ -25,6 +27,8 @@ class WebInterface:
         self.app.add_url_rule("/node/<string:addr>/upload", 'node_set_config', self.node_set_config, methods=['POST'])
         self.app.add_url_rule("/node/<string:addr>/reboot", 'node_reboot', self.node_reboot)
         self.app.add_url_rule("/node/<string:addr>/delete", 'node_delete', self.node_delete)
+        self.app.add_url_rule("/crash/<string:program>/<string:descr>/<string:maj_hash>/download", 'download_crash',
+                              self.download_crash)
 
     def index_site(self):
         table_items = []
@@ -35,7 +39,19 @@ class WebInterface:
         return render_template("main.html", section_title="OVERVIEW", body_space=node_table)
 
     def stats_site(self):
-        return render_template("main.html", section_title="STATS")
+        programs = {}
+        for crashes in self._crash_dict.items():
+            to_add = crashes[1].stats
+            to_add['download'] = "click"
+            to_add['program'] = crashes[1].program
+            if crashes[1].program not in programs.keys():
+                programs[crashes[1].program] = [to_add]
+            else:
+                programs[crashes[1].program].append(to_add)
+        for key in programs.keys():
+            programs[key] = CrashTable(programs[key])
+
+        return render_template("stats.html", section_title="STATS", programs=programs)
 
     def about_site(self):
         return render_template("main.html", section_title="ABOUT")
@@ -135,6 +151,25 @@ class WebInterface:
         self._web_queue.put((WEB_QUEUE_TASKS['TO_DB'], (DB_TYPES['DELETE_NODE'], addr)))
         del(self._node_dict[addr])
         return self.index_site()
+
+    def download_crash(self, program, maj_hash, descr):
+        if not self.__does_crash_exist(program, maj_hash, descr):
+            abort(404)
+        path = "results/" + program + "/" + descr + "/" + maj_hash + "/"
+        zip_name = "CRASH-" + program + "-" + maj_hash + ".zip"
+        upload_file = ZipFile("web/tmp/" + zip_name, "w")
+        for root, dirs, files in os.walk(path):
+            for act_file in files:
+                upload_file.write(os.path.join(root, act_file))
+        upload_file.close()
+        return send_file("tmp/" + zip_name)
+
+    def __does_crash_exist(self, program, maj_hash, descr):
+        key = program + SEPARATOR + maj_hash
+        if key in self._crash_dict.keys():
+            if self._crash_dict[key].short_description == descr:
+                return True
+        return False
 
 if __name__ == "__main__":
     from model.pyfuzz2_node import PyFuzz2Node

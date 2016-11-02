@@ -53,6 +53,5 @@ class Crash:
 
     @property
     def stats(self):
-        #["Program", "Major Hash", "Minor Hash", "Short Description", "Classification", "Nodes", "Count"]
-        return [str(self.program), str(self.major_hash), str(self.minor_hash), str(self.short_description),
-                str(self.classification), self.node_addresses, str(self.count)]
+        return { 'maj_hash': self.major_hash, 'min_hash': self.minor_hash,
+                'descr': self.short_description, 'nodes': len(self.node_addresses), 'classification': self.classification}

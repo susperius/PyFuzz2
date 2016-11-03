@@ -19,9 +19,9 @@ class BrowserFuzzer(Fuzzer):
 
     def __init__(self, html_elements, max_html_depth, max_html_attr, canvas_size, canvas_type,
                  js_function_count, js_function_size, file_type):
-        self._html_fuzzer = Html5Fuzzer(0, html_elements, max_html_depth, max_html_attr, file_type)
+        self._html_fuzzer = Html5Fuzzer(html_elements, max_html_depth, max_html_attr, file_type)
         self._canvas_fuzzer = CanvasFuzzer(canvas_size, canvas_type)
-        self._css_fuzzer = CssFuzzer(0)
+        self._css_fuzzer = CssFuzzer()
         self._js_function_count = js_function_count
         self._js_function_size = js_function_size
         self._html_page = HtmlPage()
@@ -38,6 +38,7 @@ class BrowserFuzzer(Fuzzer):
         self._js_functions = []
         self._js_objects = {}
         self.__init_js_objects_dict()
+        self._css_selector = []
 
     def set_seed(self, seed):
         pass
@@ -67,7 +68,9 @@ class BrowserFuzzer(Fuzzer):
         js_code = ""
         self._html_page = self._html_fuzzer.fuzz()
         self._css_fuzzer.set_options(self._html_page.get_elements_by_html_tag().keys(),
-                                     self._html_page.get_css_class_names())
+                                     self._html_page.get_css_class_names(),
+                                     self._html_page.get_attribs(),
+                                     self._html_page.get_element_ids())
         css_code = self._css_fuzzer.fuzz()
         for canvas_id in self._html_page.get_elements_by_html_tag()['canvas']:
             self._canvas_fuzzer.set_canvas_id(canvas_id)
@@ -86,10 +89,10 @@ class BrowserFuzzer(Fuzzer):
             code += "\t" + var_name + " = " + JsDocument.getElementById(html_id) + ";\n"
             self._js_objects['JS_DOM_ELEMENT'].append(JsDomElement(var_name, element['tag'], element['children']))
         for i in range(0, 10):
-            code += self.__create_js_obj("JS_STRING")[0] + ";\n"
-            code += self.__create_js_obj("JS_NUMBER")[0] + ";\n"
-            code += self.__create_js_obj("JS_ARRAY")[0] + ";\n"
-            code += self.__create_js_obj("JS_DOM_ELEMENT")[0] + ";\n"
+            code += "\t" + self.__create_js_obj("JS_STRING")[0] + ";\n"
+            code += "\t" + self.__create_js_obj("JS_NUMBER")[0] + ";\n"
+            code += "\t" + self.__create_js_obj("JS_ARRAY")[0] + ";\n"
+            code += "\t" + self.__create_js_obj("JS_DOM_ELEMENT")[0] + ";\n"
         code += self.CALLING_BLOCK_COMMENT + "\n"
         code += "}\n"
         return code
@@ -159,7 +162,6 @@ class BrowserFuzzer(Fuzzer):
         else:
             obj_type = random.choice(RETURN_TYPES[return_type])
             js_obj = random.choice(self._js_objects[obj_type])
-        print js_obj
         method = random.choice(js_obj.methods_and_properties_by_return_type[return_type])
         if method['parameters'] is not None:
             param_list = []

@@ -91,3 +91,11 @@ CSS_STYLES = [['align-content', 'stretch', 'center', 'flex-start', 'flex-end', '
                   ['width', '100pz', '100%', 'auto'],
                   ['word-spacing', '2px', '10px'],
                   ['z-index', '1']]
+
+CSS_SELECTOR_ELEMENT_CONJUNCTIONS = [',', ' ', '+', '~', '>']
+
+CSS_SELECTOR_STATIC_MODIFIERS = [":active", "::after", "::before", ":checked", ":disabled", ":empty", ":enabled",
+                                 ":first-child", "::first-letter", "::first-line", ":first-of-type", ":focus",
+                                 ":hover", ":in-range", ":invalid", ":last-child", ":last-of-type", ":link",
+                                 ":only-of-type", ":only-child", ":optional", ":out-of-range", ":read-only",
+                                 ":read-write", ":required", ":root", "::selection", ":target", ":valid", ":visited"]

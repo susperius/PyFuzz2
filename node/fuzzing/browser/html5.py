@@ -197,6 +197,7 @@ class Html5Fuzzer(Fuzzer):
         while len(attribs) < attr_count:
             attribs.add(random.choice(attribs_avail.keys()))
         for attr in attribs:
+            self._html_page.add_attrib(attr)
             if attribs_avail[attr] is None:  # Attributes without value
                 open_tag += " " + attr
             else:

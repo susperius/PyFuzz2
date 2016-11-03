@@ -9,6 +9,7 @@ class HtmlPage:
         self._raw_html = ""
         self._css_class_names = []
         self._elements_by_tag = {}
+        self._attribs = set()
 
     def set_raw_html(self, html):
         self._raw_html = html
@@ -43,6 +44,12 @@ class HtmlPage:
 
     def get_css_class_names(self):
         return self._css_class_names
+
+    def add_attrib(self, attr):
+        self._attribs.add(attr)
+
+    def get_attribs(self):
+        return self._attribs
 
     @staticmethod
     def __new_element(tag):

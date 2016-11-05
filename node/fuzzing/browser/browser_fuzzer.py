@@ -1,4 +1,5 @@
 import random
+from sys import maxint
 from html5 import Html5Fuzzer
 from canvas import CanvasFuzzer
 from css import CssFuzzer
@@ -9,6 +10,7 @@ from model.JsDocument import JsDocument
 from model.JsDomElement import JsDomElement
 from model.values import FuzzValues
 from model.HtmlObjects import HTML5_OBJECTS
+from model.DomObjectTypes import DomObjectTypes
 
 
 class BrowserFuzzer(Fuzzer):
@@ -29,6 +31,8 @@ class BrowserFuzzer(Fuzzer):
         self._js_objects = {}
         self._file_type = file_type
         self._method_call_depth = 0
+        self._js_event_listener = []
+        self._in_operation = False
 
     def __init_js_objects_dict(self):
         for obj_type in JS_OBJECTS:
@@ -119,21 +123,22 @@ class BrowserFuzzer(Fuzzer):
             self._js_objects[js_obj_type].append(js_dom_element)
             return js_dom_element.newElement(), js_dom_element
 
-    def __build_function(self):
+    def __build_function(self, name=None):
         tab = "\t"
-        func_name = "func_" + str(len(self._js_functions))
+        func_name = "func_" + str(len(self._js_functions)) if name is None else name
         self._js_functions.append(func_name)
         code = "function " + func_name + "(){\n"
         for i in range(self._js_function_size):
             #  Assignment (<10), Method call (<20), Loop(<23), if cond(<26)
             selection = random.randint(0, 26)
-            if selection < 20:
-                code += tab + (self.__build_assignment() if selection < 15 else self.__build_method_call()) + ";\n"
+            if selection < 24:
+                code += tab + "try{ "
+                code += (self.__build_assignment() if selection < 15 else self.__build_method_call()) + "; } catch() {}\n"
                 self._method_call_depth = 0
-            elif selection < 23:
+            elif selection < 27:
                 code += tab + self.__build_loop()
-            elif selection < 26:
-                code += tab + self.__build_if_cond()
+            '''elif selection < 26:
+                code += tab + self.__build_if_cond()'''
         code += "}\n"
         return code
 
@@ -147,22 +152,30 @@ class BrowserFuzzer(Fuzzer):
             temp_code, js_obj = self.__create_js_obj(obj_type)
             code += temp_code + ";\n"
         code += js_obj.name + " = "
-        code += self.__get_param(obj_type)
+        code += self.__get_param(obj_type) if obj_type != 'JS_ARRAY' else (self.__get_param(obj_type)).name
         if obj_type in VALID_OPERATORS.keys():
+            self._in_operation = True
             for i in range(random.randint(1, 30)):
                 operator = random.choice(VALID_OPERATORS[obj_type])
                 code += operator + " " + self.__get_param(obj_type)
-        code += ";\n"
+            self._in_operation = False
+        code += ";"
         return code
 
     def __build_method_call(self, return_type=None):
         code = ""
         if return_type is None:
             js_obj = random.choice(self._js_objects['JS_DOM_ELEMENT'])
+        elif return_type not in RETURN_TYPES.keys():
+            return self.__get_constant_param(return_type)
         else:
+            return_type = return_type.replace("*", "") if "*" in return_type else return_type
             obj_type = random.choice(RETURN_TYPES[return_type])
             js_obj = random.choice(self._js_objects[obj_type])
-        method = random.choice(js_obj.methods_and_properties_by_return_type[return_type])
+        if return_type != 'JS_NUMBER':
+            method = random.choice(js_obj.methods_and_properties_by_return_type[return_type])
+        else:
+            method = random.choice(js_obj.methods_and_properties_by_return_type[random.choice(JS_NUMBERS)])
         if method['parameters'] is not None:
             param_list = []
             for param in method['parameters']:
@@ -172,9 +185,28 @@ class BrowserFuzzer(Fuzzer):
             code += method['method']()
         return code
 
+    def __build_event_listener(self):
+        pass  # TODO: Create event listener
+
     def __build_loop(self):
-        self._method_call_depth = 0  # after build assignment
-        return "loop"
+        code = "for(i="
+        direction = random.randint(1, 2)
+        length = random.randint(5, 10000)
+        i = random.randint(0, 10000)
+        i = i - length if direction == 1 else i + length
+        code += str(i) + "; i"
+        code += "<=" if direction == 1 else "=>"
+        code += str(length) + "; i"
+        code += "++" if direction == 1 else "--"
+        code += "){\n"
+        for i in range(1, 30):
+            selection = random.randint(1, 20)
+            code += "\t\t" + "try{ "
+            code += self.__build_assignment() if selection < 15 else self.__build_method_call() + ";"
+            code += " } catch() {}\n"
+            self._method_call_depth = 0  # after build assignment
+        code += "\t}\n"
+        return code
 
     def __build_if_cond(self):
         self._method_call_depth = 0  # after build assignment
@@ -182,23 +214,29 @@ class BrowserFuzzer(Fuzzer):
 
     def __get_param(self, param_type):
         # TODO: decide if a constant value or a method call or an already existent value is chosen
-        selection = random.randint(0, 10)
+        selection = random.randint(1, 10)
         code = ""
+        if "*" in param_type and self._in_operation:
+            return None
+        elif "*" in param_type:
+            param_type = param_type.replace("*", "")
         # TODO: handle optional; catch non return types and just give them fixed val
         if param_type == 'JS_ARRAY_FUNCTION':
             pass
+        elif param_type == 'JS_ARRAY':
+            return random.choice(self._js_objects['JS_ARRAY'])
         else:
-            if selection < 6:  # method
+            if selection < 7 and param_type in RETURN_TYPES.keys():  # method
                 if self._method_call_depth < 10:
                     self._method_call_depth += 1
                     code += self.__build_method_call(param_type)
                 else:
                     code += self.__get_constant_param(param_type)
-            elif selection < 8:  # constant
-                code += self.__get_constant_param(param_type)
-            else:  # existing element
-                element = random.choice(self._js_objects[param_type])
+            elif selection < 8 and param_type in JS_OBJECTS:  # existing element
+                element = random.choice(self._js_objects[param_type]) if param_type not in JS_NUMBERS else random.choice(self._js_objects['JS_NUMBER'])
                 code += element.name
+            else:  # constant
+                code += self.__get_constant_param(param_type)
         return code
 
     def __get_constant_param(self, param_type):
@@ -211,4 +249,53 @@ class BrowserFuzzer(Fuzzer):
         elif param_type == 'JS_ARRAY' or param_type == 'JS_DOM_ELEMENT':
             obj = random.choice(self._js_objects[param_type])
             return obj.name
+        elif param_type == 'CSS_SELECTOR':
+            return self._css_fuzzer.get_css_selector()
+        elif param_type == 'CSS_CLASS':
+            return random.choice(self._html_page.get_css_class_names())
+        elif param_type == 'HTML_ATTR':
+            return random.choice(self._html_page.get_attribs())
+        elif param_type == 'HTML_ATTR_VAL':
+            return random.choice(FuzzValues.INTERESTING_VALUES)  # TODO: make an attr test intersting value list
+        elif param_type == 'JS_OBJECT':
+            obj_type = random.choice(JS_OBJECTS)
+            js_obj = random.choice(self._js_objects[obj_type])
+            return random.choice(js_obj.name)
+        elif param_type == 'JS_EVENT_LISTENER':
+            choice = random.randint(1, 10)
+            if choice < 5 and self._js_event_listener:
+                return random.choice(self._js_event_listener)
+            else:
+                listener_name = "event_listener_" + str(len(self._js_event_listener))
+                self._js_event_listener.append(listener_name)
+                return listener_name
+        elif param_type == 'EVENT':
+            return random.choice(DomObjectTypes.DOM_EVENTS)
+        elif param_type == 'JS_DOM_CHILD_ELEMENT':
+            js_obj = random.choice(self._js_objects['JS_DOM_ELEMENT'])
+            while not js_obj.get_children():
+                js_obj = random.choice(self._js_objects['JS_DOM_ELEMENT'])
+            return random.choice(js_obj.get_children())
+        elif param_type == 'JS_NUMBER':
+            choice = random.randint(1, 4)
+            if choice == 1:  # INT
+                return str(random.randint(-1 * maxint, maxint))
+            elif choice == 2:  # FLOAT
+                return str(random.randint(-1 * maxint, maxint) + random.random())
+            elif choice == 3:  # EXP_FLOAT
+                return str(random.randint(-32000, 32000) + random.random()) + "e" + random.choice(['+', '-']) + str(random.randint(1, 1000))
+            elif choice == 4:  # JS_NUMBER
+                js_num = random.choice(self._js_objects['JS_NUMBER'])
+                return js_num.name
+        elif param_type == 'UNICODE_VALUE_LIST':
+            length = random.randint(1, 100)
+            unicode_list_str = ""
+            for i in range(0, length):
+                unicode_list_str += str(random.randint(1, 65535))
+            return unicode_list_str
+        elif param_type == 'REGEX':  # TODO: implement regex construction
+            return "/ab+c/"
+        else:
+            print param_type
+            return ""
 

@@ -49,7 +49,7 @@ class HtmlPage:
         self._attribs.add(attr)
 
     def get_attribs(self):
-        return self._attribs
+        return list(self._attribs)
 
     @staticmethod
     def __new_element(tag):

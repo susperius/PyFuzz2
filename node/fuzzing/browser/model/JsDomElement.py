@@ -19,7 +19,7 @@ class JsDomElement(JsObject):
                                              'cloneNode': {'ret_val': 'JS_DOM_ELEMENT', 'parameters': ['BOOL'], 'method': self.cloneNode}, #  TODO: parameters
                                              'compareDocumentPosition': {'ret_val': 'INT', 'parameters': ['JS_DOM_ELEMENT'], 'method': self.compareDocumentPosition},
                                              'focus': {'ret_val': None, 'parameters': None, 'method': self.focus},
-                                             'getAttribute': {'ret_val': 'JS_STRING', 'parameters': ['HTML_ATTR'], 'method': self.getAttribute},
+                                             'getAttribute': {'ret_val': 'HTML_ATTR_VAL', 'parameters': ['HTML_ATTR'], 'method': self.getAttribute},
                                              'getAttributeNode': {'ret_val': 'JS_ATTR', 'parameters': ['HTML_ATTR'], 'method': self.getAttributeNode},
                                              'getElementsByClassName': {'ret_val': 'JS_NODE_LIST', 'parameters': ['CLASS_NAME'], 'method': self.getElementsByClassName},
                                              'getElementsByTagName': {'ret_val': 'JS_NODE_LIST', 'parameters': ['HTML_TAG'], 'method': self.getElementsByTagName},

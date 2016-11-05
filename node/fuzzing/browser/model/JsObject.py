@@ -10,7 +10,9 @@ RETURN_TYPES = {'JS_STRING': JS_OBJECTS, 'INT': ['JS_STRING', 'JS_NUMBER', 'JS_A
                 'JS_ATTR': ['JS_DOM_ELEMENT'], 'JS_NODE_LIST': ['JS_DOM_ELEMENT'], 'JS_NODE_MAP': ['JS_DOM_ELEMENT'],
                 'TEXT_DIRECTION': ['JS_DOM_ELEMENT'], 'JS_IDENTIFIER': ['JS_DOM_ELEMENT'],
                 'HTML_CODE': ['JS_DOM_ELEMENT'], 'HTML_TAG': ['JS_DOM_ELEMENT'], 'CSS_STYLE': ['JS_DOM_ELEMENT'],
-                'NAMESPACE_URI': ['JS_DOM_ELEMENT']}
+                'NAMESPACE_URI': ['JS_DOM_ELEMENT'], 'JS_NUMBER': ['JS_NUMBER'], 'HTML_ATTR_VAL': ['JS_DOM_ELEMENT']}
+
+JS_NUMBERS = ['INT', 'FLOAT', 'EXP_FLOAT']
 
 VALID_OPERATORS = {'JS_STRING': ['+'],
                    'INT': ['+', '-', '*', '/'],
@@ -165,7 +167,7 @@ class JsNumber(JsObject):
 
     def __init__(self, name):
         JsObject.__init__(self, name)
-        js_number_methods = {'toExponential': {'ret_val': 'EXP_FLOAT', 'parameters': ['NUMBER'], 'method': self.toExponential},
+        js_number_methods = {'toExponential': {'ret_val': 'EXP_FLOAT', 'parameters': ['JS_NUMBER'], 'method': self.toExponential},
                              'toFixed': {'ret_val': 'JS_STRING', 'parameters': ['INT'], 'method': self.toFixed},
                              'toPrecision': {'ret_val': 'FLOAT', 'parameters': ['INT'], 'method': self.toPrecision},
                              'valueOf': {'ret_val': 'INT', 'parameters': None, 'method': self.valueOf}

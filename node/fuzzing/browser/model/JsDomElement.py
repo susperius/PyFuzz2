@@ -209,7 +209,7 @@ class JsDomElement(JsObject):
 
     def setAttribute(self, attr_name, attr_value):
         self.__attributes[attr_name] = attr_value
-        return self._name + ".setAttribute('" + attr_name + "', '" + attr_value + "')"
+        return self._name + ".setAttribute('" + attr_name + "', " + attr_value + ")"
 
     def setAttributeNode(self, attr):
         return self._name + ".setAtrributeNode(" + attr + ")"

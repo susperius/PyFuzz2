@@ -91,7 +91,7 @@ class JsString(JsObject):
         self._methods_and_properties.update(js_string_methods)
 
     def newString(self, value):
-        return self._name + " = \"" + str(value) + "\""
+        return self._name + " = " + str(value)
 
     def charAt(self, pos):
         return self._name + ".charAt(" + str(pos) + ")"
@@ -100,7 +100,7 @@ class JsString(JsObject):
         return self._name + ".charCodeAt(" + str(pos) + ")"
 
     def concat(self, string):
-        return self._name + ".concat(\"" + string + "\")"
+        return self._name + ".concat(" + string + ")"
 
     def fromCharCode(self, unicode_value):
         ret = self._name + ".fromCharCode("
@@ -110,28 +110,28 @@ class JsString(JsObject):
         return ret
 
     def indexOf(self, string):
-        return self._name + ".indexOf(\"" + string + "\")"
+        return self._name + ".indexOf(" + string + ")"
 
     def lastIndexOf(self, string):
-        return self._name + ".lastIndexOf(\"" + string + "\")"
+        return self._name + ".lastIndexOf(" + string + ")"
 
     def localeCompare(self, string):
-        return self._name + ".localeCompare(\"" + string + "\")"
+        return self._name + ".localeCompare(" + string + ")"
 
     def match(self, regex_str):
-        return self._name + ".match(\"" + regex_str + "\")"  # needs regex
+        return self._name + ".match(" + regex_str + ")"  # needs regex
 
     def replace(self, search_str, replace_str):
-        return self._name + ".replace(\"" + search_str + "\", \"" + replace_str + "\")"
+        return self._name + ".replace(" + search_str + ", " + replace_str + ")"
 
     def search(self, string):
-        return self._name + ".search(\"" + string + "\")"
+        return self._name + ".search(" + string + ")"
 
     def slice(self, start_pos, end_pos):
-        return self._name + ".slice(\"" + str(start_pos) + "," + str(end_pos) + "\")"
+        return self._name + ".slice(" + str(start_pos) + "," + str(end_pos) + ")"
 
     def split(self, string):
-        return self._name + ".split(\"" + string + "\")"
+        return self._name + ".split(" + string + ")"
 
     def substr(self, start_pos, count):
         return self._name + ".substr(" + str(start_pos) + ", " + str(count) + ")"

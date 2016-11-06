@@ -21,11 +21,11 @@ class BrowserFuzzer(Fuzzer):
 
     def __init__(self, html_elements, max_html_depth, max_html_attr, canvas_size, canvas_type,
                  js_function_count, js_function_size, file_type):
-        self._html_fuzzer = Html5Fuzzer(html_elements, max_html_depth, max_html_attr, file_type)
-        self._canvas_fuzzer = CanvasFuzzer(canvas_size, canvas_type)
+        self._html_fuzzer = Html5Fuzzer(int(html_elements), int(max_html_depth), int(max_html_attr), file_type)
+        self._canvas_fuzzer = CanvasFuzzer(int(canvas_size), canvas_type)
         self._css_fuzzer = CssFuzzer()
-        self._js_function_count = js_function_count
-        self._js_function_size = js_function_size
+        self._js_function_count = int(js_function_count)
+        self._js_function_size = int(js_function_size)
         self._html_page = HtmlPage()
         self._js_functions = []
         self._js_objects = {}
@@ -33,6 +33,7 @@ class BrowserFuzzer(Fuzzer):
         self._method_call_depth = 0
         self._js_event_listener = []
         self._in_operation = False
+        self._no_more_listeners = False
 
     def __init_js_objects_dict(self):
         for obj_type in JS_OBJECTS:
@@ -43,6 +44,10 @@ class BrowserFuzzer(Fuzzer):
         self._js_objects = {}
         self.__init_js_objects_dict()
         self._css_selector = []
+        self._method_call_depth = 0
+        self._js_event_listener = []
+        self._in_operation = False
+        self._no_more_listeners = False
 
     def set_seed(self, seed):
         pass
@@ -50,6 +55,7 @@ class BrowserFuzzer(Fuzzer):
     def prng_state(self):
         pass
 
+    @property
     def file_type(self):
         return self._file_type
 
@@ -58,11 +64,19 @@ class BrowserFuzzer(Fuzzer):
         Fuzzer.clear_folder(folder)
 
     def create_testcases(self, count, directory):
-        pass
+        self.clear_folder(directory)
+        for i in range(count):
+            test_name = "/test" + str(i) if i > 9 else "/test0" + str(i)
+            with open(directory + test_name + "." + self.file_type, 'wb+') as html_file, open(directory + test_name + ".css", 'wb+') as css_file:
+                fuzz = self.fuzz()
+                html_file.write(fuzz[0])
+                css_file.write(fuzz[1])
+
+
 
     @classmethod
     def from_list(cls, params):
-        pass
+        return cls(params[0], params[1], params[2], params[3], params[4], params[5], params[6], params[7])
 
     def set_state(self, state):
         pass
@@ -83,7 +97,19 @@ class BrowserFuzzer(Fuzzer):
         js_code += self.__create_startup()
         for i in range(self._js_function_count):
             js_code += self.__build_function()
-        return js_code, css_code
+        self._no_more_listeners = True
+        for name in self._js_event_listener:
+            js_code += self.__build_function(name)
+        calling_block = ""
+        for name in self._js_functions:
+            choice = random.randint(1, 10)
+            if choice < 8:
+                calling_block += "\t" + name + "();\n"
+            else:
+                calling_block += "\twindow.setTimeout(" + name + "(), 10);\n"
+        js_code = js_code.replace(self.CALLING_BLOCK_COMMENT, calling_block)
+        whole_page = self._html_page.get_raw_html().replace("SCRIPT_BODY", js_code)
+        return whole_page, css_code
 
     def __create_startup(self):
         code = "function startup(){\n"
@@ -105,18 +131,20 @@ class BrowserFuzzer(Fuzzer):
         if js_obj_type == 'JS_STRING':
             js_string = JsString("str_" + str(len(self._js_objects[js_obj_type])))
             self._js_objects[js_obj_type].append(js_string)
-            return js_string.newString(random.choice(FuzzValues.STRINGS)), js_string
+            return js_string.newString("\"" + random.choice(FuzzValues.STRINGS) + "\""), js_string
         elif js_obj_type == 'JS_NUMBER':
             js_number = JsNumber("num_" + str(len(self._js_objects[js_obj_type])))
             self._js_objects[js_obj_type].append(js_number)
             return js_number.newNumber(random.choice(FuzzValues.INTS)), js_number
         elif js_obj_type == 'JS_ARRAY':
             js_array = JsArray("array_" + str(len(self._js_objects[js_obj_type])))
-            self._js_objects[js_obj_type].append(js_array)
             array_content = []
             array_cont_type = random.choice(JS_OBJECTS)
+            if not self._js_objects[array_cont_type]:
+                array_cont_type = random.choice(['JS_STRING', 'JS_NUMBER'])
             for i in range(0, 10):
                 array_content.append(random.choice(self._js_objects[array_cont_type]))
+            self._js_objects[js_obj_type].append(js_array)
             return js_array.newArray(array_content, array_cont_type), js_array
         elif js_obj_type == 'JS_DOM_ELEMENT':
             js_dom_element = JsDomElement("elem_" + str(len(self._js_objects[js_obj_type])), random.choice(HTML5_OBJECTS.keys()))
@@ -125,20 +153,24 @@ class BrowserFuzzer(Fuzzer):
 
     def __build_function(self, name=None):
         tab = "\t"
-        func_name = "func_" + str(len(self._js_functions)) if name is None else name
-        self._js_functions.append(func_name)
+        i = 0
+        if name is None:
+            func_name = "func_" + str(len(self._js_functions))
+            self._js_functions.append(func_name)
+        else:
+            func_name = name
         code = "function " + func_name + "(){\n"
-        for i in range(self._js_function_size):
-            #  Assignment (<10), Method call (<20), Loop(<23), if cond(<26)
+        while i < self._js_function_size:
+            #  Assignment (<10), Method call (<24), Loop(<27)
             selection = random.randint(0, 26)
             if selection < 24:
                 code += tab + "try{ "
-                code += (self.__build_assignment() if selection < 15 else self.__build_method_call()) + "; } catch() {}\n"
+                code += (self.__build_assignment() if selection < 15 else self.__build_method_call()) + "; } catch(err) {}\n"
                 self._method_call_depth = 0
             elif selection < 27:
-                code += tab + self.__build_loop()
-            '''elif selection < 26:
-                code += tab + self.__build_if_cond()'''
+                loop_code , length = self.__build_loop()
+                code += tab + loop_code
+                i += length
         code += "}\n"
         return code
 
@@ -178,8 +210,9 @@ class BrowserFuzzer(Fuzzer):
             method = random.choice(js_obj.methods_and_properties_by_return_type[random.choice(JS_NUMBERS)])
         if method['parameters'] is not None:
             param_list = []
-            for param in method['parameters']:
-                param_list.append(self.__get_param(param))
+            for param_type in method['parameters']:
+                parameter = self.__get_param(param_type)
+                param_list.append(parameter)
             code += method['method'](*param_list)
         else:
             code += method['method']()
@@ -191,22 +224,25 @@ class BrowserFuzzer(Fuzzer):
     def __build_loop(self):
         code = "for(i="
         direction = random.randint(1, 2)
-        length = random.randint(5, 10000)
-        i = random.randint(0, 10000)
+        length = random.randint(5, 100)
+        i = random.randint(0, 1000)
         i = i - length if direction == 1 else i + length
         code += str(i) + "; i"
-        code += "<=" if direction == 1 else "=>"
+        code += "<=" if direction == 1 else ">="
         code += str(length) + "; i"
         code += "++" if direction == 1 else "--"
         code += "){\n"
-        for i in range(1, 30):
+        body_length = random.randint(10, 30)
+        i = 0
+        while i < body_length:
             selection = random.randint(1, 20)
             code += "\t\t" + "try{ "
             code += self.__build_assignment() if selection < 15 else self.__build_method_call() + ";"
-            code += " } catch() {}\n"
+            code += " } catch(err) {}\n"
             self._method_call_depth = 0  # after build assignment
+            i += 1
         code += "\t}\n"
-        return code
+        return code, i
 
     def __build_if_cond(self):
         self._method_call_depth = 0  # after build assignment
@@ -256,14 +292,15 @@ class BrowserFuzzer(Fuzzer):
         elif param_type == 'HTML_ATTR':
             return random.choice(self._html_page.get_attribs())
         elif param_type == 'HTML_ATTR_VAL':
-            return random.choice(FuzzValues.INTERESTING_VALUES)  # TODO: make an attr test intersting value list
+            html_attr_val = "\"" + random.choice(FuzzValues.INTERESTING_VALUES) + "\""
+            return html_attr_val  # TODO: make an attr test intersting value list
         elif param_type == 'JS_OBJECT':
             obj_type = random.choice(JS_OBJECTS)
             js_obj = random.choice(self._js_objects[obj_type])
             return random.choice(js_obj.name)
         elif param_type == 'JS_EVENT_LISTENER':
             choice = random.randint(1, 10)
-            if choice < 5 and self._js_event_listener:
+            if choice < 5 and self._js_event_listener or self._no_more_listeners:
                 return random.choice(self._js_event_listener)
             else:
                 listener_name = "event_listener_" + str(len(self._js_event_listener))

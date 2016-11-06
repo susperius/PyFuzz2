@@ -7,7 +7,7 @@
         <program name="Chrome"  path="C:\Program Files\Google\Chrome\Application\chrome.exe" dbg_child="True" sleep_time="10" use_http="True" />
     </programs>
     <reducer type="js_reducer" path="testcases/" file_type="html"/>
-    <fuzzer type="browser_fuzzer" html_elements="100" max_html_depth="20" max_html_attr="15" canvas_size="500" canvas_type="2d" js_function_count="5" js_function_size="80" file_type="html" seed="0"/>
+    <fuzzer type="browser_fuzzer" html_elements="30" max_html_depth="20" max_html_attr="15" canvas_size="250" canvas_type="2d" js_function_count="5" js_function_size="80" file_type="html" seed="0"/>
 </PyFuzz2Node>
 
 

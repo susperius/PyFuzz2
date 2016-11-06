@@ -1,6 +1,8 @@
 # coding=utf8
+import random
 from JsObject import JsObject
 from JsDocument import JsDocument
+from values import FuzzValues
 
 
 class JsDomElement(JsObject):
@@ -104,6 +106,54 @@ class JsDomElement(JsObject):
     @property
     def attributes(self):
         return self.__attributes
+
+    def get_event_trigger(self, event):
+        if event == 'click':
+            return self.click()
+        elif event == 'error':
+            code = "var error_event  = new ErrorEvent();\n"
+            code += self.dispatchEvent("error_event") + ";\n"
+            return code
+        elif event == 'load':
+            return ""
+        elif event == 'scroll':
+            return self.scrollTop() + ";\n"
+        elif event == 'resize':
+            return ""
+        elif event == 'change':
+            return ""
+        elif event == 'focus':
+            return self.focus() + ";\n"
+        elif event == 'focusin':
+            return self.focus() + ";\n"
+        elif event == 'blur':
+            return self.blur() + ";\n"
+        elif event == 'select':
+            return self.select() + ";\n"
+        elif event == 'pageshow':
+            return ""
+        elif event == 'unload':
+            return ""
+        elif event == 'beforeunload':
+            return ""
+        elif event == 'DOMAttrModified':
+            return ""  #  self.setAttribute(random.choice(self.attributes), random.choice(FuzzValues.INTERESTING_VALUES)) + ";\n"
+        elif event == 'DOMAttributeNameChanged':
+            return ""
+        elif event == 'DOMCharacterDataModified':
+            return ""
+        elif event == 'DOMElementNameChanged':
+            return self.setAttribute("name", random.choice(FuzzValues.STRINGS)) + ";\n"
+        elif event == 'DOMNodeInserted':
+            return ""
+        elif event == 'DOMNodeRemoved':
+            return ""
+        elif event == 'DOMNodeRemovedFromDocument':
+            return ""
+        elif event == 'DOMSubtreeModified':
+            return ""
+        else:
+            return ""
 
 # region METHODS
     def newElement(self):
@@ -333,4 +383,6 @@ class JsDomElement(JsObject):
     def title(self, title=None):
         return self._name + ".title" if title is None else self._name + ".title = " + title
 
+    def dispatchEvent(self, event):
+        return  self._name + ".dipatchEvent(" + event + ")"
 # endregion

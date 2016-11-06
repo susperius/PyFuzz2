@@ -107,6 +107,7 @@ class BrowserFuzzer(Fuzzer):
                 calling_block += "\t" + name + "();\n"
             else:
                 calling_block += "\twindow.setTimeout(" + name + "(), 10);\n"
+        calling_block += self.__fire_events()
         js_code = js_code.replace(self.CALLING_BLOCK_COMMENT, calling_block)
         whole_page = self._html_page.get_raw_html().replace("SCRIPT_BODY", js_code)
         return whole_page, css_code
@@ -163,12 +164,12 @@ class BrowserFuzzer(Fuzzer):
         while i < self._js_function_size:
             #  Assignment (<10), Method call (<24), Loop(<27)
             selection = random.randint(0, 26)
-            if selection < 24:
+            if selection < 25:
                 code += tab + "try{ "
                 code += (self.__build_assignment() if selection < 15 else self.__build_method_call()) + "; } catch(err) {}\n"
                 self._method_call_depth = 0
             elif selection < 27:
-                loop_code , length = self.__build_loop()
+                loop_code, length = self.__build_loop()
                 code += tab + loop_code
                 i += length
         code += "}\n"
@@ -336,3 +337,10 @@ class BrowserFuzzer(Fuzzer):
             print param_type
             return ""
 
+    def __fire_events(self):
+        code = ""
+        for dom_element in self._js_objects['JS_DOM_ELEMENT']:
+            if len(dom_element.registered_events) != 0:
+                for event in dom_element.registered_events.keys():
+                    code += "try{" + dom_element.get_event_trigger(event) + "}catch(err) {}\n"
+        return code

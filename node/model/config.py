@@ -51,7 +51,9 @@ class ConfigParser:
             sleep_times = []
             for prog in programs:
                 sleep_times.append(prog.attrib['sleep_time'])
-                self._programs.append(prog.attrib)
+                program_conf = prog.attrib
+                program_conf['use_http'] = True if "True" == program_conf['use_http'] else False
+                self._programs.append(program_conf)
             self._sleep_time = max(sleep_times)
             if self._node_op_mode == 'fuzzing':
                 fuzzer = self._root.find("fuzzer")

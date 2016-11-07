@@ -29,7 +29,7 @@ class FuzzingWorker(Worker):
         self._programs = programs
         self._need_web_server = False
         for prog in programs:
-            if "True" == prog['use_http']:
+            if prog['use_http']:
                 self._need_web_server = True
         self._testcase = ""
         self._crash_report = ""

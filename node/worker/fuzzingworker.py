@@ -52,7 +52,6 @@ class FuzzingWorker(Worker):
                         continue
                 count += 1
                 for prog in self._programs:
-                    prog['use_http'] = "True" == prog['use_http']
                     pyfuzzdbg = PyFuzzDbg.Debugger(int(prog['sleep_time']))
                     if not self._running:
                         break

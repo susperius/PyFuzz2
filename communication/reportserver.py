@@ -10,11 +10,11 @@ gevent.monkey.patch_all()
 
 class ReportServer(Server):
     def __init__(self, port, task_queue):
+        Server.__init__(self)
         self._port = port
         self._serving = False
         self._serving_greenlet = None
         self._report_server = None
-        self._logger = logging.getLogger(__name__)
         self._task_queue = task_queue
 
     def __report_receiver(self, sock, address):

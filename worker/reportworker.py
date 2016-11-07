@@ -1,19 +1,17 @@
 import gevent
 import pickle
-import logging
 import os
+
 from worker import Worker
 from databaseworker import DB_TYPES, SEPARATOR
 from node.model.message_types import MESSAGE_TYPES
 from model.crash import Crash
 from hashlib import md5
 
-__author__ = 'susperius'
-
 
 class ReportWorker(Worker):
     def __init__(self, report_queue, db_queue, node_dict, crash_dict=None):
-        self._logger = logging.getLogger(__name__)
+        Worker.__init__(self)
         self._greenlet = None
         self._report_queue = report_queue
         self._db_queue = db_queue

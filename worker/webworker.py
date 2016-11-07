@@ -1,5 +1,5 @@
-import logging
 import gevent
+
 from model.web import WEB_QUEUE_TASKS
 from worker import Worker
 
@@ -7,7 +7,7 @@ from worker import Worker
 class WebWorker(Worker):
     '''This class just distributes the jobs from the web app to the other workers'''
     def __init__(self, node_dict, web_queue, node_queue, db_queue):
-        self._logger = logging.getLogger(__name__)
+        Worker.__init__(self)
         self._node_dict = node_dict
         self._web_queue = web_queue
         self._node_queue = node_queue

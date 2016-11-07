@@ -1,8 +1,4 @@
-__author__ = 'susperius'
-
-import logging
 import pickle
-
 import gevent
 
 from communication.nodeclient import NodeClient
@@ -11,7 +7,7 @@ from worker import Worker
 
 class NodeClientWorker(Worker):
     def __init__(self, working_queue):
-        self._logger = logging.getLogger(__name__)
+        Worker.__init__(self)
         self._greenlet = None
         self._queue = working_queue
         pass

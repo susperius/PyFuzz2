@@ -52,18 +52,23 @@ class BrowserTestcaseReducer(Reducer):
             if crashed:
                 self._html_file = self._test_html_file
                 self._tried_removal = []
-                self._block_quotient = 2
+                self._block_quotient = self._block_quotient / 2 if self._block_quotient > 2 else 2
             else:
                 self._test_html_file = self._html_file
+                print("Line Count: " + str(self._line_count) + " -- tried removal len: " + str(len(self._tried_removal)))
                 if self._line_count == len(self._tried_removal):
                     if self._line_count / self._block_quotient == 1:
+                        print("LINE_COUNT / BLOCK_QUOTIENT == 1")
                         if len(self._js_functions) > 1:
                             self._js_functions.pop(0)
+                            self._tried_removal = []
+                            self._block_quotient = 2
                         else:
                             self._phase += 1
                     else:
                         self._block_quotient *= 2
                         self._tried_removal = []
+            print("Block Quotient: " + str(self._block_quotient))
 
     def __init_phase_2(self):
         self._js_functions = self._js_function_re.findall(self._html_file)

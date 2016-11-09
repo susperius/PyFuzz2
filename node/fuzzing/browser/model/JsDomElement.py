@@ -111,25 +111,25 @@ class JsDomElement(JsObject):
         if event == 'click':
             return self.click()
         elif event == 'error':
-            code = "var error_event  = new ErrorEvent();\n"
-            code += self.dispatchEvent("error_event") + ";\n"
+            code = "var error_event  = new ErrorEvent();"
+            code += self.dispatchEvent("error_event") + ";"
             return code
         elif event == 'load':
             return ""
         elif event == 'scroll':
-            return self.scrollTop() + ";\n"
+            return self.scrollTop() + ";"
         elif event == 'resize':
             return ""
         elif event == 'change':
             return ""
         elif event == 'focus':
-            return self.focus() + ";\n"
+            return self.focus() + ";"
         elif event == 'focusin':
-            return self.focus() + ";\n"
+            return self.focus() + ";"
         elif event == 'blur':
-            return self.blur() + ";\n"
+            return self.blur() + ";"
         elif event == 'select':
-            return self.select() + ";\n"
+            return self.select() + ";"
         elif event == 'pageshow':
             return ""
         elif event == 'unload':
@@ -143,7 +143,7 @@ class JsDomElement(JsObject):
         elif event == 'DOMCharacterDataModified':
             return ""
         elif event == 'DOMElementNameChanged':
-            return self.setAttribute("name", random.choice(FuzzValues.STRINGS)) + ";\n"
+            return self.setAttribute("name", "\"" + random.choice(FuzzValues.STRINGS) + "\"") + ";"
         elif event == 'DOMNodeInserted':
             return ""
         elif event == 'DOMNodeRemoved':

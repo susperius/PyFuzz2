@@ -69,7 +69,8 @@ class BrowserFuzzer(Fuzzer):
             test_name = "/test" + str(i) if i > 9 else "/test0" + str(i)
             with open(directory + test_name + "." + self.file_type, 'wb+') as html_file, open(directory + test_name + ".css", 'wb+') as css_file:
                 fuzz = self.fuzz()
-                html_file.write(fuzz[0])
+                html = fuzz[0].replace("TESTCASE.css", test_name + ".css")
+                html_file.write(html)
                 css_file.write(fuzz[1])
 
 
@@ -342,5 +343,5 @@ class BrowserFuzzer(Fuzzer):
         for dom_element in self._js_objects['JS_DOM_ELEMENT']:
             if len(dom_element.registered_events) != 0:
                 for event in dom_element.registered_events.keys():
-                    code += "try{" + dom_element.get_event_trigger(event) + "}catch(err) {}\n"
+                    code += "\ttry{" + dom_element.get_event_trigger(event) + "}catch(err) {}\n"
         return code

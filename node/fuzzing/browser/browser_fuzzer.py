@@ -307,6 +307,8 @@ class BrowserFuzzer(Fuzzer):
             else:
                 listener_name = "event_listener_" + str(len(self._js_event_listener))
                 self._js_event_listener.append(listener_name)
+                if len(self._js_event_listener) > 5:
+                    self._no_more_listeners = True
                 return listener_name
         elif param_type == 'EVENT':
             return random.choice(DomObjectTypes.DOM_EVENTS)

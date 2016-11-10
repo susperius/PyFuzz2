@@ -29,7 +29,7 @@ class FuzzingWorker(Worker):
         self._programs = programs
         self._need_web_server = False
         for prog in programs:
-            if "True" == prog['use_http']:
+            if prog['use_http']:
                 self._need_web_server = True
         self._testcase = ""
         self._crash_report = ""
@@ -52,7 +52,6 @@ class FuzzingWorker(Worker):
                         continue
                 count += 1
                 for prog in self._programs:
-                    prog['use_http'] = "True" == prog['use_http']
                     pyfuzzdbg = PyFuzzDbg.Debugger(int(prog['sleep_time']))
                     if not self._running:
                         break

@@ -1,19 +1,19 @@
-__author__ = 'susperius'
-
-import logging
 import pickle
 import gevent
+
 from model.pyfuzz2_node import PyFuzz2Node
 from model.database import DB_TYPES, SEPARATOR
 from node.model.message_types import MESSAGE_TYPES
+from worker import Worker
 
 
-class BeaconWorker:
+class BeaconWorker(Worker):
     def __init__(self, beacon_queue, node_worker_queue, db_queue, timeout, config_req_interval, node_dict=None):
+        Worker.__init__(self)
         self._beacon_queue = beacon_queue
         self._node_worker_queue = node_worker_queue
         self._db_queue = db_queue
-        self._logger = logging.getLogger(__name__)
+        #self._logger = logging.getLogger(__name__)
         self._active = False
         self._node_dict = {} if node_dict is None else node_dict
         self._timeout = timeout

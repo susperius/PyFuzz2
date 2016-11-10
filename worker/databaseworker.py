@@ -1,9 +1,7 @@
-__author__ = 'susperius'
-
 import sqlite3 as sql
 import gevent
-import logging
 import pickle
+
 from worker import Worker
 from model.crash import Crash
 from model.pyfuzz2_node import PyFuzz2Node
@@ -12,7 +10,7 @@ from model.database import DB_TYPES, SEPARATOR
 
 class DatabaseWorker(Worker):
     def __init__(self, db_queue, node_dict=None, crash_dict=None):
-        self._logger = logging.getLogger(__name__)
+        Worker.__init__(self)
         self._db_queue = db_queue
         self._node_dict = node_dict if node_dict is not None else {}
         self._crash_dict = crash_dict if crash_dict is not None else {}

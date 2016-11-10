@@ -2,9 +2,7 @@ import logging
 import gevent
 import gevent.monkey
 from gevent.queue import Queue
-from urlparse import parse_qs
 
-import node.model.config
 from communication.beaconserver import BeaconServer
 from communication.reportserver import ReportServer
 from communication.webserver import WebServer
@@ -13,9 +11,7 @@ from worker.beaconworker import BeaconWorker
 from worker.reportworker import ReportWorker
 from worker.nodeclientworker import NodeClientWorker
 from worker.webworker import WebWorker
-from model.database import DB_TYPES
 from model.config import ConfigParser
-from node.model.message_types import MESSAGE_TYPES
 from web.app import WebInterface
 gevent.monkey.patch_all()
 
@@ -38,14 +34,14 @@ class PyFuzz2Server:
         self._db_queue = Queue()
         self._db_worker = DatabaseWorker(self._db_queue, self._node_dict, self._crash_dict)
         self._db_worker.load()
-        self._beacon_server = BeaconServer(beacon_port, self._beacon_queue)
-        self._beacon_worker = BeaconWorker(self._beacon_queue, self._node_queue, self._db_queue,
-                                           beacon_timeout, config_req_interval, self._node_dict)
-        self._report_server = ReportServer(report_port, self._report_queue)
-        self._report_worker = ReportWorker(self._report_queue, self._db_queue, self._node_dict, self._crash_dict)
-        self._node_client_worker = NodeClientWorker(self._node_queue)
         self._web_intf = WebInterface(self._web_queue, self._node_dict, self._crash_dict)
         self._web_server = WebServer(web_port, self._web_intf.app)
+        self._beacon_server = BeaconServer(beacon_port, self._beacon_queue)
+        self._report_server = ReportServer(report_port, self._report_queue)
+        self._beacon_worker = BeaconWorker(self._beacon_queue, self._node_queue, self._db_queue,
+                                           beacon_timeout, config_req_interval, self._node_dict)
+        self._report_worker = ReportWorker(self._report_queue, self._db_queue, self._node_dict, self._crash_dict)
+        self._node_client_worker = NodeClientWorker(self._node_queue)
         self._web_worker = WebWorker(self._node_dict, self._web_queue, self._node_queue, self._db_queue)
 
     def main(self):
@@ -78,8 +74,18 @@ class PyFuzz2Server:
 
 
 if __name__ == "__main__":
-    logging.basicConfig(format='%(levelname)s: %(message)s', level=logging.DEBUG)
-    logger = logging.getLogger(__name__)
+    #logging.basicConfig(format='%(levelname)s: %(message)s', level=logging.DEBUG)
+    logger = logging.getLogger("PyFuzz2-Server")
     logger.setLevel(logging.DEBUG)
+    fh = logging.FileHandler("log/server.log")
+    fh.setLevel(logging.DEBUG)
+    ch = logging.StreamHandler()
+    ch.setLevel(logging.DEBUG)
+    file_formatter = logging.Formatter('%(asctime)s - %(levelname)s: %(message)s')
+    console_formatter = logging.Formatter('%(levelname)s: %(message)s')
+    fh.setFormatter(file_formatter)
+    ch.setFormatter(console_formatter)
+    logger.addHandler(fh)
+    logger.addHandler(ch)
     server = PyFuzz2Server(logger)
     server.main()

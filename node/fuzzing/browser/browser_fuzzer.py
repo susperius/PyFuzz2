@@ -15,14 +15,12 @@ from model.DomObjectTypes import DomObjectTypes
 
 class BrowserFuzzer(Fuzzer):
     NAME = "browser_fuzzer"
-    CONFIG_PARAMS = ["html_elements", "max_html_depth", "max_html_attr", "canvas_size", "canvas_type",
+    CONFIG_PARAMS = ["html_elements", "max_html_depth", "max_html_attr",
                      "js_function_count", "js_function_size", "file_type"]
     CALLING_BLOCK_COMMENT = "//CALLFUNCTIONS"
 
-    def __init__(self, html_elements, max_html_depth, max_html_attr, canvas_size, canvas_type,
-                 js_function_count, js_function_size, file_type):
+    def __init__(self, html_elements, max_html_depth, max_html_attr, js_function_count, js_function_size, file_type):
         self._html_fuzzer = Html5Fuzzer(int(html_elements), int(max_html_depth), int(max_html_attr), file_type)
-        self._canvas_fuzzer = CanvasFuzzer(int(canvas_size), canvas_type)
         self._css_fuzzer = CssFuzzer()
         self._js_function_count = int(js_function_count)
         self._js_function_size = int(js_function_size)

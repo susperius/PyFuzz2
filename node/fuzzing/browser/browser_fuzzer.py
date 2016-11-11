@@ -89,10 +89,6 @@ class BrowserFuzzer(Fuzzer):
                                      self._html_page.get_attribs(),
                                      self._html_page.get_element_ids())
         css_code = self._css_fuzzer.fuzz()
-        for canvas_id in self._html_page.get_elements_by_html_tag()['canvas']:
-            self._canvas_fuzzer.set_canvas_id(canvas_id)
-            self._js_functions.append("func_" + canvas_id)
-            js_code += self._canvas_fuzzer.fuzz()
         js_code += self.__create_startup()
         for i in range(self._js_function_count):
             js_code += self.__build_function()

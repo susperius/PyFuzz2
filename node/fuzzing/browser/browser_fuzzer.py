@@ -216,6 +216,7 @@ class BrowserFuzzer(Fuzzer):
 
     def __build_event_listener(self):
         pass  # TODO: Create event listener
+        code = ""
 
     def __build_loop(self):
         code = "for(i="
@@ -272,7 +273,7 @@ class BrowserFuzzer(Fuzzer):
         return code
 
     def __get_constant_param(self, param_type):
-        # TODO: CSS_CLASS; CSS_STYLE; JS_EVENT_LISTENER; HTML_ATTR; HTML_TAG; JS_DOM_CHILD_ELEMENT; ... check for more
+        # TODO:  CSS_STYLE; JS_EVENT_LISTENER; HTML_ATTR; HTML_TAG; JS_DOM_CHILD_ELEMENT; ... check for more
         if param_type in self._html_fuzzer.TYPES_DICT:
             param = random.choice(self._html_fuzzer.TYPES_DICT[param_type])
             if param_type == 'JS_STRING':
@@ -289,7 +290,7 @@ class BrowserFuzzer(Fuzzer):
             return random.choice(self._html_page.get_attribs())
         elif param_type == 'HTML_ATTR_VAL':
             html_attr_val = "\"" + random.choice(FuzzValues.INTERESTING_VALUES) + "\""
-            return html_attr_val  # TODO: make an attr test intersting value list
+            return html_attr_val  # TODO: make an attr test interesting value list
         elif param_type == 'JS_OBJECT':
             obj_type = random.choice(JS_OBJECTS)
             js_obj = random.choice(self._js_objects[obj_type])
@@ -331,7 +332,7 @@ class BrowserFuzzer(Fuzzer):
         elif param_type == 'REGEX':  # TODO: implement regex construction
             return "/ab+c/"
         else:
-            print param_type
+            print(param_type)
             return ""
 
     def __fire_events(self):

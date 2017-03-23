@@ -4,6 +4,7 @@ from html5 import Html5Fuzzer
 from canvas import CanvasFuzzer
 from css import CssFuzzer
 from ..fuzzer import Fuzzer
+from ..regex_fuzzer import RegExFuzzer
 from model.FuzzedHtmlPage import HtmlPage
 from model.JsObject import *
 from model.JsDocument import JsDocument
@@ -22,6 +23,7 @@ class BrowserFuzzer(Fuzzer):
     def __init__(self, html_elements, max_html_depth, max_html_attr, js_function_count, js_function_size, file_type):
         self._html_fuzzer = Html5Fuzzer(int(html_elements), int(max_html_depth), int(max_html_attr), file_type)
         self._css_fuzzer = CssFuzzer()
+        self._reg_ex_fuzzer = RegExFuzzer(20)
         self._js_function_count = int(js_function_count)
         self._js_function_size = int(js_function_size)
         self._html_page = HtmlPage()
@@ -329,8 +331,8 @@ class BrowserFuzzer(Fuzzer):
             for i in range(0, length):
                 unicode_list_str += str(random.randint(1, 65535))
             return unicode_list_str
-        elif param_type == 'REGEX':  # TODO: implement regex construction
-            return "/ab+c/"
+        elif param_type == 'REGEX':
+            return self._reg_ex_fuzzer.fuzz()
         else:
             print(param_type)
             return ""

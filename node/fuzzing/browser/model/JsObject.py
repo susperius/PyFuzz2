@@ -1,6 +1,22 @@
 __author__ = 'susperius'
 
-JS_OBJECTS = ['JS_OBJECT', 'JS_STRING', 'JS_NUMBER', 'JS_ARRAY', 'JS_DOM_ELEMENT']  # 'JS_DATE',
+JS_OBJECTS = [
+    # 'JS_OBJECT',
+    'JS_STRING', 'JS_NUMBER', 'JS_ARRAY', 'JS_DOM_ELEMENT']  # 'JS_DATE',
+
+RETURN_TYPES = {'JS_STRING': JS_OBJECTS, 'INT': ['JS_STRING', 'JS_NUMBER', 'JS_ARRAY'],
+                'JS_DOM_ELEMENT': ['JS_DOM_ELEMENT'], 'FLOAT': ['JS_NUMBER'], 'EXP_FLOAT': ['JS_NUMBER'],
+                'BOOL': ['JS_ARRAY', 'JS_DOM_ELEMENT'], 'JS_OBJECT': ['JS_ARRAY'], 'JS_ARRAY': ['JS_ARRAY'],
+                'JS_ATTR': ['JS_DOM_ELEMENT'], 'JS_NODE_LIST': ['JS_DOM_ELEMENT'], 'JS_NODE_MAP': ['JS_DOM_ELEMENT'],
+                'TEXT_DIRECTION': ['JS_DOM_ELEMENT'], 'JS_IDENTIFIER': ['JS_DOM_ELEMENT'],
+                'HTML_CODE': ['JS_DOM_ELEMENT'], 'HTML_TAG': ['JS_DOM_ELEMENT'], 'CSS_STYLE': ['JS_DOM_ELEMENT'],
+                'NAMESPACE_URI': ['JS_DOM_ELEMENT'], 'JS_NUMBER': ['JS_NUMBER'], 'HTML_ATTR_VAL': ['JS_DOM_ELEMENT']}
+
+JS_NUMBERS = ['INT', 'FLOAT', 'EXP_FLOAT']
+
+VALID_OPERATORS = {'JS_STRING': ['+'],
+                   'INT': ['+', '-', '*', '/'],
+                   'BOOL': ['==', '===', '!=', '!==', '<', '>', '<=', '>=']}
 
 
 class JsObject:
@@ -75,7 +91,7 @@ class JsString(JsObject):
         self._methods_and_properties.update(js_string_methods)
 
     def newString(self, value):
-        return self._name + " = \"" + str(value) + "\""
+        return self._name + " = " + str(value)
 
     def charAt(self, pos):
         return self._name + ".charAt(" + str(pos) + ")"
@@ -84,7 +100,7 @@ class JsString(JsObject):
         return self._name + ".charCodeAt(" + str(pos) + ")"
 
     def concat(self, string):
-        return self._name + ".concat(\"" + string + "\")"
+        return self._name + ".concat(" + string + ")"
 
     def fromCharCode(self, unicode_value):
         ret = self._name + ".fromCharCode("
@@ -94,28 +110,28 @@ class JsString(JsObject):
         return ret
 
     def indexOf(self, string):
-        return self._name + ".indexOf(\"" + string + "\")"
+        return self._name + ".indexOf(" + string + ")"
 
     def lastIndexOf(self, string):
-        return self._name + ".lastIndexOf(\"" + string + "\")"
+        return self._name + ".lastIndexOf(" + string + ")"
 
     def localeCompare(self, string):
-        return self._name + ".localeCompare(\"" + string + "\")"
+        return self._name + ".localeCompare(" + string + ")"
 
     def match(self, regex_str):
-        return self._name + ".match(\"" + regex_str + "\")"  # needs regex
+        return self._name + ".match(" + regex_str + ")"  # needs regex
 
     def replace(self, search_str, replace_str):
-        return self._name + ".replace(\"" + search_str + "\", \"" + replace_str + "\")"
+        return self._name + ".replace(" + search_str + ", " + replace_str + ")"
 
     def search(self, string):
-        return self._name + ".search(\"" + string + "\")"
+        return self._name + ".search(" + string + ")"
 
     def slice(self, start_pos, end_pos):
-        return self._name + ".slice(\"" + str(start_pos) + "," + str(end_pos) + "\")"
+        return self._name + ".slice(" + str(start_pos) + "," + str(end_pos) + ")"
 
     def split(self, string):
-        return self._name + ".split(\"" + string + "\")"
+        return self._name + ".split(" + string + ")"
 
     def substr(self, start_pos, count):
         return self._name + ".substr(" + str(start_pos) + ", " + str(count) + ")"
@@ -151,7 +167,7 @@ class JsNumber(JsObject):
 
     def __init__(self, name):
         JsObject.__init__(self, name)
-        js_number_methods = {'toExponential': {'ret_val': 'EXP_FLOAT', 'parameters': ['NUMBER'], 'method': self.toExponential},
+        js_number_methods = {'toExponential': {'ret_val': 'EXP_FLOAT', 'parameters': ['JS_NUMBER'], 'method': self.toExponential},
                              'toFixed': {'ret_val': 'JS_STRING', 'parameters': ['INT'], 'method': self.toFixed},
                              'toPrecision': {'ret_val': 'FLOAT', 'parameters': ['INT'], 'method': self.toPrecision},
                              'valueOf': {'ret_val': 'INT', 'parameters': None, 'method': self.valueOf}
@@ -179,13 +195,14 @@ class JsNumber(JsObject):
 class JsArray(JsObject):
     TYPE = "JsArray"
 
-    def __init__(self, name, array_elements=None):
+    def __init__(self, name, array_elements=None, element_type=None):
         JsObject.__init__(self, name)
         if array_elements is not None:
             # list contents [ JsObject, ....]
             self._array_elements = array_elements
         else:
             self._array_elements = []
+        self._element_type = element_type if element_type is not None else 'JS_OBJECT'
         self._js_array_methods_and_properties = {'concat': {'ret_val': 'JS_ARRAY', 'parameters': ['JS_ARRAY'], 'method': self.concat},
                                                  'every': {'ret_val': 'BOOL', 'parameters': ['JS_ARRAY_FUNCTION'], 'method': self.every},
                                                  'filter': {'ret_val': 'JS_ARRAY', 'parameters': ['JS_ARRAY_FUNCTION'], 'method': self.filter},
@@ -193,7 +210,7 @@ class JsArray(JsObject):
                                                  'join': {'ret_val': 'JS_STRING', 'parameters': None, 'method': self.join},
                                                  'lastIndexOf': {'ret_val': 'INT', 'parameters': ['JS_OBJECT'], 'method': self.lastIndexOf},
                                                  'map': {'ret_val': 'JS_ARRAY', 'parameters': ['JS_ARRAY_FUNCTION'], 'method': self.map},
-                                                 'pop': {'ret_val': 'JS_OBJECT', 'parameters': None, 'method': self.pop},
+                                                 'pop': {'ret_val': self._element_type, 'parameters': None, 'method': self.pop},
                                                  'push': {'ret_val': 'JS_ARRAY', 'parameters': ['JS_OBJECT'], 'method': self.push},
                                                  'reverse': {'ret_val': 'JS_ARRAY', 'parameters': None, 'method': self.reverse},
                                                  'shift': {'ret_val': 'JS_ARRAY', 'parameters': None, 'method': self.shift}
@@ -204,7 +221,10 @@ class JsArray(JsObject):
     def array_elements(self):
         return self._array_elements
 
-    def newArray(self):
+    def newArray(self, array_elements=None, element_type=None):
+        if array_elements is not None:
+            self._array_elements = array_elements
+        self._element_type = element_type if element_type is not None else 'JS_OBJECT'
         code = self._name + " = [ "
         for js_object in self._array_elements:
             code += js_object.name + ", "

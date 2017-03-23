@@ -1,9 +1,9 @@
 import random
 import pickle
 import os
-import browser.javascript as javascript
-from browser.javascript_ng import JsFuzzer
+from browser.browser_fuzzer import BrowserFuzzer
 import bytemutation
+
 
 
 """
@@ -14,8 +14,7 @@ parameters as first value and a reference to your fuzzers class as the second va
 """
 #  FUZZERS = {FuzzerName: (CONFIG_PARAMS, CONSTRUCTOR())}
 FUZZERS = {bytemutation.ByteMutation.NAME: (bytemutation.ByteMutation.CONFIG_PARAMS, bytemutation.ByteMutation),
-           javascript.JsDomFuzzer.NAME: (javascript.JsDomFuzzer.CONFIG_PARAMS, javascript.JsDomFuzzer),
-           JsFuzzer.NAME: (JsFuzzer.CONFIG_PARAMS, JsFuzzer)
+           BrowserFuzzer.NAME: (BrowserFuzzer.CONFIG_PARAMS, BrowserFuzzer)
            }
 
 

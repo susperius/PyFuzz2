@@ -4,6 +4,7 @@ __author__ = 'susperius'
 class JsGlobal:
     BOOL_OPERATORS = ['==', '===', '!=', '!==', '<', '>', '<=', '>=']
 
+
     @staticmethod
     def value_infinity():
         return "Infinity"

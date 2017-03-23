@@ -1,9 +1,18 @@
-__author__ = 'susperius'
+import random
+from fuzzing.browser.browser_fuzzer import BrowserFuzzer
+from fuzzing.regex_fuzzer import RegExFuzzer
 
-from node.fuzzing.browser.javascript_ng import *
+random.seed(0)
 
-fuzzer = JsFuzzer(15, 10, 5, 5, 5, 500, 20, 'html')
+"""
+fuzzer = BrowserFuzzer(5, 2, 100, 10, 30, 'html')
 
-fuzzer.create_testcases(2, ".")
+fuzzer.create_testcases(10, './testcases/')
 
-#print(fuzzer.fuzz())
+"""
+
+fuzzer = RegExFuzzer(45)
+
+for i in range(20000):
+    print(fuzzer.fuzz())
+

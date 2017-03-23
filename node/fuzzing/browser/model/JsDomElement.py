@@ -1,14 +1,17 @@
 # coding=utf8
+import random
 from JsObject import JsObject
+from JsDocument import JsDocument
+from values import FuzzValues
 
 
 class JsDomElement(JsObject):
     TYPE = "JsElement"
 
-    def __init__(self, var_name, html_type=None):
+    def __init__(self, var_name, html_type=None, children=None):
         JsObject.__init__(self, var_name)
         self.__registered_events = {}
-        self.__children = []
+        self.__children = [] if not children else children
         self.__attributes = {}
         self.__html_type = html_type
         js_element_methods_and_properties = {'addEventListener': {'ret_val': None, 'parameters': ['EVENT', 'JS_EVENT_LISTENER'], 'method': self.addEventListener},
@@ -18,7 +21,7 @@ class JsDomElement(JsObject):
                                              'cloneNode': {'ret_val': 'JS_DOM_ELEMENT', 'parameters': ['BOOL'], 'method': self.cloneNode}, #  TODO: parameters
                                              'compareDocumentPosition': {'ret_val': 'INT', 'parameters': ['JS_DOM_ELEMENT'], 'method': self.compareDocumentPosition},
                                              'focus': {'ret_val': None, 'parameters': None, 'method': self.focus},
-                                             'getAttribute': {'ret_val': 'JS_STRING', 'parameters': ['HTML_ATTR'], 'method': self.getAttribute},
+                                             'getAttribute': {'ret_val': 'HTML_ATTR_VAL', 'parameters': ['HTML_ATTR'], 'method': self.getAttribute},
                                              'getAttributeNode': {'ret_val': 'JS_ATTR', 'parameters': ['HTML_ATTR'], 'method': self.getAttributeNode},
                                              'getElementsByClassName': {'ret_val': 'JS_NODE_LIST', 'parameters': ['CLASS_NAME'], 'method': self.getElementsByClassName},
                                              'getElementsByTagName': {'ret_val': 'JS_NODE_LIST', 'parameters': ['HTML_TAG'], 'method': self.getElementsByTagName},
@@ -104,7 +107,58 @@ class JsDomElement(JsObject):
     def attributes(self):
         return self.__attributes
 
+    def get_event_trigger(self, event):
+        if event == 'click':
+            return self.click()
+        elif event == 'error':
+            code = "var error_event  = new ErrorEvent();"
+            code += self.dispatchEvent("error_event") + ";"
+            return code
+        elif event == 'load':
+            return ""
+        elif event == 'scroll':
+            return self.scrollTop() + ";"
+        elif event == 'resize':
+            return ""
+        elif event == 'change':
+            return ""
+        elif event == 'focus':
+            return self.focus() + ";"
+        elif event == 'focusin':
+            return self.focus() + ";"
+        elif event == 'blur':
+            return self.blur() + ";"
+        elif event == 'select':
+            return self.select() + ";"
+        elif event == 'pageshow':
+            return ""
+        elif event == 'unload':
+            return ""
+        elif event == 'beforeunload':
+            return ""
+        elif event == 'DOMAttrModified':
+            return ""  #  self.setAttribute(random.choice(self.attributes), random.choice(FuzzValues.INTERESTING_VALUES)) + ";\n"
+        elif event == 'DOMAttributeNameChanged':
+            return ""
+        elif event == 'DOMCharacterDataModified':
+            return ""
+        elif event == 'DOMElementNameChanged':
+            return self.setAttribute("name", "\"" + random.choice(FuzzValues.STRINGS) + "\"") + ";"
+        elif event == 'DOMNodeInserted':
+            return ""
+        elif event == 'DOMNodeRemoved':
+            return ""
+        elif event == 'DOMNodeRemovedFromDocument':
+            return ""
+        elif event == 'DOMSubtreeModified':
+            return ""
+        else:
+            return ""
+
 # region METHODS
+    def newElement(self):
+        return self._name + " = " + JsDocument.createElement(self.__html_type)
+
     def addEventListener(self, event, function):
         self.__registered_events[event] = function
         return self._name + ".addEventListener('" + event + "', " + function + ")"
@@ -205,7 +259,7 @@ class JsDomElement(JsObject):
 
     def setAttribute(self, attr_name, attr_value):
         self.__attributes[attr_name] = attr_value
-        return self._name + ".setAttribute('" + attr_name + "', '" + attr_value + "')"
+        return self._name + ".setAttribute('" + attr_name + "', " + attr_value + ")"
 
     def setAttributeNode(self, attr):
         return self._name + ".setAtrributeNode(" + attr + ")"
@@ -329,4 +383,6 @@ class JsDomElement(JsObject):
     def title(self, title=None):
         return self._name + ".title" if title is None else self._name + ".title = " + title
 
+    def dispatchEvent(self, event):
+        return  self._name + ".dipatchEvent(" + event + ")"
 # endregion

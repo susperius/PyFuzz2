@@ -1,13 +1,15 @@
 <PyFuzz2Node name="NODE01" net_mode="net" op_mode="fuzzing" reboot_time="43200">
-    <beacon server="192.168.1.130" port="31337" interval="10"/>
-    <reporting server="192.168.1.130" port="31338"/>
+    <beacon server="192.168.1.129" port="31337" interval="10"/>
+    <reporting server="192.168.1.129" port="31338"/>
     <listener port="32337"/>
     <programs>
         <program name="Internet Explorer" path="C:\Program Files\Internet Explorer\iexplore.exe" dbg_child="True" sleep_time="10" use_http="True" />
+        <program name="Chrome"  path="C:\Program Files\Google\Chrome\Application\chrome.exe" dbg_child="True" sleep_time="10" use_http="True" />
     </programs>
     <reducer type="js_reducer" path="testcases/" file_type="html"/>
-    <fuzzer type="js_dom_fuzzer" starting_elements="30" total_operations="3000" seed="0" browser="ie" canvas_size="500" file_type="html"/>
+    <fuzzer type="browser_fuzzer" html_elements="30" max_html_depth="20" max_html_attr="15" canvas_size="250" canvas_type="2d" js_function_count="5" js_function_size="80" file_type="html" seed="0"/>
 </PyFuzz2Node>
+
 
 <!--
 REDUCING WON'T WORK IN NETWORK MODE !!!

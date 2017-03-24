@@ -39,9 +39,11 @@ class RegExFuzzer(Fuzzer):
         pattern = ""
         while len(pattern) < int(self._max_length * 0.5):
             pattern += random.choice(FuzzValues.STRINGS_FOR_REGEX)
-        while len(pattern) < self._max_length:
-            next_type = random.choice(self._component_to_method_mapping.items())
-            pattern = next_type[1](pattern)
+        #while len(pattern) < self._max_length:
+        #    next_type = random.choice(self._component_to_method_mapping.items())
+        #    pattern = next_type[1](pattern)
+        next_type = random.choice(self._component_to_method_mapping.items())
+        pattern = next_type[1](pattern)
         pattern = pattern.replace("/", "\\/")
         pattern = self.__check_for_escaped_brackets(pattern)
         regex += pattern
@@ -113,7 +115,7 @@ class RegExFuzzer(Fuzzer):
         if "X" in quantifier:
             x = random.choice(FuzzValues.STRINGS)
             y = random.choice(FuzzValues.STRINGS)
-            position = random.randint(0, len(pattern) - 1)
+            position = random.randint(1, len(pattern) - 1)
             if quantifier == "X(?=Y)":
                 return pattern[:position] + " " + x + "(?=" + y + ") " + pattern[position:]
             elif quantifier == "X(?!Y)":
@@ -122,7 +124,7 @@ class RegExFuzzer(Fuzzer):
                 return pattern[:position] + " " + x + "|" + y + " " + pattern[position:]
 
         elif "N" in quantifier:
-            position = random.randint(0, int(len(pattern) * 0.6))
+            position = random.randint(1, int(len(pattern) * 0.6))
             n = random.randint(0, int(len(pattern) * 0.6))
             if quantifier == "{N}":
                 return pattern[:position] + "{" + str(n) + "}" + pattern[position:]
@@ -132,7 +134,7 @@ class RegExFuzzer(Fuzzer):
                 m = random.randint(0, int(len(pattern) * 0.6))
                 return pattern[:position] + "{" + str(n) + "," + str(m) + "}" + pattern[position :]
         else:
-            position = random.randint(0, int(len(pattern) * 0.6))
+            position = random.randint(1, int(len(pattern) * 0.6))
             return pattern[:position] + quantifier + pattern[position:]
 
     @staticmethod

@@ -19,6 +19,7 @@ INTERESTING_EXCEPTIONS = {0x80000001: "GUARD_PAGE_VIOLATION",
                           0XC000009D: "PRIVILEGED_INSTRUCTION"}
 
 
+# noinspection PyCompatibility
 class FuzzingWorker(Worker):
     def __init__(self, programs, fuzzer, report_queue):
         self._logger = logging.getLogger(__name__)
@@ -58,7 +59,7 @@ class FuzzingWorker(Worker):
                     testcase_dir = os.getcwd() + "\\testcases\\"
                     #  --------------------------------------------------------------------------------------------
                     # For pure testing if a tool is crashing with given input, just use a small c++ extension to
-                    # start a program with DEBUG_PROCESS and return 0 if nothing happens else the exception code
+                    # start a program with DEBUG_PROCESS and return 0 if nothing happens or the exception code else
                     self._logger.debug("Test starting...\r\n\tprogram: " + prog['name'] + " testcase: " + filename +
                                        " #testcases: " + str(count))
                     if prog['use_http']:

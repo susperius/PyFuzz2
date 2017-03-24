@@ -38,10 +38,12 @@ class RegExFuzzer(Fuzzer):
         regex = "/"
         pattern = ""
         while len(pattern) < int(self._max_length * 0.5):
-            pattern += random.choice(FuzzValues.STRINGS)
+            pattern += random.choice(FuzzValues.STRINGS_FOR_REGEX)
         while len(pattern) < self._max_length:
             next_type = random.choice(self._component_to_method_mapping.items())
             pattern = next_type[1](pattern)
+        pattern = pattern.replace("/", "\\/")
+        pattern = self.__check_for_escaped_brackets(pattern)
         regex += pattern
         regex += "/"
         regex += random.choice(self.REGEX_FLAGS)
@@ -60,7 +62,7 @@ class RegExFuzzer(Fuzzer):
                 hex_str = hex(value).replace("0x", "0")
             else:
                 hex_str = hex(value).replace("0x", "")
-            return pattern[:position] + "\\x" + hex_str + pattern[position+1:]
+            return pattern[:position] + "\\x" + hex_str + pattern[position:]
         elif char_class == "\\uHHHH":
             value = random.randint(0, 0xFFFF)
             if value < 0x10:
@@ -71,20 +73,20 @@ class RegExFuzzer(Fuzzer):
                 hex_str = hex(value).replace("0x", "0")
             else:
                 hex_str = hex(value).replace("0x", "")
-            return pattern[:position] + "\\u" + hex_str + pattern[position+1:]
+            return pattern[:position] + "\\u" + hex_str + pattern[position:]
         elif char_class == "\\cX":
-            return pattern[:position] + "\\c" + random.choice(string.uppercase) + pattern[position+1:]
+            return pattern[:position] + "\\c" + random.choice(string.uppercase) + pattern[position:]
         else:
-            return pattern[:position] + char_class + pattern[position+1:]
+            return pattern[:position] + char_class + pattern[position:]
 
     def __get_character_selector(self, pattern):
         selector = random.choice(self.REGEX_CHARACTER_SELECTION)
-        start = random.randint(0, int(len(pattern) * 0.75))
-        end = random.randint(start + 1, len(pattern) - 1) # circumvent start > end scenarios
+        start = random.randint(0, int(len(pattern) * 0.6))
+        end = random.randint(start + 1, len(pattern) - 2)  # circumvent start > end scenarios
         if selector == "[X]":
-            pattern = pattern[0:start] + "[" + pattern[start + 1:end] + "]" + pattern[end:]
+            pattern = pattern[:start] + "[" + pattern[start:end] + "]" + pattern[end:]
         else:
-            pattern = pattern[0:start] + "[^" + pattern[start + 1:end] + "]" + pattern[end:]
+            pattern = pattern[:start] + "[^" + pattern[start:end] + "]" + pattern[end:]
         return pattern
 
     def __get_area_limiter(self, pattern):
@@ -96,15 +98,15 @@ class RegExFuzzer(Fuzzer):
         reference = random.choice(self.REGEX_GROUPING_AND_REVERSE_REFERENCE)
         if reference == "\\N":
             number = random.randint(0, int(len(pattern) * 0.5))
-            postition = random.randint(0, int(len(pattern) * 0.75))
+            postition = random.randint(0, int(len(pattern) * 0.6))
             return pattern[:postition] + "\\" + str(number) + pattern[postition+1:]
         else:
-            start = random.randint(0, int(len(pattern) * 0.75))
+            start = random.randint(0, int(len(pattern) * 0.6))
             end = random.randint(start, len(pattern) - 1)  # circumvent start > end scenarios
             if reference == "(X)":
-                return pattern[:start] + "(" + pattern[start+1:end] + ")" + pattern[end+1:]
+                return pattern[:start] + "(" + pattern[start:end] + ")" + pattern[end:]
             else:
-                return pattern[:start] + "(?:" + pattern[start + 1:end] + ")" + pattern[end + 1:]
+                return pattern[:start] + "(?:" + pattern[start:end] + ")" + pattern[end :]
 
     def __get_quantifier(self, pattern):
         quantifier = random.choice(self.REGEX_QUANTIFIERS)
@@ -113,23 +115,32 @@ class RegExFuzzer(Fuzzer):
             y = random.choice(FuzzValues.STRINGS)
             position = random.randint(0, len(pattern) - 1)
             if quantifier == "X(?=Y)":
-                return pattern[:position] + " " + x + "(?=" + y + " " + pattern[position+1:]
+                return pattern[:position] + " " + x + "(?=" + y + ") " + pattern[position:]
             elif quantifier == "X(?!Y)":
-                return pattern[:position] + " " + x + "(?!" + y + " " + pattern[position + 1:]
+                return pattern[:position] + " " + x + "(?!" + y + ") " + pattern[position:]
             else:
-                return pattern[:position] + " " + x + "|" + y + " " + pattern[position + 1:]
+                return pattern[:position] + " " + x + "|" + y + " " + pattern[position:]
 
         elif "N" in quantifier:
-            position = random.randint(0, int(len(pattern) * 0.75))
-            n = random.randint(0, int(len(pattern) * 0.75))
+            position = random.randint(0, int(len(pattern) * 0.6))
+            n = random.randint(0, int(len(pattern) * 0.6))
             if quantifier == "{N}":
-                return pattern[:position] + "{" + str(n) + "}" + pattern[position+1:]
+                return pattern[:position] + "{" + str(n) + "}" + pattern[position:]
             elif quantifier == "{N,}":
-                return pattern[:position] + "{" + str(n) + ",}" + pattern[position + 1:]
+                return pattern[:position] + "{" + str(n) + ",}" + pattern[position:]
             else:
-                m = random.randint(0, int(len(pattern) * 0.75))
-                return pattern[:position] + "{" + str(n) + "," + str(m) + "}" + pattern[position + 1:]
+                m = random.randint(0, int(len(pattern) * 0.6))
+                return pattern[:position] + "{" + str(n) + "," + str(m) + "}" + pattern[position :]
         else:
-            position = random.randint(0, int(len(pattern) * 0.75))
-            return pattern[:position] + quantifier + pattern[position+1:]
+            position = random.randint(0, int(len(pattern) * 0.6))
+            return pattern[:position] + quantifier + pattern[position:]
 
+    @staticmethod
+    def __check_for_escaped_brackets(pattern):
+        if pattern.find("\\]") != -1:
+            return pattern + "]"
+        elif pattern.find("\\)") != -1:
+            return pattern + ")"
+        elif pattern.find("\\}") != -1:
+            return pattern + "}"
+        return pattern

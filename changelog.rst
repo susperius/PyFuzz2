@@ -1,5 +1,6 @@
-* 11/02/10: implemented the stats page, where you get a overview of crashes happened and you can download the testcases
-* 10/30/10: re-implemented the web interface using flask;
+* 04/05/17: added the possibility to specify where the filename is inserted and whether to put in quotes or note
+* 11/02/16: implemented the stats page, where you get a overview of crashes happened and you can download the testcases
+* 10/30/16: re-implemented the web interface using flask;
 * 04/04/16: implemented a new js_fuzzer and changed the reducer to work with the new created js; implemented the html reducing step; implemented a css reducer; wrote a little c++ module for the testing in order to avoid involving the whole windbg engine in every step (code available in my PyFuzzDbg repo)
 * 01/11/16: redesigned the debugger to really avoid race conditions, in order to do this the childdbg windbg option is used
 * 01/05/16: redesigned the reducingworker in order to use the new debugging approach and to traverse through the result directories instead of the testcase directory, added a 2 seconds delay in template.dat in order to avoid/minimize race conditions, while the debugger is looking for the processes and attaching to them

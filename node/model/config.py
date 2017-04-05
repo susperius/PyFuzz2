@@ -53,6 +53,10 @@ class ConfigParser:
                 sleep_times.append(prog.attrib['sleep_time'])
                 program_conf = prog.attrib
                 program_conf['use_http'] = True if "True" == program_conf['use_http'] else False
+                if 'use_quotes' in program_conf.keys():
+                    program_conf['use_quotes'] = True if "True" == program_conf['use_quotes'] else False
+                else:
+                    program_conf['use_quotes'] = True
                 self._programs.append(program_conf)
             self._sleep_time = max(sleep_times)
             if self._node_op_mode == 'fuzzing':

@@ -50,7 +50,7 @@ class FuzzingWorker(Worker):
                                                      stderr=self._DEVNULL, cwd="testcases/")
             for filename in dir_listing:
                 if self._fuzzer.file_type not in filename:
-                        continue
+                    continue
                 count += 1
                 for prog in self._programs:
                     pyfuzzdbg = PyFuzzDbg.Debugger(int(prog['sleep_time']))
@@ -62,6 +62,15 @@ class FuzzingWorker(Worker):
                     # start a program with DEBUG_PROCESS and return 0 if nothing happens or the exception code else
                     self._logger.debug("Test starting...\r\n\tprogram: " + prog['name'] + " testcase: " + filename +
                                        " #testcases: " + str(count))
+                    app_name = prog['path']
+                    calling_argument = "http://127.0.0.1:8080/" + filename if prog['use_http'] else \
+                        testcase_dir + filename
+                    calling_argument = "\"" + calling_argument + "\"" if prog['use_quotes'] else calling_argument
+                    app_name = app_name.replace("%file", calling_argument) if "%file" in app_name else \
+                        app_name + " " + calling_argument
+                    pyfuzzdbg.set_app_name(unicode(app_name + "\x00\x00"))
+                    return_code = pyfuzzdbg.start_test()
+                    """
                     if prog['use_http']:
                         pyfuzzdbg.set_app_name(unicode(prog['path'] + " \"http://127.0.0.1:8080/" + filename +
                                                        "\"\x00\x00"))
@@ -69,22 +78,17 @@ class FuzzingWorker(Worker):
                     else:
                         pyfuzzdbg.set_app_name(unicode(prog['path'] + " \"" + testcase_dir + filename + "\"\x00\x00"))
                         return_code = pyfuzzdbg.start_test()
+                    """
                     gevent.sleep(1)
                     #  --------------------------------------------------------------------------------------------
                     #  Just involve the whole Windows Debug Engine if a crash appeared else just save the resources
                     if return_code in INTERESTING_EXCEPTIONS.keys():
-                        if prog['use_http']:
-                            self._processes.append(subprocess.Popen(
-                                "python debugging\\windbg.py -p \"" + prog['path']
-                                + "\" -t \"http://127.0.0.1:8080/" + filename + "\" -c True -X", stdout=self._DEVNULL,
-                                stderr=self._DEVNULL))
-                        else:
-                            self._processes.append(subprocess.Popen(
-                                "python debugging\\windbg.py -p \"" + prog['path']
-                                + "\" -t \"" + testcase_dir + filename + "\" -c True -X", stdout=self._DEVNULL,
-                                stderr=self._DEVNULL))
-                        self._logger.debug("Test verification started...\r\n\tprogram: " + prog['name'] + " testcase: " + filename +
-                                       " #testcases: " + str(count))
+                        self._processes.append(subprocess.Popen(
+                            "python debugging\\windbg.py -p \"" + app_name + "\" -c True -X", stdout=self._DEVNULL,
+                            stderr=self._DEVNULL))
+                        self._logger.debug(
+                            "Test verification started...\r\n\tprogram: " + prog['name'] + " testcase: " + filename +
+                            " #testcases: " + str(count))
                         gevent.sleep(int(prog['sleep_time']) / 2)
                         if not os.path.isfile("tmp_crash_report"):
                             gevent.sleep(int(prog['sleep_time']) / 2)
@@ -98,9 +102,9 @@ class FuzzingWorker(Worker):
                             # Structure crash message (0xFF, (prog['name'], crash_report, testcases[]))
                             self._report_queue.put((0xFF, (prog['name'], crash_report, testcases)))
                         #  --------------------------------------------------------------------------------------------
-                        #else: Do not save unknowns ...
-                        #    testcases = self.__bundle_testcase(testcase_dir, filename, dir_listing)
-                        #    self._report_queue.put((0xFE, (prog['name'], testcases)))
+                        else: # TODO: check the functionality of above dbg involving, until then save every crash
+                            testcases = self.__bundle_testcase(testcase_dir, filename, dir_listing)
+                            self._report_queue.put((0xFE, (prog['name'], testcases)))
                     gevent.sleep(1)
             if self._need_web_server:
                 self._web_process.kill()

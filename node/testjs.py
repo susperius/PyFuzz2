@@ -7,7 +7,7 @@ random.seed(0)
 
 fuzzer = BrowserFuzzer(5, 2, 100, 10, 30, 'html')
 
-fuzzer.create_testcases(200, './testcases/')
+fuzzer.create_testcases(100, './testcases/')
 
 
 

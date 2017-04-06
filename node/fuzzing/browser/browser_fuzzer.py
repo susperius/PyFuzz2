@@ -23,6 +23,7 @@ class BrowserFuzzer(Fuzzer):
     def __init__(self, html_elements, max_html_depth, max_html_attr, js_function_count, js_function_size, file_type):
         self._html_fuzzer = Html5Fuzzer(int(html_elements), int(max_html_depth), int(max_html_attr), file_type)
         self._css_fuzzer = CssFuzzer()
+        self._canvas_fuzzer = CanvasFuzzer(250)
         self._reg_ex_fuzzer = RegExFuzzer(20)
         self._js_function_count = int(js_function_count)
         self._js_function_size = int(js_function_size)
@@ -86,6 +87,10 @@ class BrowserFuzzer(Fuzzer):
         self.__reinit()
         js_code = ""
         self._html_page = self._html_fuzzer.fuzz()
+        for canvas_id in self._html_page.get_elements_by_html_tag()['canvas']:
+            self._canvas_fuzzer.set_canvas_id(canvas_id)
+            js_code += self._canvas_fuzzer.fuzz()
+            self._js_functions.append("func_" + canvas_id)
         self._css_fuzzer.set_options(self._html_page.get_elements_by_html_tag().keys(),
                                      self._html_page.get_css_class_names(),
                                      self._html_page.get_attribs(),
@@ -315,7 +320,7 @@ class BrowserFuzzer(Fuzzer):
                 js_obj = random.choice(self._js_objects['JS_DOM_ELEMENT'])
             return random.choice(js_obj.get_children())
         elif param_type == 'JS_NUMBER':
-            choice = random.randint(1, 4)
+            choice = random.randint(1, 5)
             if choice == 1:  # INT
                 return str(random.randint(-1 * maxint, maxint))
             elif choice == 2:  # FLOAT
@@ -325,6 +330,8 @@ class BrowserFuzzer(Fuzzer):
             elif choice == 4:  # JS_NUMBER
                 js_num = random.choice(self._js_objects['JS_NUMBER'])
                 return js_num.name
+            elif choice == 5:  # JS_NUMBER CONSTANT
+                return random.choice(JsNumber.NUMBER_CONSTANTS)
         elif param_type == 'UNICODE_VALUE_LIST':
             length = random.randint(1, 100)
             unicode_list_str = ""

@@ -100,3 +100,4 @@ class FuzzValues:
                   'ta', 'tt', 'te', 'th', 'bo', 'ti', 'to', 'ts', 'tr', 'tk', 'tw', 'ug', 'uk', 'ur', 'uz', 'vi', 'vo',
                   'wa', 'cy', 'wo', 'xh', 'Yi', 'yo', 'zu', ]
 
+

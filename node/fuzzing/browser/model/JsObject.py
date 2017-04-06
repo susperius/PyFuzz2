@@ -164,6 +164,8 @@ class JsString(JsObject):
 class JsNumber(JsObject):
     TYPE = "JsNumber"
     OPERATORS = ['+', '-', '*', '/', '%']
+    NUMBER_CONSTANTS = ["Number.EPSILON", "Number.MAX_SAFE_INTEGER", "Number.MAX_VALUE", "Number.MIN_SAFE_INTEGER,"
+                        "Number.MIN_VALUE"]
 
     def __init__(self, name):
         JsObject.__init__(self, name)
@@ -188,8 +190,6 @@ class JsNumber(JsObject):
 
     def valueOf(self):
         return self._name + ".valueOf()"
-
-    # TODO: Add properties
 
 
 class JsArray(JsObject):

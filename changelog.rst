@@ -1,4 +1,5 @@
 * 04/05/17: added the possibility to specify where the filename is inserted and whether to put in quotes or note
+* 03/24/17: implemented regex creation
 * 11/02/16: implemented the stats page, where you get a overview of crashes happened and you can download the testcases
 * 10/30/16: re-implemented the web interface using flask;
 * 04/04/16: implemented a new js_fuzzer and changed the reducer to work with the new created js; implemented the html reducing step; implemented a css reducer; wrote a little c++ module for the testing in order to avoid involving the whole windbg engine in every step (code available in my PyFuzzDbg repo)

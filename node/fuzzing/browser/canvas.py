@@ -32,8 +32,8 @@ class CanvasFuzzer(Fuzzer):
             js_canvas = JsCanvas.Canvas2d(self._canvas_id)
         else:
             return
-        function = "function func_" + self._canvas_id + "() {\r\n"
-        function += "var " + self._canvas_id + " = document.getElementById(\"" + self._canvas_id + "\");\r\n"
+        function = "function func_" + self._canvas_id + "() {\n"
+        function += "var " + self._canvas_id + " = document.getElementById(\"" + self._canvas_id + "\");\n"
         function += js_canvas.get_context("ctx")
         for i in range(self._count):
             function += "\t"
@@ -129,7 +129,7 @@ class CanvasFuzzer(Fuzzer):
                         function += JsGlobal.try_catch_block(js_canvas.arc_to(x0, y0, x1, y1, r))
         if js_canvas.has_active_path:
             function += JsGlobal.try_catch_block(js_canvas.stroke())
-        function += "}\r\n"
+        function += "}\n"
         return function
 
 

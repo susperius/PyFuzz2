@@ -120,12 +120,12 @@ class Canvas2d:
         grd_name = self.__get_grad_name()
         self._gradients.append(grd_name)
         return "var " + grd_name + " = " + self._ctx + \
-               ".createLinearGradient( " + str(x0) + ", " + str(y0) + ", " + str(x1) + ", " + str(y1) + ");\r\n"
+               ".createLinearGradient( " + str(x0) + ", " + str(y0) + ", " + str(x1) + ", " + str(y1) + ");\n"
 
     def create_pattern(self, patternable_obj, pattern_type):
         pattern_name = self.__get_pattern_name()
         self._patterns.append(pattern_name)
-        return "var " + pattern_name + " = " + self._ctx + ".createPattern(" + patternable_obj + ", \"" + pattern_type + "\");\r\n"
+        return "var " + pattern_name + " = " + self._ctx + ".createPattern(" + patternable_obj + ", \"" + pattern_type + "\");\n"
 
     # region LINE ATTRIBUTES
     def line_cap(self, line_style):
@@ -143,19 +143,19 @@ class Canvas2d:
 
     # region RECTANGLE METHODS
     def rect(self, x, y, width, height):
-        return self._ctx + ".rect(" + str(x) + ", " + str(y) + ", " + str(width) + ", " + str(height) + ");\r\n"
+        return self._ctx + ".rect(" + str(x) + ", " + str(y) + ", " + str(width) + ", " + str(height) + ");\n"
 
     def fill_rect(self, x, y, width, height):
-        return self._ctx + ".fillRect(" + str(x) + ", " + str(y) + ", " + str(width) + ", " + str(height) + ");\r\n"
+        return self._ctx + ".fillRect(" + str(x) + ", " + str(y) + ", " + str(width) + ", " + str(height) + ");\n"
 
     def stroke_rect(self, x, y, width, height):
-        return self._ctx + ".strokeRect(" + str(x) + ", " + str(y) + ", " + str(width) + ", " + str(height) + ");\r\n"
+        return self._ctx + ".strokeRect(" + str(x) + ", " + str(y) + ", " + str(width) + ", " + str(height) + ");\n"
 
     def clear_rect(self, x, y, width, height):
-        return self._ctx + ".clearRect(" + str(x) + ", " + str(y) + ", " + str(width) + ", " + str(height) + ");\r\n"
+        return self._ctx + ".clearRect(" + str(x) + ", " + str(y) + ", " + str(width) + ", " + str(height) + ");\n"
 
     def clip(self):
-        return self._ctx + ".clip();\r\n"
+        return self._ctx + ".clip();\n"
     # endregion
 
     # region PATH STUFF
@@ -164,35 +164,35 @@ class Canvas2d:
     # ------------------------------------------------------------------------------------------------------
     def begin_path(self):
         self._has_active_path = True
-        return self._ctx + ".beginPath();\r\n"
+        return self._ctx + ".beginPath();\n"
 
     def stroke(self):
-        return self._ctx + ".stroke();\r\n"
+        return self._ctx + ".stroke();\n"
 
     def fill(self):
-        return self._ctx + ".fill();\r\n"
+        return self._ctx + ".fill();\n"
 
     def move_to(self, x, y):
-        return self._ctx + ".moveTo(" + str(x) + ", " + str(y) + ");\r\n"
+        return self._ctx + ".moveTo(" + str(x) + ", " + str(y) + ");\n"
 
     def close_path(self):
         self._has_active_path = False
-        return self._ctx + ".closePath();\r\n"
+        return self._ctx + ".closePath();\n"
 
     def line_to(self, x, y):
-        return self._ctx + ".lineTo(" + str(x) + ", " + str(y) + ");\r\n"
+        return self._ctx + ".lineTo(" + str(x) + ", " + str(y) + ");\n"
 
     def quadratic_curve_to(self, cpx, cpy, x, y):
-        return self._ctx + ".quadraticCurveTo(" + str(cpx) + ", " + str(cpy) + "," + str(x) + ", " + str(y) + ");\r\n"
+        return self._ctx + ".quadraticCurveTo(" + str(cpx) + ", " + str(cpy) + "," + str(x) + ", " + str(y) + ");\n"
 
     def bezier_curve_to(self, cp1x, cp1y, cp2x, cp2y, x, y):
-        return self._ctx + ".bezierCurveTo(" + str(cp1x) + ", " + str(cp1y) + "," + str(cp2x) + ", " + str(cp2y) + "," + str(x) + ", " + str(y) + ");\r\n"
+        return self._ctx + ".bezierCurveTo(" + str(cp1x) + ", " + str(cp1y) + "," + str(cp2x) + ", " + str(cp2y) + "," + str(x) + ", " + str(y) + ");\n"
 
     def arc(self, x, y, r, start_angle, end_angle, counterclockwise):
-        return self._ctx + ".arc(" + str(x) + ", " + str(y) + ", " + str(r) + ", " + str(start_angle) + ", " + str(end_angle) + ", " + str(counterclockwise) + ");\r\n"
+        return self._ctx + ".arc(" + str(x) + ", " + str(y) + ", " + str(r) + ", " + str(start_angle) + ", " + str(end_angle) + ", " + str(counterclockwise) + ");\n"
 
     def arc_to(self, x0, y0, x1, y1, r):
-        return self._ctx + ".arcTo(" + str(x0) + ", " + str(y0) + "," + str(x1) + ", " + str(y1) + ", " + str(r) + ");\r\n"
+        return self._ctx + ".arcTo(" + str(x0) + ", " + str(y0) + "," + str(x1) + ", " + str(y1) + ", " + str(r) + ");\n"
 
     # ATTENTION --->>>> NO SEMICOLON NOR NEWLINE!
     def is_point_in_path(self, x, y):
@@ -202,19 +202,19 @@ class Canvas2d:
     # endregion
 
     def scale(self, x, y):
-        return self._ctx + ".scale(" + str(x) + ", " + str(y) + ");\r\n"
+        return self._ctx + ".scale(" + str(x) + ", " + str(y) + ");\n"
 
     def rotate(self, angle):
-        return self._ctx + ".rotate(" + str(angle) + ");\r\n"
+        return self._ctx + ".rotate(" + str(angle) + ");\n"
 
     def translate(self, x, y):
-        return self._ctx + ".translate(" + str(x) + ", " + str(y) + ");\r\n"
+        return self._ctx + ".translate(" + str(x) + ", " + str(y) + ");\n"
 
     def transform(self, a ,b, c, d, e, f):
-        return self._ctx + ".transform(" + str(a) + ", " + str(b) + ", " + str(c) + ", " + str(d) + ", " + str(e) + ", " + str(f) + ");\r\n"
+        return self._ctx + ".transform(" + str(a) + ", " + str(b) + ", " + str(c) + ", " + str(d) + ", " + str(e) + ", " + str(f) + ");\n"
 
     def set_transform(self, a, b, c, d, e, f):
-        return self._ctx + ".setTransform(" + str(a) + ", " + str(b) + ", " + str(c) + ", " + str(d) + ", " + str(e) + ", " + str(f) + ");\r\n"
+        return self._ctx + ".setTransform(" + str(a) + ", " + str(b) + ", " + str(c) + ", " + str(d) + ", " + str(e) + ", " + str(f) + ");\n"
 
     # region TEXT ATTRIBUTES
     def font(self, size_and_font_name):
@@ -228,24 +228,24 @@ class Canvas2d:
     # endregion
 
     def fill_text(self, text, x, y):
-        return self._ctx + ".fillText(\"" + text + "\", " + str(x) + ", " + str(y) + ");\r\n"
+        return self._ctx + ".fillText(\"" + text + "\", " + str(x) + ", " + str(y) + ");\n"
 
     def stroke_text(self, text, x, y):
-        return self._ctx + ".strokeText(\"" + text + "\", " + str(x) + ", " + str(y) + ");\r\n"
+        return self._ctx + ".strokeText(\"" + text + "\", " + str(x) + ", " + str(y) + ");\n"
 
     def measure_text(self, text, text_is_variable_name=False):
         var_name = "int_" + str(len(self._ints))
         self.__add_int_var(var_name)
-        return "var " + var_name + " = " + self._ctx + ".measureText(\"" + text + "\").width;\r\n" \
+        return "var " + var_name + " = " + self._ctx + ".measureText(\"" + text + "\").width;\n" \
                if not text_is_variable_name else \
-               "var " + var_name + " = " + self._ctx + ".measureText(" + text + ").width\r\n"
+               "var " + var_name + " = " + self._ctx + ".measureText(" + text + ").width\n"
 
     def draw_image(self, drawable_obj, x, y):
-        return self._ctx + ".drawImage(" + drawable_obj + ", " + str(x) + ", " + str(y) + ");\r\n"
+        return self._ctx + ".drawImage(" + drawable_obj + ", " + str(x) + ", " + str(y) + ");\n"
 
     @staticmethod
     def __assignment(left_of_eq, right_of_eq, quotes=False):
-        return str(left_of_eq) + " = \"" + str(right_of_eq) + "\";\r\n" if quotes else str(left_of_eq) + " = " + str(right_of_eq) + ";\r\n"
+        return str(left_of_eq) + " = \"" + str(right_of_eq) + "\";\n" if quotes else str(left_of_eq) + " = " + str(right_of_eq) + ";\n"
 
 
 class CanvasWebGl:

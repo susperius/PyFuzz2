@@ -25,7 +25,7 @@ class BrowserFuzzer(Fuzzer):
         random.seed(urandom(8))
         self._html_fuzzer = Html5Fuzzer(int(html_elements), int(max_html_depth), int(max_html_attr), file_type)
         self._css_fuzzer = CssFuzzer()
-        self._canvas_fuzzer = CanvasFuzzer(js_function_size * 2)
+        self._canvas_fuzzer = CanvasFuzzer(int(js_function_size) * 2)
         self._reg_ex_fuzzer = RegExFuzzer(20)
         self._js_function_count = int(js_function_count)
         self._js_function_size = int(js_function_size)

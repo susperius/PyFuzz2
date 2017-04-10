@@ -1,4 +1,5 @@
 import random
+from os import urandom
 from sys import maxint
 from html5 import Html5Fuzzer
 from canvas import CanvasFuzzer
@@ -21,6 +22,7 @@ class BrowserFuzzer(Fuzzer):
     CALLING_BLOCK_COMMENT = "//CALLFUNCTIONS"
 
     def __init__(self, html_elements, max_html_depth, max_html_attr, js_function_count, js_function_size, file_type):
+        random.seed(urandom(8))
         self._html_fuzzer = Html5Fuzzer(int(html_elements), int(max_html_depth), int(max_html_attr), file_type)
         self._css_fuzzer = CssFuzzer()
         self._canvas_fuzzer = CanvasFuzzer(js_function_size * 2)

@@ -66,9 +66,9 @@ class FuzzingWorker(Worker):
                     calling_argument = "http://127.0.0.1:8080/" + filename if prog['use_http'] else \
                         testcase_dir + filename
                     calling_argument = "\"" + calling_argument + "\"" if prog['use_quotes'] else calling_argument
-                    app_name = app_name.replace("%file", calling_argument) if "%file" in app_name else \
+                    app_caller = app_name.replace("%file", calling_argument) if "%file" in app_name else \
                         app_name + " " + calling_argument
-                    pyfuzzdbg.set_app_name(unicode(app_name + "\x00\x00"))
+                    pyfuzzdbg.set_app_name(unicode(app_caller + "\x00\x00"))
                     return_code = pyfuzzdbg.start_test()
                     """
                     if prog['use_http']:
@@ -84,7 +84,7 @@ class FuzzingWorker(Worker):
                     #  Just involve the whole Windows Debug Engine if a crash appeared else just save the resources
                     if return_code in INTERESTING_EXCEPTIONS.keys():
                         self._processes.append(subprocess.Popen(
-                            "python debugging\\windbg.py -p \"" + app_name + "\" -c True -X", stdout=self._DEVNULL,
+                            "python debugging\\windbg.py -p \"" + app_name + "\" -t \"" + calling_argument + "\" -c True -X", stdout=self._DEVNULL,
                             stderr=self._DEVNULL))
                         self._logger.debug(
                             "Test verification started...\r\n\tprogram: " + prog['name'] + " testcase: " + filename +

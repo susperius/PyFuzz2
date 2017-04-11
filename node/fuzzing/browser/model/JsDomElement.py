@@ -119,7 +119,7 @@ class JsDomElement(JsObject):
         elif event == 'scroll':
             return self.scrollTop() + ";"
         elif event == 'resize':
-            return ""
+            return self.innerHtml("AAAA" * 1200) + ";"
         elif event == 'change':
             return ""
         elif event == 'focus':

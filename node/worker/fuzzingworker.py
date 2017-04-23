@@ -70,41 +70,36 @@ class FuzzingWorker(Worker):
                         app_name + " " + calling_argument
                     pyfuzzdbg.set_app_name(unicode(app_caller + "\x00\x00"))
                     return_code = pyfuzzdbg.start_test()
-                    """
-                    if prog['use_http']:
-                        pyfuzzdbg.set_app_name(unicode(prog['path'] + " \"http://127.0.0.1:8080/" + filename +
-                                                       "\"\x00\x00"))
-                        return_code = pyfuzzdbg.start_test()
-                    else:
-                        pyfuzzdbg.set_app_name(unicode(prog['path'] + " \"" + testcase_dir + filename + "\"\x00\x00"))
-                        return_code = pyfuzzdbg.start_test()
-                    """
                     gevent.sleep(1)
                     #  --------------------------------------------------------------------------------------------
                     #  Just involve the whole Windows Debug Engine if a crash appeared else just save the resources
                     if return_code in INTERESTING_EXCEPTIONS.keys():
-                        self._processes.append(subprocess.Popen(
-                            "python debugging\\windbg.py -p \"" + app_name + "\" -t \"" + calling_argument + "\" -c True -X", stdout=self._DEVNULL,
-                            stderr=self._DEVNULL))
-                        self._logger.debug(
-                            "Test verification started...\r\n\tprogram: " + prog['name'] + " testcase: " + filename +
-                            " #testcases: " + str(count))
-                        gevent.sleep(int(prog['sleep_time']) / 2)
-                        if not os.path.isfile("tmp_crash_report"):
+                        for i in range(3):
+                            self._processes.append(subprocess.Popen(
+                                "python debugging\\windbg.py -p \"" + app_name + "\" -t \"" + calling_argument + "\" -c True -X", stdout=self._DEVNULL,
+                                stderr=self._DEVNULL))
+                            self._logger.debug(
+                                "Test verification started...\r\n\tprogram: " + prog['name'] + " testcase: " + filename +
+                                " #testcases: " + str(count))
                             gevent.sleep(int(prog['sleep_time']) / 2)
-                        self.__kill_processes()
-                        self._processes = []
-                        if os.path.isfile("tmp_crash_report"):
-                            with open("tmp_crash_report", "rb") as fd:
-                                crash_report = fd.read()
-                            os.remove("tmp_crash_report")
-                            testcases = self.__bundle_testcase(testcase_dir, filename, dir_listing)
-                            # Structure crash message (0xFF, (prog['name'], crash_report, testcases[]))
-                            self._report_queue.put((0xFF, (prog['name'], crash_report, testcases)))
-                        #  --------------------------------------------------------------------------------------------
-                        else: # TODO: check the functionality of above dbg involving, until then save every crash
-                            testcases = self.__bundle_testcase(testcase_dir, filename, dir_listing)
-                            self._report_queue.put((0xFE, (prog['name'], testcases)))
+                            if not os.path.isfile("tmp_crash_report"):
+                                gevent.sleep(int(prog['sleep_time']) / 2)
+                            self.__kill_processes()
+                            self._processes = []
+                            if os.path.isfile("tmp_crash_report"):
+                                with open("tmp_crash_report", "rb") as fd:
+                                    crash_report = fd.read()
+                                os.remove("tmp_crash_report")
+                                testcases = self.__bundle_testcase(testcase_dir, filename, dir_listing)
+                                # Structure crash message (0xFF, (prog['name'], crash_report, testcases[]))
+                                self._report_queue.put((0xFF, (prog['name'], crash_report, testcases)))
+                                break
+                            elif i < 2:
+                                continue
+                            #  --------------------------------------------------------------------------------------------
+                            else:  # TODO: check the functionality of above dbg involving, until then save every crash
+                                testcases = self.__bundle_testcase(testcase_dir, filename, dir_listing)
+                                self._report_queue.put((0xFE, (prog['name'], testcases)))
                     gevent.sleep(1)
             if self._need_web_server:
                 self._web_process.kill()

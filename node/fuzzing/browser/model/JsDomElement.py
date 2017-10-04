@@ -160,7 +160,7 @@ class JsDomElement(JsObject):
         return self._name + " = " + JsDocument.createElement(self.__html_type)
 
     def newBodyElement(self):
-        return self._name + " = " + JsDocument.prop_body() + ".createElement(" + self.__html_type + ")"
+        return self._name + " = " + JsDocument.prop_body() + ".createElement(\"" + self.__html_type + "\")"
 
     def addEventListener(self, event, function):
         self.__registered_events[event] = function

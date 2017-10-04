@@ -346,7 +346,8 @@ class BrowserFuzzer(Fuzzer):
                 unicode_list_str += str(random.randint(1, 65535))
             return unicode_list_str
         elif param_type == 'REGEX':
-            return self._reg_ex_fuzzer.fuzz()
+            return "[^abc]"
+            # return self._reg_ex_fuzzer.fuzz()
         else:
             print(param_type)
             return ""

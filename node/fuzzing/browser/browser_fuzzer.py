@@ -154,7 +154,7 @@ class BrowserFuzzer(Fuzzer):
         elif js_obj_type == 'JS_DOM_ELEMENT':
             js_dom_element = JsDomElement("elem_" + str(len(self._js_objects[js_obj_type])), random.choice(HTML5_OBJECTS.keys()))
             self._js_objects[js_obj_type].append(js_dom_element)
-            ret_val = (js_dom_element.newElement(), js_dom_element) if random.randint(1, 10) < 6 else (js_dom_element.newBodyElement(), js_dom_element)
+            ret_val = (js_dom_element.newElement(), js_dom_element) # if random.randint(1, 10) < 6 else (js_dom_element.newBodyElement(), js_dom_element)
             return ret_val
 
     def __build_function(self, name=None, event=False):
